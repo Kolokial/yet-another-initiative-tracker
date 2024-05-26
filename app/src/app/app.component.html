@@ -1,0 +1,15 @@
+<div>
+  <p>PeerId: {{myPeerId}}</p>
+  <button (click)="createRoom()">Create Room</button>
+  <button (click)="joinRoom()">Join Room</button>
+</div>
+<div>
+  <input [(ngModel)]="message" placeholder="Type a message" />
+  <button (click)="sendMessage()">Send</button>
+</div>
+<div>
+  <h3>Received Messages:</h3>
+  <ul>
+    <li *ngFor="let msg of receivedMessages"><b>{{msg.sender}} :</b>{{ msg.message }}</li>
+  </ul>
+</div>
