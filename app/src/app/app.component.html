@@ -1,16 +1,27 @@
-<div>
-  <p>RoomId: {{roomId}}</p>
-  <p>PeerId: {{myPeerId}}</p>
-  <button (click)="createRoom()">Create Room</button>
-  <button (click)="joinRoom()">Join Room</button>
-</div>
-<div>
-  <input [(ngModel)]="message" placeholder="Type a message" />
-  <button (click)="sendMessage()">Send</button>
-</div>
-<div>
-  <h3>Received Messages:</h3>
-  <ul>
-    <li *ngFor="let msg of receivedMessages"><b>{{msg.sender}} :</b>{{ msg.message }}</li>
-  </ul>
-</div>
+<mat-tab-group>
+  <mat-tab label="Room"> 
+    <div>
+      <p>RoomId: {{roomId}}</p>
+      <p>PeerId: {{myPeerId}}</p>
+      <button (click)="createRoom()">Create Room</button>
+      <button (click)="joinRoom()">Join Room</button>
+    </div>
+    <div>
+      <input [(ngModel)]="message" placeholder="Type a message" />
+      <button (click)="sendMessage()">Send</button>
+    </div>
+    <div>
+      <h3>Received Messages:</h3>
+      <ul>
+        <li *ngFor="let msg of receivedMessages"><b>{{msg.sender}} :</b>{{ msg.message }}</li>
+      </ul>
+    </div>
+  </mat-tab>
+  <mat-tab label="Initiative Tracker">  
+    <initiative-tracker [players]="players"></initiative-tracker>
+  </mat-tab>
+  <mat-tab label="Third"> Content 3 </mat-tab>
+</mat-tab-group>
+
+
+

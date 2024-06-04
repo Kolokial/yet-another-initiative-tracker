@@ -12,6 +12,10 @@ export class AppComponent {
   receivedMessages: {sender: string, message: string}[] = [];
   myPeerId!: string;
 
+  get players(): string[]{
+    return this.signalingService.players;
+  }
+
   constructor(private signalingService: SignalingService,   private ref: ChangeDetectorRef,) {
     this.signalingService.dataChannelSubject.subscribe((dataChannel) => {
       if (dataChannel) {

@@ -7,10 +7,15 @@ import { Subject } from 'rxjs';
 })
 export class SignalingService {
   private myPeerId!: string;
+  private roomId!: string;
+  
   public peerConnections: { [key: string]: RTCPeerConnection } = {};
   public dataChannels: { [key: string]: RTCDataChannel } = {};
-  dataChannelSubject = new Subject<RTCDataChannel>();
-  private roomId!: string;
+  public dataChannelSubject = new Subject<RTCDataChannel>();
+
+  public get players(): string[]{
+    return Object.keys(this.peerConnections);
+  }
 
   constructor(private socket: Socket) {
     this.socket.on('newPeerJoined', (peerId: any) => this.handleNewPeerJoined(peerId));
