@@ -10,4 +10,9 @@ import { Component, Input } from '@angular/core';
 })
 export class InitiativeTrackerComponent {
   @Input() public players: string[] = [];
+  initiativeValues: number[] = [];
+
+  constructor(){
+    this.initiativeValues = new Array(30)
+  }
 }

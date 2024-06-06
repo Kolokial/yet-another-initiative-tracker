@@ -1,5 +1,8 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { SignalingService } from './signaling.service';
+import { Camera, CameraResultType } from '@capacitor/camera';
+import { QrScannerService } from './qr-scanner/qr-scanner.service';
+
 
 @Component({
   selector: 'app-root',
@@ -16,12 +19,27 @@ export class AppComponent {
     return this.signalingService.players;
   }
 
-  constructor(private signalingService: SignalingService,   private ref: ChangeDetectorRef,) {
+  constructor(private signalingService: SignalingService,
+    private qrScanner: QrScannerService, 
+    private ref: ChangeDetectorRef,) {
     this.signalingService.dataChannelSubject.subscribe((dataChannel) => {
       if (dataChannel) {
         this.setupDataChannel(dataChannel);
       }
     });
+
+    // Camera.getPhoto({
+    //   quality: 90,
+    //   allowEditing: true,
+    //   resultType: CameraResultType.Uri
+    // }).then(x => {
+    //   console.log(x);
+    // });
+  
+  }
+
+  startScanning(){
+    this.qrScanner.startScan();
   }
 
   createRoom() {

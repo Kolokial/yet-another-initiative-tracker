@@ -1,10 +1,12 @@
 <mat-tab-group>
   <mat-tab label="Room"> 
     <div>
+      <qrcode [qrdata]="roomId" [width]="256" [errorCorrectionLevel]="'M'" [allowEmptyString]="true"></qrcode>
+      <button (click)="startScanning()">Start Scanning</button>
       <p>RoomId: {{roomId}}</p>
       <p>PeerId: {{myPeerId}}</p>
-      <button (click)="createRoom()">Create Room</button>
-      <button (click)="joinRoom()">Join Room</button>
+      <button mat-flat-button color="primary" (click)="joinRoom()">Join Room</button>
+      <button mat-flat-button color="primary" (click)="createRoom()">Create Room</button>
     </div>
     <div>
       <input [(ngModel)]="message" placeholder="Type a message" />

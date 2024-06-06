@@ -102,8 +102,4 @@ export class SignalingService {
     const peerId = data.target;
     this.peerConnections[peerId].addIceCandidate(candidate);
   }
-
-  private addIceCandidate(peerConnection: RTCPeerConnection, candidate: RTCIceCandidate): void{
-    peerConnection.addIceCandidate(candidate).catch(console.error)
-  }
 }

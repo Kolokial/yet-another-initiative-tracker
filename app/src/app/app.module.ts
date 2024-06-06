@@ -7,6 +7,11 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { MatTabsModule } from '@angular/material/tabs';
 import { InitiativeTrackerComponent } from './initiative-tracker/initiative-tracker.component';
 import { CommonModule } from '@angular/common';
+import { QRCodeModule } from 'angularx-qrcode';
+import { QrScannerService } from './qr-scanner/qr-scanner.service';
+import {MatIconModule} from '@angular/material/icon';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatButtonModule} from '@angular/material/button';
 
 //const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
 const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
@@ -22,10 +27,13 @@ const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
     FormsModule,
     SocketIoModule.forRoot(config),
     MatTabsModule,
-    InitiativeTrackerComponent
+    InitiativeTrackerComponent,
+    QRCodeModule,
+    MatButtonModule, MatDividerModule, MatIconModule
   ],
   providers: [
-    provideAnimationsAsync()
+    provideAnimationsAsync(),
+    QrScannerService
   ],
   bootstrap: [AppComponent]
 })
