@@ -1,7 +1,14 @@
-<button *ngFor="let value of initiativeValues; let i = index" mat-fab color="primary" aria-label="">{{i}}</button>
+<button
+  *ngFor="let value of initiativeValues; let i = index"
+  mat-fab
+  color="primary"
+  aria-label=""
+>
+  {{ i }}
+</button>
 
 <ul>
-    <li *ngFor="let pc of players">
-    {{pc}}
-    </li>
+  <li *ngFor="let pc of players">
+    {{ pc }}
+  </li>
 </ul>

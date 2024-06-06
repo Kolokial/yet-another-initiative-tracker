@@ -6,13 +6,13 @@ import { Component, Input } from '@angular/core';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './initiative-tracker.component.html',
-  styleUrl: './initiative-tracker.component.scss'
+  styleUrl: './initiative-tracker.component.scss',
 })
 export class InitiativeTrackerComponent {
   @Input() public players: string[] = [];
   initiativeValues: number[] = [];
 
-  constructor(){
-    this.initiativeValues = new Array(30)
+  constructor() {
+    this.initiativeValues = new Array(30);
   }
 }

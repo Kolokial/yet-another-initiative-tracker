@@ -6,11 +6,10 @@ import {
 } from '@capacitor-mlkit/barcode-scanning';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class QrScannerService {
-
-  constructor() { }
+  constructor() {}
 
   public startScan = async () => {
     // The camera is visible behind the WebView, so that you can customize the UI in the WebView.
@@ -18,37 +17,37 @@ export class QrScannerService {
     // You can find an example in our demo repository.
     // In this case we set a class `barcode-scanner-active`, which then contains certain CSS rules for our app.
     document.querySelector('body')?.classList.add('barcode-scanner-active');
-  
+
     // Add the `barcodeScanned` listener
     const listener = await BarcodeScanner.addListener(
       'barcodeScanned',
-      async result => {
+      async (result) => {
         console.log(result.barcode);
       },
     );
-  
+
     // Start the barcode scanner
     await BarcodeScanner.startScan();
   };
-  
+
   public stopScan = async () => {
     // Make all elements in the WebView visible again
     document.querySelector('body')?.classList.remove('barcode-scanner-active');
-  
+
     // Remove all listeners
     await BarcodeScanner.removeAllListeners();
-  
+
     // Stop the barcode scanner
     await BarcodeScanner.stopScan();
   };
-  
+
   public scanSingleBarcode = async () => {
-    return new Promise(async resolve => {
+    return new Promise(async (resolve) => {
       document.querySelector('body')?.classList.add('barcode-scanner-active');
-  
+
       const listener = await BarcodeScanner.addListener(
         'barcodeScanned',
-        async result => {
+        async (result) => {
           await listener.remove();
           document
             .querySelector('body')
@@ -57,7 +56,7 @@ export class QrScannerService {
           resolve(result.barcode);
         },
       );
-  
+
       await BarcodeScanner.startScan();
     });
   };

@@ -32,11 +32,14 @@ export class CallService {
   }
 
   private createDataChannel(): void {
-    const dc = this.connection.createDataChannel('ChatChannel', {negotiated: true, id:0});
-    
-    dc.onopen = ()  => console.log('opened');
-    dc.onmessage = e => console.log(`message: ${e}`);
-    this.connection.oniceconnectionstatechange = e => console.log(e);
+    const dc = this.connection.createDataChannel('ChatChannel', {
+      negotiated: true,
+      id: 0,
+    });
+
+    dc.onopen = () => console.log('opened');
+    dc.onmessage = (e) => console.log(`message: ${e}`);
+    this.connection.oniceconnectionstatechange = (e) => console.log(e);
   }
 
   public async createOffer(remoteVideo: ElementRef): Promise<void> {
@@ -48,25 +51,25 @@ export class CallService {
 
     const conn = this.connection;
 
-    this.connection.onicecandidate = ({candidate}) => {
-        if(candidate){
-            return;
-        }
-        
-        console.log(`Offer: ${conn?.localDescription?.sdp}`);
-    }
+    this.connection.onicecandidate = ({ candidate }) => {
+      if (candidate) {
+        return;
+      }
+
+      console.log(`Offer: ${conn?.localDescription?.sdp}`);
+    };
 
     //this.signalingService.sendMessage({ type: 'offer', offer });
   }
 
   public async handleOffer(
     offer: RTCSessionDescription,
-    remoteVideo: ElementRef
+    remoteVideo: ElementRef,
   ): Promise<void> {
     await this._initConnection(remoteVideo);
 
     await this.connection.setRemoteDescription(
-      new RTCSessionDescription(offer)
+      new RTCSessionDescription(offer),
     );
 
     const answer = await this.connection.createAnswer();
@@ -78,7 +81,7 @@ export class CallService {
 
   public async handleAnswer(answer: RTCSessionDescription): Promise<void> {
     await this.connection.setRemoteDescription(
-      new RTCSessionDescription(answer)
+      new RTCSessionDescription(answer),
     );
   }
 
@@ -91,13 +94,13 @@ export class CallService {
   private _registerConnectionListeners(): void {
     this.connection.onicegatheringstatechange = (ev: Event) => {
       console.log(
-        `ICE gathering state changed: ${this.connection.iceGatheringState}`
+        `ICE gathering state changed: ${this.connection.iceGatheringState}`,
       );
     };
 
     this.connection.onconnectionstatechange = () => {
       console.log(
-        `Connection state change: ${this.connection.connectionState}`
+        `Connection state change: ${this.connection.connectionState}`,
       );
     };
 
@@ -107,7 +110,7 @@ export class CallService {
 
     this.connection.oniceconnectionstatechange = () => {
       console.log(
-        `ICE connection state change: ${this.connection.iceConnectionState}`
+        `ICE connection state change: ${this.connection.iceConnectionState}`,
       );
     };
     this.connection.onicecandidate = (event) => {

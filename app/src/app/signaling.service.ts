@@ -3,22 +3,24 @@ import { Socket } from 'ngx-socket-io';
 import { Subject } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SignalingService {
   private myPeerId!: string;
   private roomId!: string;
-  
+
   public peerConnections: { [key: string]: RTCPeerConnection } = {};
   public dataChannels: { [key: string]: RTCDataChannel } = {};
   public dataChannelSubject = new Subject<RTCDataChannel>();
 
-  public get players(): string[]{
+  public get players(): string[] {
     return Object.keys(this.peerConnections);
   }
 
   constructor(private socket: Socket) {
-    this.socket.on('newPeerJoined', (peerId: any) => this.handleNewPeerJoined(peerId));
+    this.socket.on('newPeerJoined', (peerId: any) =>
+      this.handleNewPeerJoined(peerId),
+    );
     this.socket.on('offer', (data: any) => this.handleOffer(data));
     this.socket.on('answer', (data: any) => this.handleAnswer(data));
     this.socket.on('candidate', (data: any) => this.handleCandidate(data));
@@ -27,7 +29,7 @@ export class SignalingService {
   joinRoom(roomId: string): string {
     this.roomId = roomId;
     const data = this.socket.emit('joinRoom', roomId);
-    return this.myPeerId = data.id;    
+    return (this.myPeerId = data.id);
     console.log(data);
   }
 
@@ -37,7 +39,11 @@ export class SignalingService {
 
     peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
-        this.socket.emit('candidate', { roomId: this.roomId, candidate: event.candidate, target: this.myPeerId });
+        this.socket.emit('candidate', {
+          roomId: this.roomId,
+          candidate: event.candidate,
+          target: this.myPeerId,
+        });
       }
     };
 
@@ -48,21 +54,29 @@ export class SignalingService {
       console.log('ondatachannel');
     };
 
-    return peerConnection
+    return peerConnection;
   }
 
   private handleNewPeerJoined(peerId: string) {
     this.peerConnections[peerId] = this.createPeerConnection(peerId);
-    const peerConnection = this.peerConnections[peerId]
+    const peerConnection = this.peerConnections[peerId];
     this.dataChannels[peerId] = peerConnection.createDataChannel('dataChannel');
     //this.setupDataChannel(this.dataChannels[peerId], peerId);
     this.dataChannelSubject.next(this.dataChannels[peerId]);
 
-    peerConnection.createOffer().then((offer) => {
-      return peerConnection.setLocalDescription(offer);
-    }).then(() => {
-      this.socket.emit('offer', { roomId: this.roomId, offer: peerConnection.localDescription, peerId: this.myPeerId});
-    }).catch(e => console.error('Error creating offer:', e));
+    peerConnection
+      .createOffer()
+      .then((offer) => {
+        return peerConnection.setLocalDescription(offer);
+      })
+      .then(() => {
+        this.socket.emit('offer', {
+          roomId: this.roomId,
+          offer: peerConnection.localDescription,
+          peerId: this.myPeerId,
+        });
+      })
+      .catch((e) => console.error('Error creating offer:', e));
   }
 
   private handleOffer(data: any) {
@@ -73,28 +87,42 @@ export class SignalingService {
     }
 
     const peerConnection = this.peerConnections[peerId];
-    if(peerConnection.connectionState !== 'new'){
+    if (peerConnection.connectionState !== 'new') {
       return;
     }
 
-    peerConnection.setRemoteDescription(new RTCSessionDescription(offer)).then(() => {
-      return peerConnection.createAnswer()
-    }).then( answer => {
-      return peerConnection.setLocalDescription(answer);
-    }).then(()=> {
-      this.socket.emit('answer', { roomId: data.roomId, answer: peerConnection.localDescription, target: peerId, source: this.myPeerId });
-    });
+    peerConnection
+      .setRemoteDescription(new RTCSessionDescription(offer))
+      .then(() => {
+        return peerConnection.createAnswer();
+      })
+      .then((answer) => {
+        return peerConnection.setLocalDescription(answer);
+      })
+      .then(() => {
+        this.socket.emit('answer', {
+          roomId: data.roomId,
+          answer: peerConnection.localDescription,
+          target: peerId,
+          source: this.myPeerId,
+        });
+      });
   }
 
   private handleAnswer(data: any) {
     const peerId = data.source;
     const answer = data.answer;
     const peerConnection = this.peerConnections[peerId];
-    if(peerConnection.signalingState !== 'stable' && this.myPeerId === data.target){
-      peerConnection.setRemoteDescription(new RTCSessionDescription(answer)).then(() => {
-        peerConnection.addIceCandidate()
-      });
-    }    
+    if (
+      peerConnection.signalingState !== 'stable' &&
+      this.myPeerId === data.target
+    ) {
+      peerConnection
+        .setRemoteDescription(new RTCSessionDescription(answer))
+        .then(() => {
+          peerConnection.addIceCandidate();
+        });
+    }
   }
 
   private handleCandidate(data: any) {

@@ -9,18 +9,15 @@ import { InitiativeTrackerComponent } from './initiative-tracker/initiative-trac
 import { CommonModule } from '@angular/common';
 import { QRCodeModule } from 'angularx-qrcode';
 import { QrScannerService } from './qr-scanner/qr-scanner.service';
-import {MatIconModule} from '@angular/material/icon';
-import {MatDividerModule} from '@angular/material/divider';
-import {MatButtonModule} from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatButtonModule } from '@angular/material/button';
 
 //const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
 const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
 
-
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
+  declarations: [AppComponent],
   imports: [
     CommonModule,
     BrowserModule,
@@ -29,12 +26,11 @@ const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
     MatTabsModule,
     InitiativeTrackerComponent,
     QRCodeModule,
-    MatButtonModule, MatDividerModule, MatIconModule
+    MatButtonModule,
+    MatDividerModule,
+    MatIconModule,
   ],
-  providers: [
-    provideAnimationsAsync(),
-    QrScannerService
-  ],
-  bootstrap: [AppComponent]
+  providers: [provideAnimationsAsync(), QrScannerService],
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
