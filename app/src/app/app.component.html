@@ -1,37 +1,23 @@
-<mat-tab-group>
+<nav mat-tab-nav-bar [tabPanel]="tabPanel">
+  <a mat-tab-link routerLink="/room" routerLinkActive="active" (click)="activeLink = '/room'"
+    [active]="activeLink == ''">Room </a>
+  <a mat-tab-link routerLink="/init" routerLinkActive="active" (click)="activeLink = '/init'"
+    [active]="activeLink == ''"> Init </a>
+  <a mat-tab-link routerLink="/third" routerLinkActive="active" (click)="activeLink = '/third'"
+    [active]="activeLink == ''">Third </a>
+
+</nav>
+<mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
+<router-outlet></router-outlet>
+
+<!-- <mat-tab-group [selectedIndex]="1">
   <mat-tab label="Room">
-    <div>
-      <qrcode
-        [qrdata]="roomId"
-        [width]="256"
-        [errorCorrectionLevel]="'M'"
-        [allowEmptyString]="true"
-      ></qrcode>
-      <button (click)="startScanning()">Start Scanning</button>
-      <p>RoomId: {{ roomId }}</p>
-      <p>PeerId: {{ myPeerId }}</p>
-      <button mat-flat-button color="primary" (click)="joinRoom()">
-        Join Room
-      </button>
-      <button mat-flat-button color="primary" (click)="createRoom()">
-        Create Room
-      </button>
-    </div>
-    <div>
-      <input [(ngModel)]="message" placeholder="Type a message" />
-      <button (click)="sendMessage()">Send</button>
-    </div>
-    <div>
-      <h3>Received Messages:</h3>
-      <ul>
-        <li *ngFor="let msg of receivedMessages">
-          <b>{{ msg.sender }} :</b>{{ msg.message }}
-        </li>
-      </ul>
-    </div>
+    <room-manager></room-manager>
+    <qrcode [qrdata]="roomId" [width]="256" [errorCorrectionLevel]="'M'" [allowEmptyString]="true"></qrcode>
+    <button (click)="startScanning()">Start Scanning</button>
   </mat-tab>
   <mat-tab label="Initiative Tracker">
-    <initiative-tracker [players]="players"></initiative-tracker>
+    <initiative-tracker [playerName]="'Kazakin'" [players]="players"></initiative-tracker>
   </mat-tab>
   <mat-tab label="Third"> Content 3 </mat-tab>
-</mat-tab-group>
+</mat-tab-group>  -->
