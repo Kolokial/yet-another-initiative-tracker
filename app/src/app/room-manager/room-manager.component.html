@@ -1,0 +1,23 @@
+<div>
+
+    <p>RoomId: {{ roomId }}</p>
+    <p>PeerId: {{ myPeerId }}</p>
+    <button mat-flat-button color="primary" (click)="joinRoom()">
+        Join Room
+    </button>
+    <button mat-flat-button color="primary" (click)="createRoom()">
+        Create Room
+    </button>
+</div>
+<div>
+    <input #message placeholder="Type a message" />
+    <button (click)="sendMessage(message.value)">Send</button>
+</div>
+<div>
+    <h3>Received Messages:</h3>
+    <ul>
+        <li *ngFor="let msg of messageStream">
+            <b>{{ msg.sender }} :</b>{{ msg.message }}
+        </li>
+    </ul>
+</div>
