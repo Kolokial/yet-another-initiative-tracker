@@ -30,7 +30,6 @@ export class SignalingService {
     this.roomId = roomId;
     const data = this.socket.emit('joinRoom', roomId);
     return (this.myPeerId = data.id);
-    console.log(data);
   }
 
   private createPeerConnection(peerId: string) {
