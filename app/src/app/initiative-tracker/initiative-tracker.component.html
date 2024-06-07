@@ -1,14 +1,12 @@
-<button
-  *ngFor="let value of initiativeValues; let i = index"
-  mat-fab
-  color="primary"
-  aria-label=""
->
-  {{ i }}
-</button>
+<mat-form-field class="initiatve-input">
+    <mat-label>Initiative</mat-label>
+    <input #initiative matInput type="number" placeholder="Nat 20!" value="">
+
+</mat-form-field>
+<button (click)="sendInitiative(initiative.value)">Fight!</button>
 
 <ul>
-  <li *ngFor="let pc of players">
-    {{ pc }}
-  </li>
+    <li *ngFor="let pc of players">
+        {{ pc }}
+    </li>
 </ul>
