@@ -20,7 +20,7 @@ import {
     provideRouter,
     withComponentInputBinding,
 } from '@angular/router'
-import { RoomManagerComponent } from './room-manager/room-manager.component'
+import { RoomComponent } from './room/room.component'
 import { routes } from './app.routes'
 
 //const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
@@ -42,7 +42,7 @@ const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} }
         RouterOutlet,
         RouterLink,
         RouterLinkActive,
-        RoomManagerComponent,
+        RoomComponent,
     ],
     providers: [
         provideAnimationsAsync(),

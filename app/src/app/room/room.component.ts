@@ -8,7 +8,7 @@ import { MatInputModule } from '@angular/material/input'
 import { MatButtonModule } from '@angular/material/button'
 
 @Component({
-  selector: 'room-manager',
+  selector: 'room',
   standalone: true,
   imports: [
     CommonModule,
@@ -17,10 +17,10 @@ import { MatButtonModule } from '@angular/material/button'
     MatButtonModule,
     ReactiveFormsModule,
   ],
-  templateUrl: './room-manager.component.html',
-  styleUrl: './room-manager.component.scss',
+  templateUrl: './room.component.html',
+  styleUrl: './room.component.scss',
 })
-export class RoomManagerComponent {
+export class RoomComponent {
   @Input()
   set roomId(id: string) {
     if (this.roomId !== id && id) {

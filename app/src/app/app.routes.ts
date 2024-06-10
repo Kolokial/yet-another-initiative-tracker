@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { InitiativeTrackerComponent } from './initiative-tracker/initiative-tracker.component';
-import { RoomManagerComponent } from './room-manager/room-manager.component';
+import { RoomComponent } from './room/room.component';
 import { InitiativeListComponent } from './initiative-list/initiative-list.component';
 
 export const routes: Routes = [
@@ -17,12 +17,12 @@ export const routes: Routes = [
   {
     title: 'Room Manager',
     path: 'room/:roomId',
-    component: RoomManagerComponent,
+    component: RoomComponent,
   },
   {
     title: 'Room Manager',
     path: 'room',
-    component: RoomManagerComponent,
+    component: RoomComponent,
   },
   {
     title: 'Initiative Order',

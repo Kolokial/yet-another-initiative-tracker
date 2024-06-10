@@ -10,6 +10,42 @@ input[type=number] {
     -moz-appearance: textfield;
 }
 
-.initiatve-input {
+input.initiative {
+    -moz-appearance: textfield;
     margin: auto;
+    display: block;
+    max-width: 100%;
+    background: transparent;
+    border: none;
+    transition: border-color 0.3s; /* Smooth transition for border color */
+
+    text-align: center;
+    height: 1;
+    font-size: 8vh;
+    color: white;
+
+    &:focus-visible {
+        border: none;
+        outline: none;
+
+
+    }
+
+
+    &:after, &:before {
+        display:block;
+        content: '';
+        border-bottom: solid 3px #019fb6;  
+        transform: scaleX(0);  
+        transition: transform 250ms ease-in-out;
+    }
+
+    &:before{
+        position:absolute;
+        bottom:1.2em; left:0;
+        width:100%;
+    }
+      
+        
+      &:hover:after, &:hover:before { transform: scaleX(1); }
 }
