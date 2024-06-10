@@ -17,6 +17,8 @@ import {
     RouterLink,
     RouterLinkActive,
     RouterModule,
+    provideRouter,
+    withComponentInputBinding,
 } from '@angular/router'
 import { RoomManagerComponent } from './room-manager/room-manager.component'
 import { routes } from './app.routes'
@@ -42,7 +44,11 @@ const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} }
         RouterLinkActive,
         RoomManagerComponent,
     ],
-    providers: [provideAnimationsAsync(), QrScannerService],
+    providers: [
+        provideAnimationsAsync(),
+        QrScannerService,
+        provideRouter(routes, withComponentInputBinding()),
+    ],
     bootstrap: [AppComponent],
 })
 export class AppModule {}

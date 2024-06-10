@@ -2,6 +2,10 @@
 
     <p>RoomId: {{ roomId }}</p>
     <p>PeerId: {{ myPeerId }}</p>
+    <mat-form-field class="initiatve-input">
+        <mat-label>Character name</mat-label>
+        <input [(ngModel)]="displayName" matInput type="text">
+    </mat-form-field>
     <button mat-flat-button color="primary" (click)="joinRoom()">
         Join Room
     </button>
@@ -17,7 +21,7 @@
     <h3>Received Messages:</h3>
     <ul>
         <li *ngFor="let msg of messageStream">
-            <b>{{ msg.sender }} :</b>{{ msg.message }}
+            <b>{{ msg.displayName }} :</b>{{ msg.message }}
         </li>
     </ul>
 </div>

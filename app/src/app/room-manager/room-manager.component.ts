@@ -1,24 +1,37 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
-import { Envelope, MessagingService } from '../messaging.service';
-import { QrScannerService } from '../qr-scanner/qr-scanner.service';
-import { SignalingService } from '../signaling.service';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { Observable } from 'rxjs';
+import { ChangeDetectorRef, Component, Input } from '@angular/core'
+import { Envelope, MessagingService } from '../messaging.service'
+import { SignalingService } from '../signaling.service'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { CommonModule } from '@angular/common'
+import { ActivatedRoute, Params, Router } from '@angular/router'
+import { MatInputModule } from '@angular/material/input'
+import { MatButtonModule } from '@angular/material/button'
 
 @Component({
   selector: 'room-manager',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatInputModule,
+    MatButtonModule,
+    ReactiveFormsModule,
+  ],
   templateUrl: './room-manager.component.html',
-  styleUrl: './room-manager.component.scss'
+  styleUrl: './room-manager.component.scss',
 })
 export class RoomManagerComponent {
+  @Input()
+  set roomId(id: string) {
+    if (this.roomId !== id && id) {
+      this.messagingService.joinRoom(id)
+    }
+  }
 
-  activeLink: any;
+  activeLink: any
 
   get players(): string[] {
-    return [...this.signalService.players, this.myPeerId];
+    return [...this.signalService.players, this.myPeerId]
   }
 
   get myPeerId(): string {
@@ -26,31 +39,56 @@ export class RoomManagerComponent {
   }
 
   get roomId(): string {
-    return this.messagingService.roomId;
+    return this.messagingService.roomId
   }
 
-  public messageStream: Envelope[] = [];
+  get displayName(): string {
+    return this.messagingService.displayName
+  }
+
+  set displayName(displayName: string) {
+    this.messagingService.displayName = displayName
+  }
+
+  public messageStream: Envelope[] = []
 
   constructor(
     private signalService: SignalingService,
     private messagingService: MessagingService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
     private ref: ChangeDetectorRef
   ) {
-    this.messagingService.messageStream.subscribe(x => {
-      this.messageStream.push(x);
-      this.ref.detectChanges();
+    this.messagingService.messageStream.subscribe((x) => {
+      this.messageStream.push(x)
+      this.ref.detectChanges()
+      localStorage.setItem(
+        `${this.displayName}-${this.roomId}`,
+        JSON.stringify(this.messageStream)
+      )
     })
   }
 
   createRoom() {
     this.messagingService.createRoom()
+    this.updateQueryStringWithRoomId()
   }
 
   joinRoom() {
-    this.messagingService.joinRoom();
+    this.messagingService.joinRoomWithoutId()
+    this.updateQueryStringWithRoomId()
   }
 
   sendMessage(message: string) {
-    this.messagingService.sendMessage(message);
+    this.messagingService.sendMessage(message)
+  }
+
+  private updateQueryStringWithRoomId() {
+    const queryParams: Params = { roomId: this.roomId }
+    this.router.navigate([], {
+      relativeTo: this.activatedRoute,
+      queryParams,
+      queryParamsHandling: 'merge',
+    })
   }
 }

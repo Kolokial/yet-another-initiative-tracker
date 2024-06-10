@@ -22,20 +22,22 @@ io.on('connection', (socket) => {
         rooms[roomId].push(socket.id);
         console.log(`Client ${socket.id} joined room ${roomId}`);
         notifyPeersInRoom(socket, roomId, 'newPeerJoined', socket.id);
+
+        io.to(socket.id).emit('roomJoined', JSON.stringify(rooms[roomId]));
     });
 
     socket.on('offer', (data) => {
-      console.log(`Offer: ${JSON.stringify(data)}`);
+      //console.log(`Offer: ${JSON.stringify(data)}`);
         socket.to(data.roomId).emit('offer', data);
     });
 
     socket.on('answer', (data) => {
-      console.log(`Answer: ${JSON.stringify(data)}`);
+      //console.log(`Answer: ${JSON.stringify(data)}`);
         socket.to(data.roomId).emit('answer', data);
     });
 
     socket.on('candidate', (data) => {
-      console.log(`Candidate: ${JSON.stringify(data)}`);
+      //console.log(`Candidate: ${JSON.stringify(data)}`);
         socket.to(data.roomId).emit('candidate', data);
     });
 
@@ -49,9 +51,9 @@ function notifyPeersInRoom(socket, roomId, event, data) {
     const peersInRoom = rooms[roomId] || [];
     console.log(`Notifying peers`);
     for (const peerId of peersInRoom) {
-      console.log(`PeerId ${peerId}, SocketId: ${socket.id}`);
         if (peerId !== socket.id) {
-            io.to(peerId).emit(event, data);
+          console.log(`PeerId ${peerId}, SocketId: ${socket.id}`);
+            //io.to(peerId).emit(event, data);
         }
     }
 }
