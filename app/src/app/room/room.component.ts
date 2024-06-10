@@ -1,11 +1,11 @@
-import { ChangeDetectorRef, Component, Input } from '@angular/core'
-import { Envelope, MessagingService } from '../messaging.service'
-import { SignalingService } from '../signaling.service'
-import { FormsModule, ReactiveFormsModule } from '@angular/forms'
-import { CommonModule } from '@angular/common'
-import { ActivatedRoute, Params, Router } from '@angular/router'
-import { MatInputModule } from '@angular/material/input'
-import { MatButtonModule } from '@angular/material/button'
+import { ChangeDetectorRef, Component, Input } from '@angular/core';
+import { Envelope, MessagingService } from '../messaging.service';
+import { SignalingService } from '../signaling.service';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CommonModule, Location } from '@angular/common';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'room',
@@ -23,72 +23,67 @@ import { MatButtonModule } from '@angular/material/button'
 export class RoomComponent {
   @Input()
   set roomId(id: string) {
-    if (this.roomId !== id && id) {
-      this.messagingService.joinRoom(id)
+    if ((this.roomId !== id && id) || !this.myPeerId) {
+      this.messagingService.joinRoom(id);
     }
   }
 
-  activeLink: any
+  activeLink: any;
 
   get players(): string[] {
-    return [...this.signalService.players, this.myPeerId]
+    return [...this.signalService.players, this.myPeerId];
   }
 
   get myPeerId(): string {
-    return this.messagingService.myPeerId
+    return this.messagingService.myPeerId;
   }
 
   get roomId(): string {
-    return this.messagingService.roomId
+    return this.messagingService.roomId;
   }
 
   get displayName(): string {
-    return this.messagingService.displayName
+    return this.messagingService.displayName;
   }
 
   set displayName(displayName: string) {
-    this.messagingService.displayName = displayName
+    this.messagingService.displayName = displayName;
   }
 
-  public messageStream: Envelope[] = []
+  public messageStream: Envelope[] = [];
 
   constructor(
     private signalService: SignalingService,
     private messagingService: MessagingService,
-    private router: Router,
-    private activatedRoute: ActivatedRoute,
+    private location: Location,
     private ref: ChangeDetectorRef
   ) {
     this.messagingService.messageStream.subscribe((x) => {
-      this.messageStream.push(x)
-      this.ref.detectChanges()
+      this.messageStream.push(x);
+      this.ref.detectChanges();
       localStorage.setItem(
         `${this.displayName}-${this.roomId}`,
         JSON.stringify(this.messageStream)
-      )
-    })
+      );
+    });
   }
 
   createRoom() {
-    this.messagingService.createRoom()
-    this.updateQueryStringWithRoomId()
+    this.messagingService.createRoom();
+    this.updateQueryStringWithRoomId();
   }
 
   joinRoom() {
-    this.messagingService.joinRoomWithoutId()
-    this.updateQueryStringWithRoomId()
+    this.messagingService.joinRoomWithoutId();
+    this.updateQueryStringWithRoomId();
   }
 
   sendMessage(message: string) {
-    this.messagingService.sendMessage(message)
+    this.messagingService.sendMessage(message);
   }
 
   private updateQueryStringWithRoomId() {
-    const queryParams: Params = { roomId: this.roomId }
-    this.router.navigate([], {
-      relativeTo: this.activatedRoute,
-      queryParams,
-      queryParamsHandling: 'merge',
-    })
+    //const queryParams: Params = { roomId: this.roomId }
+    this.location.replaceState(`${this.roomId}`);
   }
 }

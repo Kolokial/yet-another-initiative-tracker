@@ -14,7 +14,6 @@ const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  roomId!: string;
   message!: string;
   receivedMessages: { sender: string; message: string }[] = [];
   myPeerId!: string;
@@ -22,6 +21,10 @@ export class AppComponent {
 
   get players(): string[] {
     return [...this.signalService.players, this.myPeerId];
+  }
+
+  public get roomUrl(): string {
+    return `room/${this.messagingService.roomId}`;
   }
 
   constructor(
@@ -45,5 +48,11 @@ export class AppComponent {
 
   startScanning() {
     this.qrScanner.startScan();
+  }
+
+  ngOnInit() {
+    if (!this.messagingService.myPeerId) {
+      this.signalService.joinRoom(this.messagingService.roomId);
+    }
   }
 }

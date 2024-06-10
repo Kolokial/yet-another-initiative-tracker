@@ -1,10 +1,12 @@
+<input
+  #initiative
+  [disabled]="isInitiativeInputDisabled"
+  class="initiative"
+  type="number"
+  placeholder="Nat 20!"
+  value=""
+  max="70"
+  (keyup.enter)="sendInitiative(initiative.value)"
+/>
 
-<input #initiative class="initiative" type="number" placeholder="Nat 20!" value="" max="70" (keyup.enter)="sendInitiative(initiative.value)">
-
-<!-- <button (click)="sendInitiative(initiative.value)">Fight!</button> -->
-
-<ul>
-    <li *ngFor="let pc of players">
-        {{ pc }}
-    </li>
-</ul>
+<button (click)="sendInitiative(initiative.value)">Fight!</button>

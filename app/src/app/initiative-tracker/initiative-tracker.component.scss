@@ -15,37 +15,22 @@ input.initiative {
     margin: auto;
     display: block;
     max-width: 100%;
-    background: transparent;
-    border: none;
+    background: 
+        linear-gradient(rgb(131, 14, 155) 0 0) bottom / 0% 2px no-repeat
+        transparent;
+    transition: 1s;
     transition: border-color 0.3s; /* Smooth transition for border color */
-
+    border: none;
     text-align: center;
     height: 1;
-    font-size: 8vh;
+    font-size: 5em;
     color: white;
+    transition: 0.5s;
+    width: 5em;
 
-    &:focus-visible {
-        border: none;
+
+    &:hover {
         outline: none;
-
-
+        background-size: 100% 2px;
     }
-
-
-    &:after, &:before {
-        display:block;
-        content: '';
-        border-bottom: solid 3px #019fb6;  
-        transform: scaleX(0);  
-        transition: transform 250ms ease-in-out;
-    }
-
-    &:before{
-        position:absolute;
-        bottom:1.2em; left:0;
-        width:100%;
-    }
-      
-        
-      &:hover:after, &:hover:before { transform: scaleX(1); }
 }

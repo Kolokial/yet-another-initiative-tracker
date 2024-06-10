@@ -1,11 +1,29 @@
 <nav mat-tab-nav-bar [tabPanel]="tabPanel">
-  <a mat-tab-link routerLink="/room" routerLinkActive="active" (click)="activeLink = '/room'"
-    [active]="activeLink == ''">Room </a>
-  <a mat-tab-link routerLink="/init" routerLinkActive="active" (click)="activeLink = '/init'"
-    [active]="activeLink == ''"> Initiative Tracker </a>
-  <a mat-tab-link routerLink="/order" routerLinkActive="active" (click)="activeLink = '/order'"
-    [active]="activeLink == ''">Initative Order </a>
-
+  <a
+    mat-tab-link
+    [routerLink]="roomUrl"
+    routerLinkActive="active"
+    (click)="activeLink = roomUrl"
+    [active]="activeLink == ''"
+    >Room
+  </a>
+  <a
+    mat-tab-link
+    routerLink="/init/"
+    routerLinkActive="active"
+    (click)="activeLink = '/init'"
+    [active]="activeLink == ''"
+  >
+    Initiative Tracker
+  </a>
+  <a
+    mat-tab-link
+    routerLink="/order/"
+    routerLinkActive="active"
+    (click)="activeLink = '/order'"
+    [active]="activeLink == ''"
+    >Initative Order
+  </a>
 </nav>
 <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
 <router-outlet></router-outlet>

@@ -7,13 +7,19 @@ export type Envelope = {
   message: string;
   timestamp: number;
   displayName: string;
+  isProfileUpdate?: boolean;
 };
 
 @Injectable({
   providedIn: 'root',
 })
 export class MessagingService {
-  private _roomId: string = '';
+  private set _roomId(roomId: string) {
+    this.updateLocalStorageRoomId(roomId);
+  }
+  private get _roomId(): string {
+    return localStorage.getItem('RoomId') ?? '';
+  }
   public get roomId(): string {
     return this._roomId;
   }
@@ -101,16 +107,27 @@ export class MessagingService {
     dataChannel.onopen = (event: Event) => {
       this.populateMessageStream();
       console.log('Data channel open', event);
+      this.sendProfileUpdate(dataChannel);
     };
 
     dataChannel.onmessage = (event: MessageEvent) => {
       if (event.data.sender !== this.myPeerId) {
         const envelope: Envelope = JSON.parse(event.data);
         this.updateMessageStream(envelope);
-
         console.log('Data channel message:', event.data);
       }
     };
+  }
+
+  private sendProfileUpdate(dataChannel: RTCDataChannel): void {
+    const introduction: Envelope = {
+      displayName: this._displayName,
+      peerId: this._myPeerId,
+      timestamp: Date.now(),
+      isProfileUpdate: true,
+      message: '',
+    };
+    dataChannel.send(JSON.stringify(introduction));
   }
 
   private updateMessageStream(message: Envelope): void {
@@ -132,5 +149,9 @@ export class MessagingService {
         }
       });
     }
+  }
+
+  private updateLocalStorageRoomId(roomId: string): void {
+    localStorage.setItem('RoomId', roomId);
   }
 }

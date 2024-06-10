@@ -4,6 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "two": "concurrently --kill-others \"ng serve --host 0.0.0.0 --port 5200\" \"ng serve --host 0.0.0.0 --port 4200\"",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
@@ -38,6 +39,7 @@
     "@angular/compiler-cli": "^18.0.0",
     "@capacitor/cli": "^6.0.0",
     "@types/jasmine": "~5.1.0",
+    "concurrently": "^8.2.2",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
