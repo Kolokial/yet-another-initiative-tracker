@@ -14,12 +14,7 @@ export type Envelope = {
   providedIn: 'root',
 })
 export class MessagingService {
-  private set _roomId(roomId: string) {
-    this.updateLocalStorageRoomId(roomId);
-  }
-  private get _roomId(): string {
-    return localStorage.getItem('RoomId') ?? '';
-  }
+  private _roomId: string = ''
   public get roomId(): string {
     return this._roomId;
   }

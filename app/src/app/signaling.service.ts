@@ -28,12 +28,17 @@ export class SignalingService {
   public joinRoom(roomId: string): Observable<string> {
     const subject = new Subject<string>();
 
-    const intervalId = setInterval(() => {
-      if (this.socket.ioSocket.connected) {
-        subject.next(this.emitJoinRoom(roomId));
-        clearInterval(intervalId);
-      }
-    }, 500);
+    if(!roomId){
+      subject.complete();
+    } else {
+      const intervalId = setInterval(() => {
+        if (this.socket.ioSocket.connected) {
+          subject.next(this.emitJoinRoom(roomId));
+          subject.complete();
+          clearInterval(intervalId);
+        }
+      }, 500);
+    }
 
     return subject;
   }

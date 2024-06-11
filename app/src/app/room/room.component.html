@@ -6,10 +6,10 @@
         <mat-label>Character name</mat-label>
         <input [(ngModel)]="displayName" matInput type="text">
     </mat-form-field>
-    <button mat-flat-button color="primary" (click)="joinRoom()">
+    <button mat-flat-button color="primary" [disabled]='!displayName'(click)="joinRoom()">
         Join Room
     </button>
-    <button mat-flat-button color="primary" (click)="createRoom()">
+    <button mat-flat-button color="primary" [disabled]='!displayName'(click)="createRoom()">
         Create Room
     </button>
 </div>

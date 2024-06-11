@@ -3,7 +3,6 @@ import { Envelope, MessagingService } from '../messaging.service';
 import { SignalingService } from '../signaling.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule, Location } from '@angular/common';
-import { ActivatedRoute, Params, Router } from '@angular/router';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 
@@ -69,13 +68,18 @@ export class RoomComponent {
   }
 
   createRoom() {
-    this.messagingService.createRoom();
-    this.updateQueryStringWithRoomId();
+    if(this.displayName.length){
+      this.messagingService.createRoom();
+      this.updateQueryStringWithRoomId();  
+    }
   }
 
   joinRoom() {
-    this.messagingService.joinRoomWithoutId();
-    this.updateQueryStringWithRoomId();
+    if(this.displayName.length){
+      this.messagingService.joinRoomWithoutId();
+      this.updateQueryStringWithRoomId();  
+    }
+    
   }
 
   sendMessage(message: string) {
@@ -84,6 +88,6 @@ export class RoomComponent {
 
   private updateQueryStringWithRoomId() {
     //const queryParams: Params = { roomId: this.roomId }
-    this.location.replaceState(`${this.roomId}`);
+    this.location.replaceState(`room/${this.roomId}`);
   }
 }

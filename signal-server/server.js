@@ -15,7 +15,11 @@ io.on('connection', (socket) => {
     console.log('New client connected');
 
     socket.on('joinRoom', (roomId) => {
+        if(!roomId){
+          return
+        }
         socket.join(roomId);
+        console.log(roomId);
         if (!rooms[roomId]) {
             rooms[roomId] = [];
         }
