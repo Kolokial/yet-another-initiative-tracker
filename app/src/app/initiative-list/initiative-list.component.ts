@@ -1,7 +1,7 @@
-import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { Envelope, MessagingService } from '../messaging.service';
 import { NgFor } from '@angular/common';
-import { MatTable, MatTableModule } from '@angular/material/table';
+import { MatTableModule } from '@angular/material/table';
 
 type InitiativeDetail = {
   peerId: string;
@@ -17,10 +17,9 @@ type InitiativeDetail = {
   styleUrl: './initiative-list.component.scss',
 })
 export class InitiativeListComponent {
-  //public _peers: Map<string, string> = new Map<string, string>();
+  /* Todo: now we need to work out whose turn it is */
   public initiatives: InitiativeDetail[] = [];
   public displayedColumns: string[] = ['displayName', 'initiativeValue'];
-  @ViewChild(MatTable) public table!: MatTable<InitiativeDetail>;
 
   constructor(
     private messagingService: MessagingService,
@@ -44,14 +43,7 @@ export class InitiativeListComponent {
           ...this.initiatives.sort((a, b) => b.initiativeValue - a.initiativeValue),
         ];
         this.ref.detectChanges();
-        //this.table.renderRows();
       },
-    });
-
-    this.messagingService.messageStream.subscribe((x: Envelope) => {
-      if (x.isProfileUpdate) {
-        return;
-      }
     });
   }
 
