@@ -12,7 +12,7 @@ const io = socketIo(server, {
 const rooms = {};
 
 io.on('connection', (socket) => {
-    console.log('New client connected');
+    console.log('New client connected', socket.id);
 
     socket.on('joinRoom', (roomId) => {
         if(!roomId){
@@ -46,8 +46,9 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
+        console.log('Client disconnected', socket.id);
         removePeerFromRooms(socket.id);
-        console.log('Client disconnected');
+        
     });
 });
 

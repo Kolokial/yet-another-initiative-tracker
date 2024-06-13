@@ -1,6 +1,8 @@
 /* Housekeeping! */
 import { Injectable } from '@angular/core';
 import { SignalingService } from '../signaling.service';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { ROOM_ID } from '../constants';
 
 @Injectable({
   providedIn: 'root',
@@ -18,30 +20,55 @@ export class RoomService {
 
   private roomHistory: Map<string, string> = new Map<string, string>();
 
-  constructor(private signalingService: SignalingService) {}
+  constructor(
+    private signalingService: SignalingService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute
+  ) {
+    this.attemptToAutoJoinRoom();
+  }
+
+  private attemptToAutoJoinRoom() {
+    const url = new URL(window.location.href);
+    let roomId = url.searchParams.get(ROOM_ID);
+    console.log('checking url');
+    if (!roomId) {
+      console.log('checking localStorage');
+      roomId = localStorage.getItem(ROOM_ID);
+    }
+
+    if (roomId != null) {
+      this.joinRoom(roomId);
+    }
+  }
 
   createRoom() {
     this._roomId = Math.random().toString(36).substring(7);
-    this.signalingService.joinRoom(this.roomId).subscribe((peerId: string) => {
+    this.signalingService.joinRoom(this.roomId).subscribe((peerId) => {
       this._myPeerId = peerId;
     });
-    alert(`Room created with ID: ${this.roomId}`);
+    //alert(`Room created with ID: ${this.roomId}`);
   }
 
   joinRoom(roomId: string) {
     if (roomId) {
       this._roomId = roomId;
-      this.signalingService.joinRoom(this.roomId).subscribe((peerId: string) => {
+      localStorage.setItem(ROOM_ID, roomId);
+      this.signalingService.joinRoom(this.roomId).subscribe((peerId) => {
         this._myPeerId = peerId;
       });
     }
+  }
+
+  leaveRoom() {
+    this.signalingService.leaveRoom();
   }
 
   joinRoomWithoutId() {
     const roomId = prompt('Enter the room ID to join:');
     if (roomId) {
       this._roomId = roomId;
-      this.signalingService.joinRoom(this.roomId).subscribe((peerId: string) => {
+      this.signalingService.joinRoom(this.roomId).subscribe((peerId) => {
         this._myPeerId = peerId;
       });
     }

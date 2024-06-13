@@ -1,13 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, take } from 'rxjs';
 import { Envelope } from './messaging.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SignalingService {
-  private myPeerId!: string;
+  private _myPeerId!: string;
+  public get myPeerId(): string {
+    return this._myPeerId;
+  }
   private roomId!: string;
 
   public peerConnections: { [key: string]: RTCPeerConnection } = {};
@@ -28,25 +31,37 @@ export class SignalingService {
   public joinRoom(roomId: string): Observable<string> {
     const subject = new Subject<string>();
 
-    if(!roomId){
+    if (!roomId) {
       subject.complete();
     } else {
       const intervalId = setInterval(() => {
         if (this.socket.ioSocket.connected) {
           subject.next(this.emitJoinRoom(roomId));
-          subject.complete();
           clearInterval(intervalId);
         }
       }, 500);
     }
 
-    return subject;
+    return subject.pipe(take(1));
+  }
+
+  public leaveRoom() {
+    this.roomId = '';
+    this._myPeerId = '';
+    Object.keys(this.dataChannels).forEach((key) => {
+      this.dataChannels[key].close();
+      delete this.dataChannels[key];
+    });
+    Object.keys(this.peerConnections).forEach((key) => {
+      this.peerConnections[key].close();
+      delete this.peerConnections[key];
+    });
   }
 
   private emitJoinRoom(roomId: string): string {
     this.roomId = roomId;
     const data = this.socket.emit('joinRoom', roomId);
-    return (this.myPeerId = data.id);
+    return (this._myPeerId = data.id);
   }
 
   private createPeerConnection(peerId: string) {
@@ -58,7 +73,7 @@ export class SignalingService {
         this.socket.emit('candidate', {
           roomId: this.roomId,
           candidate: event.candidate,
-          target: this.myPeerId,
+          target: this._myPeerId,
         });
       }
     };
@@ -78,7 +93,7 @@ export class SignalingService {
     console.log(peerList);
 
     JSON.parse(peerList).forEach((peer: string) => {
-      if (peer != this.myPeerId) {
+      if (peer != this._myPeerId) {
         this.createOffer(peer);
       }
     });
@@ -104,7 +119,7 @@ export class SignalingService {
         this.socket.emit('offer', {
           roomId: this.roomId,
           offer: peerConnection.localDescription,
-          peerId: this.myPeerId,
+          peerId: this._myPeerId,
         });
       })
       .catch((e) => console.error('Error creating offer:', e));
@@ -136,7 +151,7 @@ export class SignalingService {
           roomId: data.roomId,
           answer: peerConnection.localDescription,
           target: peerId,
-          source: this.myPeerId,
+          source: this._myPeerId,
         });
       });
   }
@@ -145,7 +160,7 @@ export class SignalingService {
     const peerId = data.source;
     const answer = data.answer;
     const peerConnection = this.peerConnections[peerId];
-    if (peerConnection.signalingState !== 'stable' && this.myPeerId === data.target) {
+    if (peerConnection.signalingState !== 'stable' && this._myPeerId === data.target) {
       peerConnection.setRemoteDescription(new RTCSessionDescription(answer)).then(() => {
         peerConnection.addIceCandidate();
       });
@@ -187,12 +202,12 @@ export class SignalingService {
   }
 
   private getDataChannelLabel(peerId: string): string {
-    return `${peerId}-${this.myPeerId}`;
+    return `${peerId}-${this._myPeerId}`;
   }
 
   private doesDataChannelLabelMatch(peerId: string, label: string): boolean {
     return (
-      `${peerId}-${this.myPeerId}` === label || `${this.myPeerId}-${peerId}` === label
+      `${peerId}-${this._myPeerId}` === label || `${this._myPeerId}-${peerId}` === label
     );
   }
 }

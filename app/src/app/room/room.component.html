@@ -1,27 +1,40 @@
 <div>
+  <p>RoomId: {{ roomId }}</p>
+  <p>PeerId: {{ myPeerId }}</p>
+  <mat-form-field class="initiatve-input">
+    <mat-label>Character name</mat-label>
+    <input [(ngModel)]="displayName" matInput type="text" />
+  </mat-form-field>
+  <button mat-flat-button color="primary" [disabled]="!displayName" (click)="joinRoom()">
+    Join Room
+  </button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="!displayName"
+    (click)="createRoom()"
+  >
+    Create Room
+  </button>
 
-    <p>RoomId: {{ roomId }}</p>
-    <p>PeerId: {{ myPeerId }}</p>
-    <mat-form-field class="initiatve-input">
-        <mat-label>Character name</mat-label>
-        <input [(ngModel)]="displayName" matInput type="text">
-    </mat-form-field>
-    <button mat-flat-button color="primary" [disabled]='!displayName'(click)="joinRoom()">
-        Join Room
-    </button>
-    <button mat-flat-button color="primary" [disabled]='!displayName'(click)="createRoom()">
-        Create Room
-    </button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="!myPeerId && !roomId"
+    (click)="createRoom()"
+  >
+    Leave Room
+  </button>
 </div>
 <div>
-    <input #message placeholder="Type a message" />
-    <button (click)="sendMessage(message.value)">Send</button>
+  <input #message placeholder="Type a message" />
+  <button (click)="sendMessage(message.value)">Send</button>
 </div>
 <div>
-    <h3>Received Messages:</h3>
-    <ul>
-        <li *ngFor="let msg of messageStream">
-            <b>{{ msg.displayName }} :</b>{{ msg.message }}
-        </li>
-    </ul>
+  <h3>Received Messages:</h3>
+  <ul>
+    <li *ngFor="let msg of messageStream">
+      <b>{{ msg.displayName }} :</b>{{ msg.message }}
+    </li>
+  </ul>
 </div>

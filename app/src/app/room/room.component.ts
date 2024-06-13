@@ -1,21 +1,17 @@
 import { ChangeDetectorRef, Component, Input } from '@angular/core';
 import { Envelope, MessagingService } from '../messaging.service';
 import { SignalingService } from '../signaling.service';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { CommonModule, Location } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { RoomService } from './room.service';
+import { ROOM_ID } from '../constants';
 
 @Component({
   selector: 'room',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatInputModule,
-    MatButtonModule,
-    ReactiveFormsModule,
-  ],
+  imports: [CommonModule, FormsModule, MatInputModule, MatButtonModule],
   templateUrl: './room.component.html',
   styleUrl: './room.component.scss',
 })
@@ -23,7 +19,7 @@ export class RoomComponent {
   @Input()
   set roomId(id: string) {
     if ((this.roomId !== id && id) || !this.myPeerId) {
-      this.messagingService.joinRoom(id);
+      this.roomService.joinRoom(id);
     }
   }
 
@@ -34,11 +30,11 @@ export class RoomComponent {
   }
 
   get myPeerId(): string {
-    return this.messagingService.myPeerId;
+    return this.roomService.myPeerId;
   }
 
   get roomId(): string {
-    return this.messagingService.roomId;
+    return this.roomService.roomId;
   }
 
   get displayName(): string {
@@ -54,32 +50,23 @@ export class RoomComponent {
   constructor(
     private signalService: SignalingService,
     private messagingService: MessagingService,
+    private roomService: RoomService,
     private location: Location,
     private ref: ChangeDetectorRef
-  ) {
-    this.messagingService.messageStream.subscribe((x) => {
-      this.messageStream.push(x);
-      this.ref.detectChanges();
-      localStorage.setItem(
-        `${this.displayName}-${this.roomId}`,
-        JSON.stringify(this.messageStream)
-      );
-    });
-  }
+  ) {}
 
   createRoom() {
-    if(this.displayName.length){
-      this.messagingService.createRoom();
-      this.updateQueryStringWithRoomId();  
+    if (this.displayName.length) {
+      this.roomService.createRoom();
+      this.updateQueryStringWithRoomId();
     }
   }
 
   joinRoom() {
-    if(this.displayName.length){
-      this.messagingService.joinRoomWithoutId();
-      this.updateQueryStringWithRoomId();  
+    if (this.displayName.length) {
+      this.roomService.joinRoomWithoutId();
+      this.updateQueryStringWithRoomId();
     }
-    
   }
 
   sendMessage(message: string) {
@@ -88,6 +75,7 @@ export class RoomComponent {
 
   private updateQueryStringWithRoomId() {
     //const queryParams: Params = { roomId: this.roomId }
-    this.location.replaceState(`room/${this.roomId}`);
+    this.location.replaceState(`room`);
+    localStorage.setItem(ROOM_ID, this.roomId);
   }
 }

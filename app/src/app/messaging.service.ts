@@ -14,14 +14,13 @@ export type Envelope = {
   providedIn: 'root',
 })
 export class MessagingService {
-  private _roomId: string = ''
+  private _roomId: string = '';
   public get roomId(): string {
     return this._roomId;
   }
 
-  private _myPeerId: string = '';
   public get myPeerId(): string {
-    return this._myPeerId;
+    return this.signalingService.myPeerId;
   }
 
   private _messageStream: ReplaySubject<Envelope> = new ReplaySubject<Envelope>();
@@ -50,33 +49,6 @@ export class MessagingService {
     });
   }
 
-  createRoom() {
-    this._roomId = Math.random().toString(36).substring(7);
-    this.signalingService.joinRoom(this.roomId).subscribe((peerId) => {
-      this._myPeerId = peerId;
-    });
-    alert(`Room created with ID: ${this.roomId}`);
-  }
-
-  joinRoom(roomId: string) {
-    if (roomId) {
-      this._roomId = roomId;
-      this.signalingService.joinRoom(this.roomId).subscribe((peerId) => {
-        this._myPeerId = peerId;
-      });
-    }
-  }
-
-  joinRoomWithoutId() {
-    const roomId = prompt('Enter the room ID to join:');
-    if (roomId) {
-      this._roomId = roomId;
-      this.signalingService.joinRoom(this.roomId).subscribe((peerId) => {
-        this._myPeerId = peerId;
-      });
-    }
-  }
-
   sendMessage(message: string) {
     /*
       To do: handle sendMessage being called before readyState is set to open.
@@ -90,7 +62,7 @@ export class MessagingService {
           peerId: this.myPeerId,
           message: message,
           timestamp: Date.now(),
-          displayName: this._displayName,
+          displayName: this.displayName,
         };
         this.updateMessageStream(envelope);
         dataChannel.send(JSON.stringify(envelope));
@@ -100,7 +72,7 @@ export class MessagingService {
 
   private setupDataChannel(dataChannel: RTCDataChannel) {
     dataChannel.onopen = (event: Event) => {
-      this.populateMessageStream();
+      //this.populateMessageStream();
       console.log('Data channel open', event);
       this.sendProfileUpdate(dataChannel);
     };
@@ -116,8 +88,8 @@ export class MessagingService {
 
   private sendProfileUpdate(dataChannel: RTCDataChannel): void {
     const introduction: Envelope = {
-      displayName: this._displayName,
-      peerId: this._myPeerId,
+      displayName: this.displayName,
+      peerId: this.myPeerId,
       timestamp: Date.now(),
       isProfileUpdate: true,
       message: '',
