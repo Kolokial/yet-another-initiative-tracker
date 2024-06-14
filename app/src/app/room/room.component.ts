@@ -70,7 +70,7 @@ export class RoomComponent {
   }
 
   sendMessage(message: string) {
-    this.messagingService.sendMessage(message);
+    this.messagingService.sendDiceRollMessage(message);
   }
 
   private updateQueryStringWithRoomId() {

@@ -8,6 +8,7 @@ export type Envelope = {
   timestamp: number;
   displayName: string;
   isProfileUpdate?: boolean;
+  isTurnFinished?: boolean;
 };
 
 @Injectable({
@@ -49,21 +50,30 @@ export class MessagingService {
     });
   }
 
-  sendMessage(message: string) {
-    /*
-      To do: handle sendMessage being called before readyState is set to open.
-      Perhaps queuing up messages?
-    
-    */
+  public sendDiceRollMessage(message: string) {
+    const envelope: Envelope = {
+      peerId: this.myPeerId,
+      message: message,
+      timestamp: Date.now(),
+      displayName: this.displayName,
+    };
+    this.sendMessage(envelope);
+  }
+
+  public sendTurnFinishedMessage():void {
+    this.sendMessage({
+      peerId: this.myPeerId,
+      message: '',
+      timestamp: Date.now(),
+      displayName: this._displayName,
+      isTurnFinished: true,
+    })
+  }
+
+  private sendMessage(envelope: Envelope): void {
     for (const peerId of Object.keys(this.signalingService.peerConnections)) {
       const dataChannel = this.signalingService.dataChannels[peerId];
       if (dataChannel && dataChannel.readyState === 'open') {
-        const envelope: Envelope = {
-          peerId: this.myPeerId,
-          message: message,
-          timestamp: Date.now(),
-          displayName: this.displayName,
-        };
         this.updateMessageStream(envelope);
         dataChannel.send(JSON.stringify(envelope));
       }

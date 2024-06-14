@@ -44,23 +44,18 @@ export class InitiativeTrackerComponent {
   public get isInitiativeInputDisabled(): boolean {
     return this._isInitiativeInputDisabled;
   }
-  initiativeValues: number[] = [];
+  initiativeValue!: number;
 
   constructor(private messagingService: MessagingService) {
-    this.initiativeValues = new Array(30);
   }
 
-  ngBeforeViewInit() {
-    console.log(this.initiative);
-  }
-
-  ngAfterContentInit() {
+  ngAfterViewInit() {
     console.log(this.initiative);
     this._isInitiativeInputDisabled = false;
   }
 
-  sendInitiative(initiativeString: string) {
-    let initiativeValue = parseInt(initiativeString);
+  sendInitiative(initiativeString: number) {
+    let initiativeValue = parseInt(`${initiativeString}`);
     if (this.dexterityModifier) {
       initiativeValue += this.dexterityModifier;
     }
@@ -68,6 +63,6 @@ export class InitiativeTrackerComponent {
     if (this.alertFeat) {
       initiativeValue += 5;
     }
-    this.messagingService.sendMessage(`${initiativeValue}`);
+    this.messagingService.sendDiceRollMessage(`${initiativeValue}`);
   }
 }

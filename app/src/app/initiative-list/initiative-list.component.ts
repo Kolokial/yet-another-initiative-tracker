@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component } from '@angular/core';
 import { Envelope, MessagingService } from '../messaging.service';
 import { NgFor } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
+import { Observable, Subscription } from 'rxjs';
 
 type InitiativeDetail = {
   peerId: string;
@@ -21,6 +22,8 @@ export class InitiativeListComponent {
   public initiatives: InitiativeDetail[] = [];
   public displayedColumns: string[] = ['displayName', 'initiativeValue'];
 
+  private messagingObservable!: Subscription;
+
   constructor(
     private messagingService: MessagingService,
     private ref: ChangeDetectorRef
@@ -33,18 +36,29 @@ export class InitiativeListComponent {
       initiativeValue: 0,
     });
 
-    this.messagingService.messageStream.subscribe({
+    this.messagingObservable = this.messagingService.messageStream.subscribe({
       next: (envelope: Envelope) => {
         const detail = this.findInitiativeByPeerId(envelope.peerId);
 
         detail.displayName = envelope.displayName;
         detail.initiativeValue = parseInt(envelope.message);
-        this.initiatives = [
-          ...this.initiatives.sort((a, b) => b.initiativeValue - a.initiativeValue),
-        ];
+        if(envelope.isTurnFinished){
+          const currentPlayersTurn = this.initiatives.splice(0,1);
+          this.initiatives.push(currentPlayersTurn[0])
+          this
+        } else {
+          this.initiatives = [
+            ...this.initiatives.sort((a, b) => b.initiativeValue - a.initiativeValue),
+          ];
+        }
+  
         this.ref.detectChanges();
       },
     });
+  }
+
+  ngOnDestroy(){
+    this.messagingObservable.unsubscribe();
   }
 
   private findInitiativeByPeerId(peerId: string): InitiativeDetail {
@@ -59,5 +73,9 @@ export class InitiativeListComponent {
     } else {
       return this.initiatives[index];
     }
+  }
+
+  public sendTurnFinishedMessage(): void {
+    this.messagingService.sendTurnFinishedMessage();
   }
 }

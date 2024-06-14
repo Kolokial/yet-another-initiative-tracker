@@ -1,15 +1,15 @@
 <input
-  #initiative
   [disabled]="isInitiativeInputDisabled"
   class="initiative"
   type="number"
-  placeholder="Nat 20!"
-  value=""
+  placeholder="20"
+  autofocus
+  [(ngModel)]="initiativeValue"
   max="70"
-  (keyup.enter)="sendInitiative(initiative.value)"
+  (keyup.enter)="sendInitiative(initiativeValue)"
 />
 
-<button (click)="sendInitiative(initiative.value)">Fight!</button>
+<button (click)="sendInitiative(initiativeValue)">Fight!</button>
 
 <mat-form-field class="dexterity-mod">
   <mat-label>Dexterity Modifier</mat-label>
