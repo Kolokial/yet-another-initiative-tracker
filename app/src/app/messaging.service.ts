@@ -4,7 +4,7 @@ import { SignalingService } from './signaling.service';
 
 export type Envelope = {
   peerId: string;
-  message: string;
+  diceRoll: number;
   timestamp: number;
   displayName: string;
   isProfileUpdate?: boolean;
@@ -40,6 +40,10 @@ export class MessagingService {
     return this._displayName;
   }
 
+  get dataChannelClosing$(): Observable<string> {
+    return this.signalingService.dataChannelClosing$;
+  }
+
   private messageEnvelopes: { [timestamp: string]: Envelope } = {};
 
   constructor(private signalingService: SignalingService) {
@@ -50,24 +54,24 @@ export class MessagingService {
     });
   }
 
-  public sendDiceRollMessage(message: string) {
+  public sendDiceRollMessage(message: number) {
     const envelope: Envelope = {
       peerId: this.myPeerId,
-      message: message,
+      diceRoll: message,
       timestamp: Date.now(),
       displayName: this.displayName,
     };
     this.sendMessage(envelope);
   }
 
-  public sendTurnFinishedMessage():void {
+  public sendTurnFinishedMessage(): void {
     this.sendMessage({
       peerId: this.myPeerId,
-      message: '',
+      diceRoll: 0,
       timestamp: Date.now(),
       displayName: this._displayName,
       isTurnFinished: true,
-    })
+    });
   }
 
   private sendMessage(envelope: Envelope): void {
@@ -102,7 +106,7 @@ export class MessagingService {
       peerId: this.myPeerId,
       timestamp: Date.now(),
       isProfileUpdate: true,
-      message: '',
+      diceRoll: 0,
     };
     dataChannel.send(JSON.stringify(introduction));
   }

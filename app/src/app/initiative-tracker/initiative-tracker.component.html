@@ -6,6 +6,7 @@
   autofocus
   [(ngModel)]="initiativeValue"
   max="70"
+  (keyup)="onInitiativeKeyUp(initiativeValue)"
   (keyup.enter)="sendInitiative(initiativeValue)"
 />
 

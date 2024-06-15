@@ -69,8 +69,8 @@ export class RoomComponent {
     }
   }
 
-  sendMessage(message: string) {
-    this.messagingService.sendDiceRollMessage(message);
+  sendMessage(message: number | string) {
+    this.messagingService.sendDiceRollMessage(message as number);
   }
 
   private updateQueryStringWithRoomId() {

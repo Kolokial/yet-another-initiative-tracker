@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, Input, NgModule, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,6 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MessagingService } from '../messaging.service';
 import { FormsModule } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'initiative-tracker',
@@ -44,9 +45,23 @@ export class InitiativeTrackerComponent {
   public get isInitiativeInputDisabled(): boolean {
     return this._isInitiativeInputDisabled;
   }
-  initiativeValue!: number;
+  public initiativeValue!: number;
 
-  constructor(private messagingService: MessagingService) {
+  private keyup$: Subject<number> = new Subject<number>();
+  private keyupSubscription!: Subscription;
+
+  constructor(private messagingService: MessagingService) {}
+
+  ngOnInit() {
+    this.keyupSubscription = this.keyup$
+      .pipe(debounceTime(1000), distinctUntilChanged())
+      .subscribe((initiative) => {
+        this.sendInitiative(initiative);
+      });
+  }
+
+  ngOnDestroy() {
+    this.keyupSubscription.unsubscribe();
   }
 
   ngAfterViewInit() {
@@ -63,6 +78,10 @@ export class InitiativeTrackerComponent {
     if (this.alertFeat) {
       initiativeValue += 5;
     }
-    this.messagingService.sendDiceRollMessage(`${initiativeValue}`);
+    this.messagingService.sendDiceRollMessage(initiativeValue);
+  }
+
+  onInitiativeKeyUp(initiative: number) {
+    this.keyup$.next(initiative);
   }
 }

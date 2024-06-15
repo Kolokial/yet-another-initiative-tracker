@@ -17,6 +17,11 @@ export class SignalingService {
   public dataChannels: { [key: string]: RTCDataChannel } = {};
   public dataChannelSubject = new Subject<RTCDataChannel>();
 
+  private _dataChannelClosingSubject = new Subject<string>();
+  public get dataChannelClosing$(): Observable<string> {
+    return this._dataChannelClosingSubject.asObservable();
+  }
+
   public get players(): string[] {
     return Object.keys(this.peerConnections);
   }
@@ -189,6 +194,7 @@ export class SignalingService {
         if (this.doesDataChannelLabelMatch(peerId, dataChannel.label)) {
           delete this.peerConnections[peerId];
           delete this.dataChannels[peerId];
+          this._dataChannelClosingSubject.next(peerId);
         }
       });
       console.log('Count after');

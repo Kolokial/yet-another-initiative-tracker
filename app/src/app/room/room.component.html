@@ -27,14 +27,14 @@
   </button>
 </div>
 <div>
-  <input #message placeholder="Type a message" />
+  <input #message type="number" placeholder="Type a message" />
   <button (click)="sendMessage(message.value)">Send</button>
 </div>
 <div>
   <h3>Received Messages:</h3>
   <ul>
     <li *ngFor="let msg of messageStream">
-      <b>{{ msg.displayName }} :</b>{{ msg.message }}
+      <b>{{ msg.displayName }} :</b>{{ msg.diceRoll }}
     </li>
   </ul>
 </div>
