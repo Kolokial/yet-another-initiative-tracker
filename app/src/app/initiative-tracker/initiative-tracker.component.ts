@@ -52,6 +52,13 @@ export class InitiativeTrackerComponent {
     this.dataStore.alertFeat = value;
   }
 
+  public get luckStone(): boolean {
+    return this.dataStore.luckStone;
+  }
+  public set luckStone(v: boolean) {
+    this.dataStore.luckStone = v;
+  }
+
   private _isInitiativeInputDisabled: boolean = false;
   public get isInitiativeInputDisabled(): boolean {
     return this._isInitiativeInputDisabled;
