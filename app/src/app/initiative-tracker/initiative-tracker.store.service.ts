@@ -4,7 +4,10 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class InitiativeTrackerStoreService {
-  public initiativeValue!: number;
-  public dexterityModifier!: number;
+  public initiativeRoll!: number;
+  public dexterityScore!: number;
   public alertFeat: boolean = false;
+  public luckStone: boolean = false;
+  public agilityStone: boolean = false;
+  public scorpionArmor: boolean = false;
 }

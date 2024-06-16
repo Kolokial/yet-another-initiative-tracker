@@ -1,0 +1,9 @@
+[
+  { "variableName": "alertFeat", "displayName": "", "bonus": 5 },
+
+  { "variableName": "luckStone", "displayName": "", "bonus": 1 },
+
+  { "variableName": "agilityStone", "displayName": "", "bonus": 1 },
+
+  { "variableName": "scorpionArmor", "displayName": "", "bonus": 5 }
+]

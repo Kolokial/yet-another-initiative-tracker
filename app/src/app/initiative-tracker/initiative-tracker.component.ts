@@ -32,12 +32,16 @@ export class InitiativeTrackerComponent {
   @Input() public players: string[] = [];
   @Input() public playerName: string = '';
 
+  public get displayName(): string {
+    return this.messagingService.displayName;
+  }
+
   public get dexterityModifier(): number {
-    return this.dataStore.dexterityModifier;
+    return this.dataStore.dexterityScore;
   }
 
   public set dexterityModifier(value: string) {
-    this.dataStore.dexterityModifier = parseInt(value);
+    this.dataStore.dexterityScore = parseInt(value);
   }
 
   public get alertFeat(): boolean {
@@ -54,10 +58,10 @@ export class InitiativeTrackerComponent {
   }
 
   public get initiativeValue(): number {
-    return this.dataStore.initiativeValue;
+    return this.dataStore.initiativeRoll;
   }
   public set initiativeValue(v: number) {
-    this.dataStore.initiativeValue = v;
+    this.dataStore.initiativeRoll = v;
   }
 
   private keyup$: Subject<number> = new Subject<number>();

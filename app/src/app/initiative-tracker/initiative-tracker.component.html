@@ -1,3 +1,4 @@
+<h2>{{ displayName }}</h2>
 <input
   [disabled]="isInitiativeInputDisabled"
   class="initiative"
@@ -22,6 +23,11 @@
     <ul>
       <li>
         <mat-checkbox [(ngModel)]="alertFeat"> Alert Feat </mat-checkbox>
+      </li>
+      <li>
+        <mat-checkbox [(ngModel)]="luckStone">
+          Stone of Good Luck (Luckstone)</mat-checkbox
+        >
       </li>
     </ul>
   </span>

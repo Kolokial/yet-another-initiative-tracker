@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, ReplaySubject } from 'rxjs';
-import { SignalingService } from './signaling.service';
+import { DataChannelEvents, SignalingService } from './signaling.service';
 
 export type Envelope = {
   peerId: string;
@@ -47,7 +47,7 @@ export class MessagingService {
   private messageEnvelopes: { [timestamp: string]: Envelope } = {};
 
   constructor(private signalingService: SignalingService) {
-    this.signalingService.dataChannelSubject.subscribe((dataChannel) => {
+    this.signalingService.dataChannelEvents$.subscribe((dataChannel) => {
       if (dataChannel) {
         this.setupDataChannel(dataChannel);
       }
@@ -84,20 +84,24 @@ export class MessagingService {
     }
   }
 
-  private setupDataChannel(dataChannel: RTCDataChannel) {
-    dataChannel.onopen = (event: Event) => {
-      //this.populateMessageStream();
-      console.log('Data channel open', event);
-      this.sendProfileUpdate(dataChannel);
-    };
+  private setupDataChannel(dataChannel: DataChannelEvents) {
+    dataChannel.onOpen.subscribe({
+      next: (event: Event) => {
+        //this.populateMessageStream();
+        console.log('Data channel open', event);
+        this.sendProfileUpdate(this.signalingService.dataChannels[dataChannel.peerId]);
+      },
+    });
 
-    dataChannel.onmessage = (event: MessageEvent) => {
-      if (event.data.sender !== this.myPeerId) {
-        const envelope: Envelope = JSON.parse(event.data);
-        this.updateMessageStream(envelope);
-        console.log('Data channel message:', event.data);
-      }
-    };
+    dataChannel.onMessage.subscribe({
+      next: (event: MessageEvent) => {
+        if (event.data.sender !== this.myPeerId) {
+          const envelope: Envelope = JSON.parse(event.data);
+          this.updateMessageStream(envelope);
+          console.log('Data channel message:', event.data);
+        }
+      },
+    });
   }
 
   private sendProfileUpdate(dataChannel: RTCDataChannel): void {

@@ -1,7 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
 import { Observable, Subject, take } from 'rxjs';
-import { Envelope } from './messaging.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+
+export type DataChannelEvents = {
+  readonly peerId: string;
+
+  onOpen: Observable<Event>;
+  onMessage: Observable<MessageEvent>;
+  onClosing: Observable<Event>;
+  onClose: Observable<Event>;
+  onError: Observable<Event>;
+};
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +25,8 @@ export class SignalingService {
 
   public peerConnections: { [key: string]: RTCPeerConnection } = {};
   public dataChannels: { [key: string]: RTCDataChannel } = {};
-  public dataChannelSubject = new Subject<RTCDataChannel>();
+  public dataChannelEvents$ = new Subject<DataChannelEvents>();
+  private dataChannelEvents: DataChannelEvents[] = [];
 
   private _dataChannelClosingSubject = new Subject<string>();
   public get dataChannelClosing$(): Observable<string> {
@@ -26,7 +37,10 @@ export class SignalingService {
     return Object.keys(this.peerConnections);
   }
 
-  constructor(private socket: Socket) {
+  constructor(
+    private socket: Socket,
+    private snackbar: MatSnackBar
+  ) {
     this.socket.on('roomJoined', (data: any) => this.handleNewPeerJoined(data));
     this.socket.on('offer', (data: any) => this.handleOffer(data));
     this.socket.on('answer', (data: any) => this.handleAnswer(data));
@@ -85,9 +99,11 @@ export class SignalingService {
 
     peerConnection.ondatachannel = (event) => {
       this.dataChannels[peerId] = event.channel;
-      this.dataChannelSubject.next(this.dataChannels[peerId]);
+
       //this.setupDataChannel(this.dataChannels[peerId]);
-      this.setupDataChannelClosingEvent(this.dataChannels[peerId]);
+      this.dataChannelEvents$.next(
+        this.setupDataChannelEvents(this.dataChannels[peerId], peerId)
+      );
       console.log(`createDataChannel called by Peer: ${peerId}`);
     };
 
@@ -108,12 +124,7 @@ export class SignalingService {
     this.peerConnections[peerId] = this.createPeerConnection(peerId);
 
     const peerConnection = this.peerConnections[peerId];
-    const dataChannelLabel = this.getDataChannelLabel(peerId);
-    this.dataChannels[peerId] = peerConnection.createDataChannel(dataChannelLabel);
-    const dataChannel = this.dataChannels[peerId];
-
-    this.setupDataChannelClosingEvent(dataChannel);
-    this.dataChannelSubject.next(dataChannel);
+    this.setupDataChannel(peerConnection, peerId);
 
     peerConnection
       .createOffer()
@@ -178,13 +189,41 @@ export class SignalingService {
     this.peerConnections[peerId].addIceCandidate(candidate);
   }
 
-  private setupDataChannelClosingEvent(dataChannel: RTCDataChannel): void {
+  private setupDataChannel(peerConnection: RTCPeerConnection, peerId: string): void {
+    const dataChannelLabel = this.getDataChannelLabel(peerId);
+    this.dataChannels[peerId] = peerConnection.createDataChannel(dataChannelLabel);
+    const dataChannel = this.dataChannels[peerId];
+
+    const events = this.setupDataChannelEvents(dataChannel, peerId);
+    this.dataChannelEvents.push(events);
+    this.dataChannelEvents$.next(events);
+  }
+
+  private setupDataChannelEvents(
+    dataChannel: RTCDataChannel,
+    peerId: string
+  ): DataChannelEvents {
+    const onOpen: Subject<Event> = new Subject<Event>();
+    const onMessage: Subject<MessageEvent> = new Subject<MessageEvent>();
+    const onClosing: Subject<Event> = new Subject<Event>();
+    const onClose: Subject<Event> = new Subject<Event>();
+    const onError: Subject<Event> = new Subject<Event>();
+    dataChannel.onopen = (event: Event) => {
+      onOpen.next(event);
+    };
+
+    dataChannel.onmessage = (event: MessageEvent) => {
+      onMessage.next(event);
+    };
+
     /* TODO Possibly use subjects so other parts of system can make use of these events. */
     dataChannel.onclosing = (event: Event) => {
+      onClosing.next(event);
       const dataChannel = event.currentTarget as RTCDataChannel;
       console.log(`onclosing event for: ${dataChannel.label} `, event);
     };
     dataChannel.onclose = (event: Event) => {
+      onClose.next(event);
       console.log('onclose event', event);
       console.log('Count before');
       console.log(`PeerConnections Count: ${Object.keys(this.peerConnections).length}`);
@@ -203,7 +242,17 @@ export class SignalingService {
     };
 
     dataChannel.onerror = (event: Event) => {
+      onError.next(event);
       console.log('There was an error', event);
+    };
+
+    return {
+      peerId: peerId,
+      onOpen: onOpen.asObservable(),
+      onMessage: onMessage.asObservable(),
+      onClosing: onClosing.asObservable(),
+      onClose: onClose.asObservable(),
+      onError: onError.asObservable(),
     };
   }
 
