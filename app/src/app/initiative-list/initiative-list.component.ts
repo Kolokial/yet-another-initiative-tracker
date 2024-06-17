@@ -41,6 +41,7 @@ export class InitiativeListComponent {
     });
     this.setupMessageStreamSubscription();
     this.setupDataChannelClosingSubscription();
+
   }
 
   ngOnDestroy() {
@@ -99,6 +100,7 @@ export class InitiativeListComponent {
 
           if (index > -1) {
             this.initiatives.splice(index, 1);
+            this.ref.detectChanges();
           }
         },
       });

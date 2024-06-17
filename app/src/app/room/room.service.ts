@@ -1,8 +1,8 @@
 /* Housekeeping! */
 import { Injectable } from '@angular/core';
 import { SignalingService } from '../signaling.service';
-import { ActivatedRoute, Params, Router } from '@angular/router';
 import { ROOM_ID } from '../constants';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -18,12 +18,9 @@ export class RoomService {
     return this._myPeerId;
   }
 
-  private roomHistory: Map<string, string> = new Map<string, string>();
-
+  private joinRoomSuccess$!: Observable<string>;
   constructor(
-    private signalingService: SignalingService,
-    private router: Router,
-    private activatedRoute: ActivatedRoute
+    private signalingService: SignalingService
   ) {
     this.attemptToAutoJoinRoom();
   }
@@ -54,7 +51,8 @@ export class RoomService {
     if (roomId) {
       this._roomId = roomId;
       localStorage.setItem(ROOM_ID, roomId);
-      this.signalingService.joinRoom(this.roomId).subscribe((peerId) => {
+      this.joinRoomSuccess$ = this.signalingService.joinRoom(this.roomId)
+      this.joinRoomSuccess$.subscribe((peerId) => {
         this._myPeerId = peerId;
       });
     }
