@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { RoomService } from './room.service';
 import { ROOM_ID } from '../constants';
+import { Observable, combineLatest, take } from 'rxjs';
 
 @Component({
   selector: 'room',
@@ -18,22 +19,28 @@ import { ROOM_ID } from '../constants';
 export class RoomComponent {
   @Input()
   set roomId(id: string) {
-    if ((this.roomId !== id && id) || !this.myPeerId) {
-      this.roomService.joinRoom(id);
-    }
+    combineLatest([this.roomId, this.myPeerId])
+      .pipe(take(1))
+      .subscribe({
+        next: ([roomId, myPeerId]) => {
+          if ((roomId !== id && id) || !myPeerId) {
+            this.roomService.joinRoomWithId(id);
+          }
+        },
+      });
   }
 
   activeLink: any;
 
-  get players(): string[] {
-    return [...this.signalService.players, this.myPeerId];
-  }
+  // get players(): string[] {
+  //   return [...this.signalService.players, this.myPeerId];
+  // }
 
-  get myPeerId(): string {
+  get myPeerId(): Observable<string> {
     return this.roomService.myPeerId;
   }
 
-  get roomId(): string {
+  get roomId(): Observable<string> {
     return this.roomService.roomId;
   }
 
@@ -69,13 +76,19 @@ export class RoomComponent {
     }
   }
 
+  leaveRoom() {
+    this.roomService.leaveRoom();
+  }
+
   sendMessage(message: number | string) {
     this.messagingService.sendDiceRollMessage(message as number);
   }
 
   private updateQueryStringWithRoomId() {
     //const queryParams: Params = { roomId: this.roomId }
-    this.location.replaceState(`room`);
-    localStorage.setItem(ROOM_ID, this.roomId);
+    this.roomId.pipe(take(1)).subscribe((roomId: string) => {
+      this.location.replaceState(`room`);
+      localStorage.setItem(ROOM_ID, roomId);
+    });
   }
 }

@@ -1,6 +1,6 @@
 <div>
-  <p>RoomId: {{ roomId }}</p>
-  <p>PeerId: {{ myPeerId }}</p>
+  <p>RoomId: {{ roomId | async }}</p>
+  <p>PeerId: {{ myPeerId | async }}</p>
   <mat-form-field class="initiatve-input">
     <mat-label>Character name</mat-label>
     <input [(ngModel)]="displayName" matInput type="text" />
@@ -21,7 +21,7 @@
     mat-flat-button
     color="primary"
     [disabled]="!myPeerId && !roomId"
-    (click)="createRoom()"
+    (click)="leaveRoom()"
   >
     Leave Room
   </button>

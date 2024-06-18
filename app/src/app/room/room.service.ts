@@ -2,25 +2,27 @@
 import { Injectable } from '@angular/core';
 import { SignalingService } from '../signaling.service';
 import { ROOM_ID } from '../constants';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, take } from 'rxjs';
+import { Socket } from 'ngx-socket-io';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RoomService {
-  private _roomId: string = '';
-  public get roomId(): string {
-    return this._roomId;
+  private _roomId: BehaviorSubject<string> = new BehaviorSubject<string>('');
+  public get roomId(): Observable<string> {
+    return this._roomId.asObservable();
   }
 
-  private _myPeerId: string = '';
-  public get myPeerId(): string {
-    return this._myPeerId;
+  private _myPeerId: BehaviorSubject<string> = new BehaviorSubject<string>('');
+  public get myPeerId(): Observable<string> {
+    return this._myPeerId.asObservable();
   }
 
   private joinRoomSuccess$!: Observable<string>;
   constructor(
-    private signalingService: SignalingService
+    private signalingService: SignalingService,
+    private socket: Socket
   ) {
     this.attemptToAutoJoinRoom();
   }
@@ -39,35 +41,60 @@ export class RoomService {
     }
   }
 
+  private joinRoom(roomId: string): Observable<string> {
+    const subject = new Subject<string>();
+
+    if (!roomId) {
+      subject.complete();
+    } else {
+      const intervalId = setInterval(() => {
+        if (this.socket.ioSocket.connected) {
+          subject.next(this.emitJoinRoom(roomId));
+          clearInterval(intervalId);
+        }
+      }, 500);
+    }
+
+    return subject.pipe(take(1));
+  }
+
+  private emitJoinRoom(roomId: string): string {
+    this._roomId.next(roomId);
+    const data = this.socket.emit('joinRoom', roomId);
+    this._myPeerId.next(data.id);
+    return data.id;
+  }
+
+  public leaveRoom() {
+    this._roomId.next('');
+    this._myPeerId.next('');
+    localStorage.removeItem(ROOM_ID);
+    this.signalingService.disconnect();
+  }
+
   createRoom() {
-    this._roomId = Math.random().toString(36).substring(7);
-    this.signalingService.joinRoom(this.roomId).subscribe((peerId) => {
-      this._myPeerId = peerId;
+    const roomId = Math.random().toString(36).substring(7);
+    this.joinRoom(roomId).subscribe((peerId: string) => {
+      this._myPeerId.next(peerId);
     });
     //alert(`Room created with ID: ${this.roomId}`);
   }
 
-  joinRoom(roomId: string) {
+  joinRoomWithId(roomId: string) {
     if (roomId) {
-      this._roomId = roomId;
       localStorage.setItem(ROOM_ID, roomId);
-      this.joinRoomSuccess$ = this.signalingService.joinRoom(this.roomId)
-      this.joinRoomSuccess$.subscribe((peerId) => {
-        this._myPeerId = peerId;
+      this.joinRoomSuccess$ = this.joinRoom(roomId);
+      this.joinRoomSuccess$.subscribe((peerId: string) => {
+        this._myPeerId.next(peerId);
       });
     }
-  }
-
-  leaveRoom() {
-    this.signalingService.leaveRoom();
   }
 
   joinRoomWithoutId() {
     const roomId = prompt('Enter the room ID to join:');
     if (roomId) {
-      this._roomId = roomId;
-      this.signalingService.joinRoom(this.roomId).subscribe((peerId) => {
-        this._myPeerId = peerId;
+      this.joinRoom(roomId).subscribe((peerId) => {
+        this._myPeerId.next(peerId);
       });
     }
   }

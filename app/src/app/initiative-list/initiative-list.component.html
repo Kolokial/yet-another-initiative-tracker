@@ -5,7 +5,10 @@
   Todo: Expand row to show how total was calculated.
   flat roll + dex + bonuses + feats, etc
 -->
-<button (click)="sendTurnFinishedMessage()" [disabled]="turnFinishedButtonEnabled | async">
+<button
+  (click)="sendTurnFinishedMessage()"
+  [disabled]="turnFinishedButtonEnabled$ | async"
+>
   I'm finished
 </button>
 <table mat-table [dataSource]="initiatives" class="mat-elevation-z8" matSort>

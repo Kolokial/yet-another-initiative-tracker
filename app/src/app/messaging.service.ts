@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, ReplaySubject } from 'rxjs';
+import { Observable, ReplaySubject, take } from 'rxjs';
 import { DataChannelEvents, SignalingService } from './signaling.service';
 
 export type Envelope = {
@@ -55,7 +55,7 @@ export class MessagingService {
   }
 
   public sendDiceRollMessage(message: number) {
-    const sub = this.myPeerId.subscribe({
+    this.myPeerId.pipe(take(1)).subscribe({
       next: (peerId: string) => {
         const envelope: Envelope = {
           peerId: peerId,
@@ -64,13 +64,12 @@ export class MessagingService {
           displayName: this.displayName,
         };
         this.sendMessage(envelope);
-        sub.unsubscribe();
       },
     });
   }
 
   public sendTurnFinishedMessage(): void {
-    const sub = this.myPeerId.subscribe({
+    this.myPeerId.pipe(take(1)).subscribe({
       next: (peerId: string) => {
         this.sendMessage({
           peerId: peerId,
@@ -79,7 +78,6 @@ export class MessagingService {
           displayName: this._displayName,
           isTurnFinished: true,
         });
-        sub.unsubscribe();
       },
     });
   }
@@ -115,7 +113,7 @@ export class MessagingService {
   }
 
   private sendProfileUpdate(dataChannel: RTCDataChannel): void {
-    const sub = this.myPeerId.subscribe({
+    this.myPeerId.pipe(take(1)).subscribe({
       next: (peerId: string) => {
         const introduction: Envelope = {
           displayName: this.displayName,

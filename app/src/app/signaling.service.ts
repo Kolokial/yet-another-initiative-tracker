@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
-import { BehaviorSubject, Observable, Subject, take } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, combineLatest, take } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { RoomService } from './room/room.service';
 
 export type DataChannelEvents = {
   readonly peerId: string;
@@ -17,11 +18,13 @@ export type DataChannelEvents = {
   providedIn: 'root',
 })
 export class SignalingService {
-  private _myPeerId: BehaviorSubject<string> = new BehaviorSubject<string>('');
   public get myPeerId(): Observable<string> {
-    return this._myPeerId.asObservable();
+    return this.roomService.myPeerId.pipe(take(1));
   }
-  private roomId!: string;
+
+  public get roomId(): Observable<string> {
+    return this.roomService.roomId.pipe(take(1));
+  }
 
   public peerConnections: { [key: string]: RTCPeerConnection } = {};
   public dataChannels: { [key: string]: RTCDataChannel } = {};
@@ -39,60 +42,64 @@ export class SignalingService {
 
   constructor(
     private socket: Socket,
+    private roomService: RoomService,
     private snackbar: MatSnackBar
   ) {
-    this.socket.on('roomJoined', (data: any) => this.handleNewPeerJoined(data));
-    this.socket.on('offer', (data: any) => this.handleOffer(data));
+    this.socket.on('roomJoined', (data: any) => {
+      this.getLatestRoomIdAndPeerId().subscribe(({ myPeerId, roomId }) => {
+        this.handleNewPeerJoined(data, myPeerId, roomId);
+      });
+    });
+    this.socket.on('offer', (data: any) => {
+      this.getLatestRoomIdAndPeerId().subscribe(({ myPeerId, roomId }) => {
+        this.handleOffer(data, myPeerId, roomId);
+      });
+    });
     this.socket.on('answer', (data: any) => this.handleAnswer(data));
     this.socket.on('candidate', (data: any) => this.handleCandidate(data));
   }
 
-  public joinRoom(roomId: string): Observable<string> {
-    const subject = new Subject<string>();
+  private handleNewPeerJoined(peerList: string, myPeerId: string, roomId: string) {
+    console.log(peerList);
 
-    if (!roomId) {
-      subject.complete();
-    } else {
-      const intervalId = setInterval(() => {
-        if (this.socket.ioSocket.connected) {
-          subject.next(this.emitJoinRoom(roomId));
-          clearInterval(intervalId);
-        }
-      }, 500);
-    }
-
-    return subject.pipe(take(1));
-  }
-
-  public leaveRoom() {
-    this.roomId = '';
-    this._myPeerId.next('');
-    Object.keys(this.dataChannels).forEach((key) => {
-      this.dataChannels[key].close();
-      delete this.dataChannels[key];
-    });
-    Object.keys(this.peerConnections).forEach((key) => {
-      this.peerConnections[key].close();
-      delete this.peerConnections[key];
+    JSON.parse(peerList).forEach((peer: string) => {
+      if (peer != myPeerId) {
+        this.createOffer(peer, myPeerId, roomId);
+      }
     });
   }
 
-  private emitJoinRoom(roomId: string): string {
-    this.roomId = roomId;
-    const data = this.socket.emit('joinRoom', roomId);
-    return (this._myPeerId = data.id);
+  private createOffer(peerId: string, myPeerId: string, roomId: string) {
+    this.peerConnections[peerId] = this.createPeerConnection(peerId, myPeerId, roomId);
+
+    const peerConnection = this.peerConnections[peerId];
+    this.setupDataChannel(peerConnection, peerId, myPeerId);
+
+    peerConnection
+      .createOffer()
+      .then((offer) => {
+        return peerConnection.setLocalDescription(offer);
+      })
+      .then(() => {
+        this.socket.emit('offer', {
+          roomId: roomId,
+          offer: peerConnection.localDescription,
+          peerId: myPeerId,
+        });
+      })
+      .catch((e) => console.error('Error creating offer:', e));
   }
 
-  private createPeerConnection(peerId: string) {
+  private createPeerConnection(peerId: string, myPeerId: string, roomId: string) {
     console.log('Creating PeerConnection with', peerId);
     const peerConnection = new RTCPeerConnection();
 
     peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
         this.socket.emit('candidate', {
-          roomId: this.roomId,
+          roomId: roomId,
           candidate: event.candidate,
-          target: this._myPeerId,
+          target: myPeerId,
         });
       }
     };
@@ -102,7 +109,7 @@ export class SignalingService {
 
       //this.setupDataChannel(this.dataChannels[peerId]);
       this.dataChannelEvents$.next(
-        this.setupDataChannelEvents(this.dataChannels[peerId], peerId)
+        this.setupDataChannelEvents(this.dataChannels[peerId], peerId, myPeerId)
       );
       console.log(`createDataChannel called by Peer: ${peerId}`);
     };
@@ -110,44 +117,12 @@ export class SignalingService {
     return peerConnection;
   }
 
-  private handleNewPeerJoined(peerList: string) {
-    console.log(peerList);
-
-    JSON.parse(peerList).forEach((peer: string) => {
-      const myPeerId = this._myPeerId.value;
-      if (peer != myPeerId) {
-        this.createOffer(peer);
-      }
-    });
-  }
-
-  private createOffer(peerId: string) {
-    this.peerConnections[peerId] = this.createPeerConnection(peerId);
-
-    const peerConnection = this.peerConnections[peerId];
-    this.setupDataChannel(peerConnection, peerId);
-
-    peerConnection
-      .createOffer()
-      .then((offer) => {
-        return peerConnection.setLocalDescription(offer);
-      })
-      .then(() => {
-        this.socket.emit('offer', {
-          roomId: this.roomId,
-          offer: peerConnection.localDescription,
-          peerId: this._myPeerId,
-        });
-      })
-      .catch((e) => console.error('Error creating offer:', e));
-  }
-
-  private handleOffer(data: any) {
+  private handleOffer(data: any, myPeerId: string, roomId: string) {
     const peerId = data.peerId;
     const offer = data.offer;
     localStorage.setItem(peerId, JSON.stringify(offer));
     if (!this.peerConnections[peerId]) {
-      this.peerConnections[peerId] = this.createPeerConnection(peerId);
+      this.peerConnections[peerId] = this.createPeerConnection(peerId, myPeerId, roomId);
     }
 
     const peerConnection = this.peerConnections[peerId];
@@ -164,11 +139,13 @@ export class SignalingService {
         return peerConnection.setLocalDescription(answer);
       })
       .then(() => {
-        this.socket.emit('answer', {
-          roomId: data.roomId,
-          answer: peerConnection.localDescription,
-          target: peerId,
-          source: this._myPeerId,
+        this.myPeerId.subscribe((myPeerId) => {
+          this.socket.emit('answer', {
+            roomId: data.roomId,
+            answer: peerConnection.localDescription,
+            target: peerId,
+            source: myPeerId,
+          });
         });
       });
   }
@@ -177,11 +154,15 @@ export class SignalingService {
     const peerId = data.source;
     const answer = data.answer;
     const peerConnection = this.peerConnections[peerId];
-    if (peerConnection.signalingState !== 'stable' && this._myPeerId === data.target) {
-      peerConnection.setRemoteDescription(new RTCSessionDescription(answer)).then(() => {
-        peerConnection.addIceCandidate();
-      });
-    }
+    this.myPeerId.subscribe((myPeerId) => {
+      if (peerConnection.signalingState !== 'stable' && myPeerId === data.target) {
+        peerConnection
+          .setRemoteDescription(new RTCSessionDescription(answer))
+          .then(() => {
+            peerConnection.addIceCandidate();
+          });
+      }
+    });
   }
 
   private handleCandidate(data: any) {
@@ -190,19 +171,24 @@ export class SignalingService {
     this.peerConnections[peerId].addIceCandidate(candidate);
   }
 
-  private setupDataChannel(peerConnection: RTCPeerConnection, peerId: string): void {
-    const dataChannelLabel = this.getDataChannelLabel(peerId);
+  private setupDataChannel(
+    peerConnection: RTCPeerConnection,
+    peerId: string,
+    myPeerId: string
+  ): void {
+    const dataChannelLabel = this.getDataChannelLabel(peerId, myPeerId);
     this.dataChannels[peerId] = peerConnection.createDataChannel(dataChannelLabel);
     const dataChannel = this.dataChannels[peerId];
 
-    const events = this.setupDataChannelEvents(dataChannel, peerId);
+    const events = this.setupDataChannelEvents(dataChannel, peerId, myPeerId);
     this.dataChannelEvents.push(events);
     this.dataChannelEvents$.next(events);
   }
 
   private setupDataChannelEvents(
     dataChannel: RTCDataChannel,
-    peerId: string
+    peerId: string,
+    myPeerId: string
   ): DataChannelEvents {
     const onOpen: Subject<Event> = new Subject<Event>();
     const onMessage: Subject<MessageEvent> = new Subject<MessageEvent>();
@@ -231,7 +217,7 @@ export class SignalingService {
       console.log(`DataChannels Count: ${Object.keys(this.dataChannels).length}`);
       Object.keys(this.peerConnections).forEach((peerId) => {
         const dataChannel = event.currentTarget as RTCDataChannel;
-        if (this.doesDataChannelLabelMatch(peerId, dataChannel.label)) {
+        if (this.doesDataChannelLabelMatch(peerId, myPeerId, dataChannel.label)) {
           delete this.peerConnections[peerId];
           delete this.dataChannels[peerId];
           this._dataChannelClosingSubject.next(peerId);
@@ -257,13 +243,31 @@ export class SignalingService {
     };
   }
 
-  private getDataChannelLabel(peerId: string): string {
-    return `${peerId}-${this._myPeerId}`;
+  public disconnect(): void {
+    Object.keys(this.dataChannels).forEach((key) => {
+      this.dataChannels[key].close();
+      delete this.dataChannels[key];
+    });
+    Object.keys(this.peerConnections).forEach((key) => {
+      this.peerConnections[key].close();
+      delete this.peerConnections[key];
+    });
+    this.socket.disconnect();
   }
 
-  private doesDataChannelLabelMatch(peerId: string, label: string): boolean {
-    return (
-      `${peerId}-${this._myPeerId}` === label || `${this._myPeerId}-${peerId}` === label
-    );
+  private getDataChannelLabel(peerId: string, myPeerId: string): string {
+    return `${peerId}-${myPeerId}`;
+  }
+
+  private doesDataChannelLabelMatch(
+    peerId: string,
+    myPeerId: string,
+    label: string
+  ): boolean {
+    return `${peerId}-${myPeerId}` === label || `${myPeerId}-${peerId}` === label;
+  }
+
+  private getLatestRoomIdAndPeerId(): Observable<{ myPeerId: string; roomId: string }> {
+    return combineLatest({ myPeerId: this.myPeerId, roomId: this.roomId }).pipe(take(1));
   }
 }

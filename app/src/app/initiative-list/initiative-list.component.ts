@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component } from '@angular/core';
 import { Envelope, MessagingService } from '../messaging.service';
 import { AsyncPipe, NgFor } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
-import { Observable, Subscription, map, pipe } from 'rxjs';
+import { Observable, Subscription, map, switchMap, take } from 'rxjs';
 
 type InitiativeDetail = {
   peerId: string;
@@ -19,13 +19,7 @@ type InitiativeDetail = {
 })
 export class InitiativeListComponent {
   /* Todo: now we need to work out whose turn it is */
-  public get turnFinishedButtonEnabled(): Observable<boolean> {
-    return this.messagingService.myPeerId.pipe(
-      map((peerId: string) => {
-        return peerId === this.initiatives[0].peerId;
-      })
-    );
-  }
+  public turnFinishedButtonEnabled$: Observable<boolean>;
   public initiatives: InitiativeDetail[] = [];
   public displayedColumns: string[] = ['displayName', 'initiativeValue'];
 
@@ -35,10 +29,16 @@ export class InitiativeListComponent {
   constructor(
     private messagingService: MessagingService,
     private ref: ChangeDetectorRef
-  ) {}
+  ) {
+    this.turnFinishedButtonEnabled$ = this.messagingService.myPeerId.pipe(
+      map((peerId: string) => {
+        return peerId === this.initiatives[0].peerId;
+      })
+    );
+  }
 
   ngOnInit() {
-    const sub = this.messagingService.myPeerId.subscribe({
+    this.messagingService.myPeerId.pipe(take(1)).subscribe({
       next: (peerId: string) => {
         this.initiatives.push({
           displayName: this.messagingService.displayName,
@@ -47,7 +47,6 @@ export class InitiativeListComponent {
         });
         this.setupMessageStreamSubscription();
         this.setupDataChannelClosingSubscription();
-        sub.unsubscribe();
       },
     });
   }
