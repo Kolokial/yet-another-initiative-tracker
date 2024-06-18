@@ -20,7 +20,7 @@ export class MessagingService {
     return this._roomId;
   }
 
-  public get myPeerId(): string {
+  public get myPeerId(): Observable<string> {
     return this.signalingService.myPeerId;
   }
 
@@ -55,22 +55,32 @@ export class MessagingService {
   }
 
   public sendDiceRollMessage(message: number) {
-    const envelope: Envelope = {
-      peerId: this.myPeerId,
-      diceRoll: message,
-      timestamp: Date.now(),
-      displayName: this.displayName,
-    };
-    this.sendMessage(envelope);
+    const sub = this.myPeerId.subscribe({
+      next: (peerId: string) => {
+        const envelope: Envelope = {
+          peerId: peerId,
+          diceRoll: message,
+          timestamp: Date.now(),
+          displayName: this.displayName,
+        };
+        this.sendMessage(envelope);
+        sub.unsubscribe();
+      },
+    });
   }
 
   public sendTurnFinishedMessage(): void {
-    this.sendMessage({
-      peerId: this.myPeerId,
-      diceRoll: 0,
-      timestamp: Date.now(),
-      displayName: this._displayName,
-      isTurnFinished: true,
+    const sub = this.myPeerId.subscribe({
+      next: (peerId: string) => {
+        this.sendMessage({
+          peerId: peerId,
+          diceRoll: 0,
+          timestamp: Date.now(),
+          displayName: this._displayName,
+          isTurnFinished: true,
+        });
+        sub.unsubscribe();
+      },
     });
   }
 
@@ -105,14 +115,18 @@ export class MessagingService {
   }
 
   private sendProfileUpdate(dataChannel: RTCDataChannel): void {
-    const introduction: Envelope = {
-      displayName: this.displayName,
-      peerId: this.myPeerId,
-      timestamp: Date.now(),
-      isProfileUpdate: true,
-      diceRoll: 0,
-    };
-    dataChannel.send(JSON.stringify(introduction));
+    const sub = this.myPeerId.subscribe({
+      next: (peerId: string) => {
+        const introduction: Envelope = {
+          displayName: this.displayName,
+          peerId: peerId,
+          timestamp: Date.now(),
+          isProfileUpdate: true,
+          diceRoll: 0,
+        };
+        dataChannel.send(JSON.stringify(introduction));
+      },
+    });
   }
 
   private updateMessageStream(message: Envelope): void {

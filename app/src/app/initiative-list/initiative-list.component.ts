@@ -1,8 +1,8 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { Envelope, MessagingService } from '../messaging.service';
-import { NgFor } from '@angular/common';
+import { AsyncPipe, NgFor } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription, map, pipe } from 'rxjs';
 
 type InitiativeDetail = {
   peerId: string;
@@ -13,14 +13,18 @@ type InitiativeDetail = {
 @Component({
   selector: 'initiative-list',
   standalone: true,
-  imports: [NgFor, MatTableModule],
+  imports: [NgFor, MatTableModule, AsyncPipe],
   templateUrl: './initiative-list.component.html',
   styleUrl: './initiative-list.component.scss',
 })
 export class InitiativeListComponent {
   /* Todo: now we need to work out whose turn it is */
-  public get turnFinishedButtonEnabled(): boolean {
-    return this.messagingService.myPeerId === this.initiatives[0].peerId;
+  public get turnFinishedButtonEnabled(): Observable<boolean> {
+    return this.messagingService.myPeerId.pipe(
+      map((peerId: string) => {
+        return peerId === this.initiatives[0].peerId;
+      })
+    );
   }
   public initiatives: InitiativeDetail[] = [];
   public displayedColumns: string[] = ['displayName', 'initiativeValue'];
@@ -34,14 +38,18 @@ export class InitiativeListComponent {
   ) {}
 
   ngOnInit() {
-    this.initiatives.push({
-      displayName: this.messagingService.displayName,
-      peerId: this.messagingService.myPeerId,
-      initiativeValue: 0,
+    const sub = this.messagingService.myPeerId.subscribe({
+      next: (peerId: string) => {
+        this.initiatives.push({
+          displayName: this.messagingService.displayName,
+          peerId: peerId,
+          initiativeValue: 0,
+        });
+        this.setupMessageStreamSubscription();
+        this.setupDataChannelClosingSubscription();
+        sub.unsubscribe();
+      },
     });
-    this.setupMessageStreamSubscription();
-    this.setupDataChannelClosingSubscription();
-
   }
 
   ngOnDestroy() {

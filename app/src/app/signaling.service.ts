@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
-import { Observable, Subject, take } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, take } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 export type DataChannelEvents = {
@@ -17,9 +17,9 @@ export type DataChannelEvents = {
   providedIn: 'root',
 })
 export class SignalingService {
-  private _myPeerId!: string;
-  public get myPeerId(): string {
-    return this._myPeerId;
+  private _myPeerId: BehaviorSubject<string> = new BehaviorSubject<string>('');
+  public get myPeerId(): Observable<string> {
+    return this._myPeerId.asObservable();
   }
   private roomId!: string;
 
@@ -66,7 +66,7 @@ export class SignalingService {
 
   public leaveRoom() {
     this.roomId = '';
-    this._myPeerId = '';
+    this._myPeerId.next('');
     Object.keys(this.dataChannels).forEach((key) => {
       this.dataChannels[key].close();
       delete this.dataChannels[key];
@@ -114,7 +114,8 @@ export class SignalingService {
     console.log(peerList);
 
     JSON.parse(peerList).forEach((peer: string) => {
-      if (peer != this._myPeerId) {
+      const myPeerId = this._myPeerId.value;
+      if (peer != myPeerId) {
         this.createOffer(peer);
       }
     });
