@@ -116,6 +116,7 @@ export class InitiativeTrackerComponent {
     if (this.alertFeat) {
       initiativeValue += 5;
     }
+    this.lastSentRoll = initiativeValue;
     this.messagingService.sendDiceRollMessage(initiativeValue);
   }
 

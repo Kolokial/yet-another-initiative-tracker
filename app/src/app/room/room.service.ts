@@ -51,6 +51,8 @@ export class RoomService {
         if (this.socket.ioSocket.connected) {
           subject.next(this.emitJoinRoom(roomId));
           clearInterval(intervalId);
+        } else {
+          this.socket.connect();
         }
       }, 500);
     }
@@ -93,6 +95,7 @@ export class RoomService {
   joinRoomWithoutId() {
     const roomId = prompt('Enter the room ID to join:');
     if (roomId) {
+      localStorage.setItem(ROOM_ID, roomId);
       this.joinRoom(roomId).subscribe((peerId) => {
         this._myPeerId.next(peerId);
       });
