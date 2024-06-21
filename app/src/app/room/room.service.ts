@@ -21,7 +21,7 @@ export class RoomService {
 
   private joinRoomSuccess$!: Observable<string>;
   constructor(
-    private signalingService: SignalingService,
+    // private signalingService: SignalingService,
     private socket: Socket
   ) {
     this.attemptToAutoJoinRoom();
@@ -69,7 +69,7 @@ export class RoomService {
     this._roomId.next('');
     this._myPeerId.next('');
     localStorage.removeItem(ROOM_ID);
-    this.signalingService.disconnect();
+    // this.signalingService.disconnect();
   }
 
   createRoom() {

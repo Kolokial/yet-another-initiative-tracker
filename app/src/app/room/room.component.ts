@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
 import { Envelope, MessagingService } from '../messaging.service';
 import { SignalingService } from '../signaling.service';
 import { FormsModule } from '@angular/forms';
@@ -29,6 +29,8 @@ export class RoomComponent {
         },
       });
   }
+
+  @Output() onLeaveRoom: EventEmitter<void> = new EventEmitter<void>();
 
   activeLink: any;
 
@@ -77,6 +79,7 @@ export class RoomComponent {
   }
 
   leaveRoom() {
+    this.onLeaveRoom.emit();
     this.roomService.leaveRoom();
   }
 

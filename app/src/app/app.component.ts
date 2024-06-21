@@ -1,9 +1,10 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { SignalingService } from './signaling.service';
 import { QrScannerService } from './qr-scanner/qr-scanner.service';
 import { MessagingService } from './messaging.service';
 import { SocketIoConfig } from 'ngx-socket-io';
 import { RoomService } from './room/room.service';
+import { RoomComponent } from './room/room.component';
 
 //const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
 const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
@@ -28,7 +29,9 @@ export class AppComponent {
     return `room/${this.messagingService.roomId}`;
   }
 
-  constructor(
+  @ViewChild(RoomComponent, {read: ViewContainerRef}) private roomComponent!: RoomComponent;
+
+  constructor(  
     private signalService: SignalingService,
     private messagingService: MessagingService,
     private roomService: RoomService,
@@ -46,6 +49,7 @@ export class AppComponent {
     this.messagingService.messageStream.subscribe((x) => {
       this.ref.detectChanges();
     });
+
   }
 
   startScanning() {
@@ -56,5 +60,7 @@ export class AppComponent {
     // if (!this.messagingService.myPeerId) {
     //   this.signalService.joinRoom(this.messagingService.roomId);
     // }
+    this.roomComponent.onLeaveRoom.subscribe(x => console.log('left!'))
+
   }
 }

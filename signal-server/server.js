@@ -27,7 +27,7 @@ io.on('connection', (socket) => {
         console.log(`Client ${socket.id} joined room ${roomId}`);
         notifyPeersInRoom(socket, roomId, 'newPeerJoined', socket.id);
 
-        io.to(socket.id).emit('roomJoined', JSON.stringify(rooms[roomId]));
+        io.to(socket.id).emit('roomJoined', rooms[roomId]);
     });
 
     socket.on('offer', (data) => {

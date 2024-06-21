@@ -3,6 +3,7 @@ import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject, Observable, Subject, combineLatest, take } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RoomService } from './room/room.service';
+import { AppServiceStore } from './app.service.store';
 
 export type DataChannelEvents = {
   readonly peerId: string;
@@ -13,6 +14,12 @@ export type DataChannelEvents = {
   onClose: Observable<Event>;
   onError: Observable<Event>;
 };
+
+type YAITCustomOffer = {
+  offer: RTCSessionDescriptionInit;
+  roomId: string;
+  peerId: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -42,27 +49,28 @@ export class SignalingService {
 
   constructor(
     private socket: Socket,
-    private roomService: RoomService,
-    private snackbar: MatSnackBar
+    private roomService: RoomService
   ) {
-    this.socket.on('roomJoined', (data: any) => {
+    this.socket.on('roomJoined', (data: string[]) => {
+      console.log('ROomJoined',data);
       this.getLatestRoomIdAndPeerId().subscribe(({ myPeerId, roomId }) => {
         this.handleNewPeerJoined(data, myPeerId, roomId);
       });
     });
-    this.socket.on('offer', (data: any) => {
-      this.getLatestRoomIdAndPeerId().subscribe(({ myPeerId, roomId }) => {
-        this.handleOffer(data, myPeerId, roomId);
+    this.socket.on('offer', (data: YAITCustomOffer) => {
+      console.log('offer',data)
+      this.myPeerId.subscribe((myPeerId:string) => {
+        this.handleOffer(data, myPeerId, data.roomId);
       });
     });
     this.socket.on('answer', (data: any) => this.handleAnswer(data));
     this.socket.on('candidate', (data: any) => this.handleCandidate(data));
   }
 
-  private handleNewPeerJoined(peerList: string, myPeerId: string, roomId: string) {
+  private handleNewPeerJoined(peerList: string[], myPeerId: string, roomId: string) {
     console.log(peerList);
 
-    JSON.parse(peerList).forEach((peer: string) => {
+    peerList.forEach((peer: string) => {
       if (peer != myPeerId) {
         this.createOffer(peer, myPeerId, roomId);
       }
