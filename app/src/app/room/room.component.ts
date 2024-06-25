@@ -67,14 +67,12 @@ export class RoomComponent {
   createRoom() {
     if (this.displayName.length) {
       this.roomService.createRoom();
-      this.updateQueryStringWithRoomId();
     }
   }
 
   joinRoom() {
     if (this.displayName.length) {
       this.roomService.joinRoomWithoutId();
-      this.updateQueryStringWithRoomId();
     }
   }
 
@@ -85,13 +83,5 @@ export class RoomComponent {
 
   sendMessage(message: number | string) {
     this.messagingService.sendDiceRollMessage(message as number);
-  }
-
-  private updateQueryStringWithRoomId() {
-    //const queryParams: Params = { roomId: this.roomId }
-    this.roomId.pipe(take(1)).subscribe((roomId: string) => {
-      this.location.replaceState(`room`);
-      localStorage.setItem(ROOM_ID, roomId);
-    });
   }
 }

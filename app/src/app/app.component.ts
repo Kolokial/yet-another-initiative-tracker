@@ -46,10 +46,6 @@ export class AppComponent {
     // }).then(x => {
     //   console.log(x);
     // });
-
-    this.messagingService.messageStream.subscribe((x) => {
-      this.ref.detectChanges();
-    });
   }
 
   startScanning() {

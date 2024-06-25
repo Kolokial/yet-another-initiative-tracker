@@ -147,8 +147,4 @@ export class MessagingService {
       });
     }
   }
-
-  private updateLocalStorageRoomId(roomId: string): void {
-    localStorage.setItem('RoomId', roomId);
-  }
 }
