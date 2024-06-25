@@ -19,7 +19,7 @@ type InitiativeDetail = {
 })
 export class InitiativeListComponent {
   /* Todo: now we need to work out whose turn it is */
-  public turnFinishedButtonEnabled$: Observable<boolean>;
+  public turnFinishedButtonEnabled$!: Observable<boolean>;
   public initiatives: InitiativeDetail[] = [];
   public displayedColumns: string[] = ['displayName', 'initiativeValue'];
 
@@ -30,11 +30,7 @@ export class InitiativeListComponent {
     private messagingService: MessagingService,
     private ref: ChangeDetectorRef
   ) {
-    this.turnFinishedButtonEnabled$ = this.messagingService.myPeerId.pipe(
-      map((peerId: string) => {
-        return peerId === this.initiatives[0].peerId;
-      })
-    );
+    this.refreshTurnOrder();
   }
 
   ngOnInit() {
@@ -72,6 +68,7 @@ export class InitiativeListComponent {
 
   public sendTurnFinishedMessage(): void {
     this.messagingService.sendTurnFinishedMessage();
+    this.refreshTurnOrder();
   }
 
   private setupMessageStreamSubscription(): void {
@@ -93,6 +90,7 @@ export class InitiativeListComponent {
         }
 
         this.ref.detectChanges();
+        this.refreshTurnOrder();
       },
     });
   }
@@ -111,5 +109,13 @@ export class InitiativeListComponent {
           }
         },
       });
+  }
+
+  private refreshTurnOrder(): void {
+    this.turnFinishedButtonEnabled$ = this.messagingService.myPeerId.pipe(
+      map((peerId: string) => {
+        return !(peerId === this.initiatives[0].peerId);
+      })
+    );
   }
 }

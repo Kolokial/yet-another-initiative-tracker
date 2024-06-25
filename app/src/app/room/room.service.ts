@@ -1,9 +1,9 @@
 /* Housekeeping! */
 import { Injectable } from '@angular/core';
-import { SignalingService } from '../signaling.service';
 import { ROOM_ID } from '../constants';
 import { BehaviorSubject, Observable, Subject, take } from 'rxjs';
 import { Socket } from 'ngx-socket-io';
+import { Location } from '@angular/common';
 
 @Injectable({
   providedIn: 'root',
@@ -21,7 +21,7 @@ export class RoomService {
 
   private joinRoomSuccess$!: Observable<string>;
   constructor(
-    // private signalingService: SignalingService,
+    private location: Location,
     private socket: Socket
   ) {
     this.attemptToAutoJoinRoom();
@@ -76,6 +76,7 @@ export class RoomService {
 
   createRoom() {
     const roomId = Math.random().toString(36).substring(7);
+    this.location.replaceState(`room`);
     this.joinRoom(roomId).subscribe((peerId: string) => {
       this._myPeerId.next(peerId);
     });
@@ -96,6 +97,7 @@ export class RoomService {
     const roomId = prompt('Enter the room ID to join:');
     if (roomId) {
       localStorage.setItem(ROOM_ID, roomId);
+      this.location.replaceState(`room`);
       this.joinRoom(roomId).subscribe((peerId) => {
         this._myPeerId.next(peerId);
       });
@@ -105,6 +107,6 @@ export class RoomService {
   private updateRoomHistory(): void {
     /* Todo: add room history functionality */
     //this.roomHistory.set(this.)
-    //localStorage.setItem('RoomId', JSON.stringify());
+    //localStorage.setItem(ROOM_ID, JSON.stringify());
   }
 }
