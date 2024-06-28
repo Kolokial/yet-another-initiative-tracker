@@ -1,11 +1,14 @@
 {
   "dependencies": {
     "socket.io": "^4.7.5",
+    "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7"
   },
   "scripts": {
-    "start": "node server.ts"
+    "start": "npm run compile && node ./dist/server.js",
+    "compile": "npx tsc"
   },
+  "type": "module",
   "name": "signal-server",
   "version": "1.0.0",
   "main": "server.js",

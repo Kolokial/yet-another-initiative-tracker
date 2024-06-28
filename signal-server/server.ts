@@ -1,17 +1,20 @@
-const http = require("http");
-const socketIo = require("socket.io");
+import { createServer } from "http";
+import { Server, Socket } from "socket.io";
+import { ClientToServerEvents, ServerToClientEvents } from "./signals";
 
-const server = http.createServer();
-const io = socketIo(server, {
+//const socketIo = require("socket.io");
+
+const server = createServer();
+const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
   },
 });
 
-const rooms = {};
+const rooms: { [roomId: string]: string[] } = {};
 
-io.on("connection", (socket: any) => {
+io.on("connection", (socket) => {
   console.log("New client connected", socket.id);
 
   socket.on("joinRoom", (roomId) => {
@@ -25,7 +28,7 @@ io.on("connection", (socket: any) => {
     }
     rooms[roomId].push(socket.id);
     console.log(`Client ${socket.id} joined room ${roomId}`);
-    notifyPeersInRoom(socket, roomId, "newPeerJoined", socket.id);
+    //notifyPeersInRoom(socket, roomId, "newPeerJoined", socket.id);
 
     io.to(socket.id).emit("roomJoined", rooms[roomId]);
   });
@@ -51,7 +54,10 @@ io.on("connection", (socket: any) => {
   });
 });
 
-function notifyPeersInRoom(socket, roomId, event, data) {
+function notifyPeersInRoom(
+  socket: Socket<ClientToServerEvents, ServerToClientEvents>,
+  roomId: string
+) {
   const peersInRoom = rooms[roomId] || [];
   console.log(`Notifying peers`);
   for (const peerId of peersInRoom) {
@@ -62,7 +68,7 @@ function notifyPeersInRoom(socket, roomId, event, data) {
   }
 }
 
-function removePeerFromRooms(peerId) {
+function removePeerFromRooms(peerId: string) {
   for (const roomId in rooms) {
     if (rooms[roomId].includes(peerId)) {
       rooms[roomId] = rooms[roomId].filter((id) => id !== peerId);
