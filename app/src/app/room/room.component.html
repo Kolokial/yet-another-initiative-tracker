@@ -1,6 +1,10 @@
 <div>
   <p>RoomId: {{ roomId | async }}</p>
   <p>PeerId: {{ myPeerId | async }}</p>
+  <ul *ngIf="auth.user$ | async as user">
+    <li>{{ user.name }}</li>
+    <li>{{ user.email }}</li>
+  </ul>
   <mat-form-field class="initiatve-input">
     <mat-label>Character name</mat-label>
     <input [(ngModel)]="displayName" matInput type="text" />

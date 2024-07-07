@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { RoomService } from './room.service';
 import { ROOM_ID } from '../constants';
 import { Observable, combineLatest, take } from 'rxjs';
+import { AuthService } from '@auth0/auth0-angular';
 
 @Component({
   selector: 'room',
@@ -61,7 +62,8 @@ export class RoomComponent {
     private messagingService: MessagingService,
     private roomService: RoomService,
     private location: Location,
-    private ref: ChangeDetectorRef
+    private ref: ChangeDetectorRef,
+    public auth: AuthService
   ) {}
 
   createRoom() {
