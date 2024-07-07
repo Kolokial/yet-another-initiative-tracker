@@ -19,7 +19,7 @@ type YAITCustomOffer = {
   offer: RTCSessionDescriptionInit;
   roomId: string;
   peerId: string;
-}
+};
 
 @Injectable({
   providedIn: 'root',
@@ -52,14 +52,14 @@ export class SignalingService {
     private roomService: RoomService
   ) {
     this.socket.on('roomJoined', (data: string[]) => {
-      console.log('ROomJoined',data);
+      console.log('RoomJoined', data);
       this.getLatestRoomIdAndPeerId().subscribe(({ myPeerId, roomId }) => {
         this.handleNewPeerJoined(data, myPeerId, roomId);
       });
     });
     this.socket.on('offer', (data: YAITCustomOffer) => {
-      console.log('offer',data)
-      this.myPeerId.subscribe((myPeerId:string) => {
+      console.log('offer', data);
+      this.myPeerId.subscribe((myPeerId: string) => {
         this.handleOffer(data, myPeerId, data.roomId);
       });
     });
