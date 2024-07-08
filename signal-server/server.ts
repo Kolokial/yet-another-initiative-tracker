@@ -1,6 +1,7 @@
 import { createServer } from "http";
 import { Server, Socket } from "socket.io";
 import { ClientToServerEvents, ServerToClientEvents } from "./signals";
+import { Data } from "./setup";
 
 //const socketIo = require("socket.io");
 
@@ -81,3 +82,4 @@ function removePeerFromRooms(peerId: string) {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const d = new Data();
