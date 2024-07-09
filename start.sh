@@ -27,7 +27,7 @@ echo "Started Signal Server with PID $NPM2_PID"
 # Start the SQLite database
 sqlite3 ./database/myTestDatabase.db < ./database/schema.sql &
 SQLITE_PID=$!
-echo "Started SQLite with PID $SQLITE_PID"  
+echo "Started SQLite with PID $SQLITE_PID"
 
 # Wait for all background processes
 wait $NPM1_PID $NPM2_PID $SQLITE_PID

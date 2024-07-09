@@ -1,7 +1,7 @@
 import { createServer } from "http";
 import { Server, Socket } from "socket.io";
 import { ClientToServerEvents, ServerToClientEvents } from "./signals";
-import { Data } from "./setup";
+import { Data } from "./setup.js";
 
 //const socketIo = require("socket.io");
 

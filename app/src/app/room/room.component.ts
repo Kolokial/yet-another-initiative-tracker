@@ -86,4 +86,7 @@ export class RoomComponent {
   sendMessage(message: number | string) {
     this.messagingService.sendDiceRollMessage(message as number);
   }
+  parse(object: any) {
+    return JSON.stringify(object);
+  }
 }

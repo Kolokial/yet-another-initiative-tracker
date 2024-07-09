@@ -1,6 +1,6 @@
 
 CREATE TABLE IF NOT EXISTS User(
-  UserId TEXT PRIMARY KEY,
+  UserId INTEGER PRIMARY KEY,
   Auth0Id TEXT NOT NULL
 );
 
@@ -8,11 +8,8 @@ CREATE TABLE IF NOT EXISTS PlayerCharacter(
     PlayerCharacterId INTEGER PRIMARY KEY,
     UserId TEXT NOT NULL,
     CharacterName TEXT NOT NULL,
+    DexterityMod INTEGER NULL,
     FOREIGN KEY(UserId) REFERENCES User(UserId)
-
-    
-    -- Modifiers
-
 );
 
 CREATE TABLE IF NOT EXISTS Room(
