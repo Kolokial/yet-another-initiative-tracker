@@ -1,4 +1,3 @@
-<app-auth-button></app-auth-button>
 <nav mat-tab-nav-bar [tabPanel]="tabPanel">
   <a
     mat-tab-link
@@ -6,7 +5,13 @@
     routerLinkActive="active"
     (click)="activeLink = roomUrl"
     [active]="activeLink == ''"
-    >Room
+  >
+    <mat-icon
+      aria-hidden="false"
+      aria-label="Room Manager"
+      fontIcon="room_preferences"
+    ></mat-icon>
+    <span class="nav-label">Room Manager</span>
   </a>
   <a
     mat-tab-link
@@ -15,7 +20,12 @@
     (click)="activeLink = '/init'"
     [active]="activeLink == ''"
   >
-    Initiative Tracker
+    <mat-icon
+      aria-hidden="false"
+      aria-label="Initiative Tracker"
+      fontIcon="casino"
+    ></mat-icon>
+    <span class="nav-label">Initiative Tracker</span>
   </a>
   <a
     mat-tab-link
@@ -23,9 +33,16 @@
     routerLinkActive="active"
     (click)="activeLink = '/order'"
     [active]="activeLink == ''"
-    >Initative Order
+  >
+    <mat-icon
+      aria-hidden="false"
+      aria-label="Initiative Order"
+      fontIcon="table_chart"
+    ></mat-icon>
+    <span class="nav-label">Initative Order</span>
   </a>
 </nav>
+<h2 class="nav-title">{{ componentTitle }}</h2>
 <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
 <router-outlet (activate)="onActivate($event)"></router-outlet>
 

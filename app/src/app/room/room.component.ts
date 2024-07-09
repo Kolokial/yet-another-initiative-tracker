@@ -9,6 +9,7 @@ import { RoomService } from './room.service';
 import { ROOM_ID } from '../constants';
 import { Observable, combineLatest, take } from 'rxjs';
 import { AuthService } from '@auth0/auth0-angular';
+import { HasTitle } from '../types/title';
 
 @Component({
   selector: 'room',
@@ -17,7 +18,7 @@ import { AuthService } from '@auth0/auth0-angular';
   templateUrl: './room.component.html',
   styleUrl: './room.component.scss',
 })
-export class RoomComponent {
+export class RoomComponent implements HasTitle {
   @Input()
   set roomId(id: string) {
     combineLatest([this.roomId, this.myPeerId])
@@ -34,10 +35,7 @@ export class RoomComponent {
   @Output() onLeaveRoom: EventEmitter<void> = new EventEmitter<void>();
 
   activeLink: any;
-
-  // get players(): string[] {
-  //   return [...this.signalService.players, this.myPeerId];
-  // }
+  readonly title: string = 'Room Manager';
 
   get myPeerId(): Observable<string> {
     return this.roomService.myPeerId;

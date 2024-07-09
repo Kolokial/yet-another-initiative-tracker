@@ -1,0 +1,13 @@
+.nav-title {
+    display: none;
+    text-align: center;
+}
+@media screen and (max-width: 505px){
+    .nav-label{
+        display:none;
+    }
+
+    .nav-title {
+        display: block;
+    }
+}

@@ -11,6 +11,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Subject, Subscription, debounceTime, distinctUntilChanged, tap } from 'rxjs';
 import { InitiativeTrackerStoreService } from './initiative-tracker.store.service';
+import { HasTitle } from '../types/title';
 
 @Component({
   selector: 'initiative-tracker',
@@ -28,9 +29,10 @@ import { InitiativeTrackerStoreService } from './initiative-tracker.store.servic
   templateUrl: './initiative-tracker.component.html',
   styleUrl: './initiative-tracker.component.scss',
 })
-export class InitiativeTrackerComponent {
+export class InitiativeTrackerComponent implements HasTitle {
   @Input() public players: string[] = [];
   @Input() public playerName: string = '';
+  title: string = 'Initiative Tracker';
 
   public get displayName(): string {
     return this.messagingService.displayName;

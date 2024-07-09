@@ -3,6 +3,7 @@ import { Envelope, MessagingService } from '../messaging.service';
 import { AsyncPipe, NgFor } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { Observable, Subscription, map, switchMap, take } from 'rxjs';
+import { HasTitle } from '../types/title';
 
 type InitiativeDetail = {
   peerId: string;
@@ -17,7 +18,7 @@ type InitiativeDetail = {
   templateUrl: './initiative-list.component.html',
   styleUrl: './initiative-list.component.scss',
 })
-export class InitiativeListComponent {
+export class InitiativeListComponent implements HasTitle {
   /* Todo: now we need to work out whose turn it is */
   public turnFinishedButtonEnabled$!: Observable<boolean>;
   public initiatives: InitiativeDetail[] = [];
@@ -32,6 +33,7 @@ export class InitiativeListComponent {
   ) {
     this.refreshTurnOrder();
   }
+  readonly title: string = 'Initiative List';
 
   ngOnInit() {
     this.messagingService.myPeerId.pipe(take(1)).subscribe({

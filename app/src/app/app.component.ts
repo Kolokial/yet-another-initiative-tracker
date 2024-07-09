@@ -8,6 +8,7 @@ import { RoomComponent } from './room/room.component';
 import { InitiativeListComponent } from './initiative-list/initiative-list.component';
 import { InitiativeTrackerComponent } from './initiative-tracker/initiative-tracker.component';
 import { take } from 'rxjs';
+import { HasTitle } from './types/title';
 
 //const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
 const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
@@ -30,6 +31,12 @@ export class AppComponent {
 
   public get roomUrl(): string {
     return `room/${this.messagingService.roomId}`;
+  }
+
+  private currentComponent!: HasTitle;
+
+  public get componentTitle(): string {
+    return this.currentComponent?.title;
   }
 
   constructor(
@@ -57,6 +64,7 @@ export class AppComponent {
   onActivate(
     component: RoomComponent | InitiativeListComponent | InitiativeTrackerComponent
   ): void {
+    this.currentComponent = component;
     if (component instanceof RoomComponent) {
       component.onLeaveRoom
         .pipe(take(1))
