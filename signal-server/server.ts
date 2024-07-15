@@ -1,12 +1,17 @@
-import { createServer } from "http";
+import express, { application } from "express";
+import swaggerUI from "swagger-ui-express";
 import { Server, Socket } from "socket.io";
 import { ClientToServerEvents, ServerToClientEvents } from "./signals";
-import { Data } from "./setup.js";
+import { DatabaseSetup } from "./database/DatabaseSetup.js";
+import { createServer } from "http2";
+import { swaggerSpec } from "./swagger.js";
 
 //const socketIo = require("socket.io");
 
-const server = createServer();
-const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
+const app = express();
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
+const httpServer = createServer(app);
+const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
@@ -80,6 +85,32 @@ function removePeerFromRooms(peerId: string) {
   }
 }
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-const d = new Data();
+const SOCKET_IO_PORT = process.env.PORT || 3001;
+const API_PORT = 8080;
+httpServer.listen(SOCKET_IO_PORT, () =>
+  console.log(`Socket IO Server running on port ${SOCKET_IO_PORT}`)
+);
+/**
+ * @swagger
+ * /api/resource:
+ * get:
+ *  summary: Get a resource
+ *  description: Get a specific resource by ID.
+ *  parameters:
+ * — in: path
+ * name: id
+ * required: true
+ * description: ID of the resource to retrieve.
+ * schema:
+ * type: string
+ * responses:
+ * 200:
+ * description: Successful response
+ */
+app.get(`/api/resource/:id`, (req, res) => {
+  console.log(req);
+});
+app.listen(API_PORT, () => {
+  console.log(`API Server is running on port ${API_PORT}`);
+});
+const d = new DatabaseSetup();

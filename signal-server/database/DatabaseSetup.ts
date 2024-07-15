@@ -7,7 +7,7 @@ const __dirname = dirname(__filename);
 
 const DATABASE_PATH = `${process.cwd()}/database/myTestDatabase.db`;
 
-export class Data {
+export class DatabaseSetup {
   private databaseConnection: Database;
 
   constructor() {

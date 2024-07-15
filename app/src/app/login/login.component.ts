@@ -13,5 +13,12 @@ export class LoginComponent {
   constructor(
     @Inject(DOCUMENT) public document: Document,
     public auth: AuthService
-  ) {}
+  ) {
+    this.auth.idTokenClaims$.subscribe({
+      next: (obj) => {
+        console.log(obj);
+      },
+    });
+    this.auth.user$;
+  }
 }
