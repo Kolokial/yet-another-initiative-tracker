@@ -1,6 +1,7 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { Component, Inject } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
+import { UserService } from '../user.service';
 
 @Component({
   selector: 'login',
@@ -12,7 +13,8 @@ import { AuthService } from '@auth0/auth0-angular';
 export class LoginComponent {
   constructor(
     @Inject(DOCUMENT) public document: Document,
-    public auth: AuthService
+    public auth: AuthService,
+    private user: UserService
   ) {
     this.auth.idTokenClaims$.subscribe({
       next: (obj) => {
@@ -20,5 +22,6 @@ export class LoginComponent {
       },
     });
     this.auth.user$;
+    this.user.getUser(9);
   }
 }

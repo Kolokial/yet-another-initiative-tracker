@@ -23,6 +23,11 @@ import { RoomComponent } from './room/room.component';
 import { routes } from './app.routes';
 import { RoomService } from './room/room.service';
 import { AuthButtonComponent } from './auth0/auth0.component';
+import {
+  HttpClient,
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 
 //const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
 const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
@@ -57,6 +62,7 @@ const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
         redirect_uri: window.location.origin,
       },
     }),
+    provideHttpClient(withInterceptorsFromDi()),
   ],
   bootstrap: [AppComponent],
 })
