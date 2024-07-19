@@ -24,13 +24,13 @@ export class DatabaseSetup {
         }
       }
     );
-    this.insertUserData();
+    //this.insertUserData();
   }
 
-  public insertUserData() {
+  public insertUserData(auth0Id: string) {
     this.databaseConnection
-      .prepare(`INSERT INTO User (Auth0Id) VALUES($UserId)`)
-      .bind("myUserId")
+      .prepare(`INSERT INTO User (Auth0Id) VALUES($auth0Id)`)
+      .bind(auth0Id)
       .run((err) => {
         console.log("ran the query, now what?", err);
       });

@@ -1,5 +1,5 @@
 #!/bin/sh
-
+npx kill-port 3000 8080 3001 4200 5200
 # Function to handle termination
 terminate() {
   echo "Terminating all processes..."
@@ -10,7 +10,7 @@ terminate() {
 }
 
 # Trap the termination signals
-trap terminate SIGINT SIGTERM
+trap terminate INT TERM
 
 # Navigate to the first npm project and start it
 cd ./app/
@@ -31,3 +31,4 @@ echo "Started SQLite with PID $SQLITE_PID"
 
 # Wait for all background processes
 wait $NPM1_PID $NPM2_PID $SQLITE_PID
+npx kill-port 3000 8080 3001 4200 5200

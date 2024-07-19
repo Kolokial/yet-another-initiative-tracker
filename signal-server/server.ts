@@ -1,4 +1,5 @@
 import express, { Express } from "express";
+import { auth } from "express-oauth2-jwt-bearer";
 import swaggerUI from "swagger-ui-express";
 import { Server, Socket } from "socket.io";
 import { ClientToServerEvents, ServerToClientEvents } from "./signals";
@@ -10,7 +11,10 @@ import { setupRoutes } from "./routes.js";
 //const socketIo = require("socket.io");
 
 const app: Express = express();
+const database = new DatabaseSetup();
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
+app.use(express.json());
+
 const httpServer = createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
   cors: {
@@ -91,8 +95,7 @@ const API_PORT = 8080;
 httpServer.listen(SOCKET_IO_PORT, () =>
   console.log(`Socket IO Server running on port ${SOCKET_IO_PORT}`)
 );
-setupRoutes(app);
+setupRoutes(app, database);
 app.listen(API_PORT, () => {
   console.log(`API Server is running on port ${API_PORT}`);
 });
-const d = new DatabaseSetup();

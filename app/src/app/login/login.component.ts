@@ -19,9 +19,10 @@ export class LoginComponent {
     this.auth.idTokenClaims$.subscribe({
       next: (obj) => {
         console.log(obj);
+        this.user.createUser(obj?.['sub']);
       },
     });
     this.auth.user$;
-    this.user.getUser(9);
+    //this.user.getUser(9);
   }
 }

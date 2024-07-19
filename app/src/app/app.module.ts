@@ -23,11 +23,8 @@ import { RoomComponent } from './room/room.component';
 import { routes } from './app.routes';
 import { RoomService } from './room/room.service';
 import { AuthButtonComponent } from './auth0/auth0.component';
-import {
-  HttpClient,
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { API_DOMAIN, API_SCHEME } from './constants';
 
 //const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
 const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
@@ -60,6 +57,7 @@ const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
       clientId: 'LaP8gm04fP6EnxRhmVBc8F86lCUKKAUA',
       authorizationParams: {
         redirect_uri: window.location.origin,
+        audience: `yait`,
       },
     }),
     provideHttpClient(withInterceptorsFromDi()),
