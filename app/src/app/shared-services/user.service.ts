@@ -14,6 +14,10 @@ export class UserService {
     private auth: AuthService
   ) {}
 
+  public canActivate(): Observable<boolean> {
+    return this.auth.isAuthenticated$;
+  }
+
   public createUser(id: number) {
     this.postRequest(`${API_FULL_URL}/api/user`, `{"auth0Id": "${id}"}`).subscribe({
       next: (response) => {

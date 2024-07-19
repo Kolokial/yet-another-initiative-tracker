@@ -4,6 +4,7 @@ import { RoomComponent } from './components/room/room.component';
 import { InitiativeListComponent } from './components/initiative-list/initiative-list.component';
 import { LoginComponent } from './components/login/login.component';
 import { UserComponent } from './components/user/user.component';
+import { canActivateUserGuard } from './guards/can-activate-user.guard';
 
 export const routes: Routes = [
   {
@@ -15,7 +16,7 @@ export const routes: Routes = [
     title: 'My Account',
     path: 'user',
     component: UserComponent,
-    canActivate: [],
+    canActivate: [canActivateUserGuard],
   },
   {
     title: 'Initiative Tracker',
