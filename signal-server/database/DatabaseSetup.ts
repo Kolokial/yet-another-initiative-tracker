@@ -28,6 +28,7 @@ export class DatabaseSetup {
   }
 
   public insertUserData(auth0Id: string) {
+    console.log(`inserting ${auth0Id}`);
     this.databaseConnection
       .prepare(`INSERT INTO User (Auth0Id) VALUES($auth0Id)`)
       .bind(auth0Id)

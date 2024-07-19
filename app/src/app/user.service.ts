@@ -45,13 +45,12 @@ export class UserService {
   }
 
   private postRequest<T>(url: string, body: T): Observable<any> {
-    let header = new HttpHeaders();
     return this.auth.getAccessTokenSilently().pipe(
       mergeMap((token: string) => {
-        header = header.set('Authorization', `Bearer ${token}`);
         return this.http.post(url, body, {
           headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
           },
         });
       })

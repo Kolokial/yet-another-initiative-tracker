@@ -52,7 +52,7 @@ export function setupRoutes(app: Express, database: DatabaseSetup) {
     res.send(`{"good": "job"}`);
   });
   app.post("/api/user", checkJwt, (req: Request, res: Response) => {
-    console.log(`req.body = ` + req.body);
+    console.log(`req.body = ` + JSON.stringify(req.body));
     database.insertUserData(req.body.auth0Id);
     res.send("null");
     res.status(201).end();

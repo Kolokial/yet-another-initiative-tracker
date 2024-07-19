@@ -22,7 +22,11 @@ export class LoginComponent {
         this.user.createUser(obj?.['sub']);
       },
     });
-    this.auth.user$;
+    //this.auth.user$;
     //this.user.getUser(9);
+  }
+
+  parse(object: any) {
+    return JSON.stringify(object);
   }
 }
