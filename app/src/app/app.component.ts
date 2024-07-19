@@ -1,12 +1,12 @@
 import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
-import { SignalingService } from './signaling.service';
-import { QrScannerService } from './qr-scanner/qr-scanner.service';
-import { MessagingService } from './messaging.service';
+import { SignalingService } from './shared-services/signaling.service';
+import { QrScannerService } from './components/qr-scanner/qr-scanner.service';
+import { MessagingService } from './shared-services/messaging.service';
 import { SocketIoConfig } from 'ngx-socket-io';
-import { RoomService } from './room/room.service';
-import { RoomComponent } from './room/room.component';
-import { InitiativeListComponent } from './initiative-list/initiative-list.component';
-import { InitiativeTrackerComponent } from './initiative-tracker/initiative-tracker.component';
+import { RoomService } from './components/room/room.service';
+import { RoomComponent } from './components/room/room.component';
+import { InitiativeListComponent } from './components/initiative-list/initiative-list.component';
+import { InitiativeTrackerComponent } from './components/initiative-tracker/initiative-tracker.component';
 import { take } from 'rxjs';
 import { HasTitle } from './types/title';
 

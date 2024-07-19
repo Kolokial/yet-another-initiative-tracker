@@ -4,9 +4,9 @@ import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 import { AppComponent } from './app.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { MatTabsModule } from '@angular/material/tabs';
-import { InitiativeTrackerComponent } from './initiative-tracker/initiative-tracker.component';
+import { InitiativeTrackerComponent } from './components/initiative-tracker/initiative-tracker.component';
 import { CommonModule } from '@angular/common';
-import { QrScannerService } from './qr-scanner/qr-scanner.service';
+import { QrScannerService } from './components/qr-scanner/qr-scanner.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,10 +19,10 @@ import {
   provideRouter,
   withComponentInputBinding,
 } from '@angular/router';
-import { RoomComponent } from './room/room.component';
+import { RoomComponent } from './components/room/room.component';
 import { routes } from './app.routes';
-import { RoomService } from './room/room.service';
-import { AuthButtonComponent } from './auth0/auth0.component';
+import { RoomService } from './components/room/room.service';
+import { AuthButtonComponent } from './components/auth0/auth0.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { API_DOMAIN, API_SCHEME } from './constants';
 

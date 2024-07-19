@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
 import { HttpOptions } from '@capacitor/core';
 import { Observable, mergeMap } from 'rxjs';
-import { API_FULL_URL } from './constants';
+import { API_FULL_URL } from '../constants';
 
 @Injectable({
   providedIn: 'root',

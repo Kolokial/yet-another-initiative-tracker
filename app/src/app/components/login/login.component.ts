@@ -1,7 +1,7 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { Component, Inject } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
-import { UserService } from '../user.service';
+import { UserService } from '../../shared-services/user.service';
 
 @Component({
   selector: 'login',

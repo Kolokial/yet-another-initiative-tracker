@@ -1,9 +1,9 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
-import { Envelope, MessagingService } from '../messaging.service';
+import { Envelope, MessagingService } from '../../shared-services/messaging.service';
 import { AsyncPipe, NgFor } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { Observable, Subscription, map, switchMap, take } from 'rxjs';
-import { HasTitle } from '../types/title';
+import { HasTitle } from '../../types/title';
 
 type InitiativeDetail = {
   peerId: string;

@@ -5,13 +5,13 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MessagingService } from '../messaging.service';
+import { MessagingService } from '../../shared-services/messaging.service';
 import { FormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Subject, Subscription, debounceTime, distinctUntilChanged, tap } from 'rxjs';
 import { InitiativeTrackerStoreService } from './initiative-tracker.store.service';
-import { HasTitle } from '../types/title';
+import { HasTitle } from '../../types/title';
 
 @Component({
   selector: 'initiative-tracker',

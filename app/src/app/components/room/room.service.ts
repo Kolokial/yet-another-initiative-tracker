@@ -1,6 +1,6 @@
 /* Housekeeping! */
 import { Injectable } from '@angular/core';
-import { ROOM_ID } from '../constants';
+import { ROOM_ID } from '../../constants';
 import { BehaviorSubject, Observable, Subject, take } from 'rxjs';
 import { Socket } from 'ngx-socket-io';
 import { Location } from '@angular/common';

@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject, Observable, Subject, combineLatest, take } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { RoomService } from './room/room.service';
-import { AppServiceStore } from './app.service.store';
+import { RoomService } from '../components/room/room.service';
+import { AppServiceStore } from '../app.service.store';
 
 export type DataChannelEvents = {
   readonly peerId: string;

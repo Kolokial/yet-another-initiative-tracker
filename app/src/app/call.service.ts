@@ -1,5 +1,5 @@
 import { ElementRef, Injectable } from '@angular/core';
-import { SignalingService } from './signaling.service';
+import { SignalingService } from './shared-services/signaling.service';
 
 @Injectable({
   providedIn: 'root',
@@ -8,10 +8,7 @@ export class CallService {
   configuration: RTCConfiguration = {
     iceServers: [
       {
-        urls: [
-          'stun:stun1.l.google.com:19302',
-          'stun:stun2.l.google.com:19302',
-        ],
+        urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
       },
     ],
     iceCandidatePoolSize: 10,
@@ -64,13 +61,11 @@ export class CallService {
 
   public async handleOffer(
     offer: RTCSessionDescription,
-    remoteVideo: ElementRef,
+    remoteVideo: ElementRef
   ): Promise<void> {
     await this._initConnection(remoteVideo);
 
-    await this.connection.setRemoteDescription(
-      new RTCSessionDescription(offer),
-    );
+    await this.connection.setRemoteDescription(new RTCSessionDescription(offer));
 
     const answer = await this.connection.createAnswer();
 
@@ -80,9 +75,7 @@ export class CallService {
   }
 
   public async handleAnswer(answer: RTCSessionDescription): Promise<void> {
-    await this.connection.setRemoteDescription(
-      new RTCSessionDescription(answer),
-    );
+    await this.connection.setRemoteDescription(new RTCSessionDescription(answer));
   }
 
   public async handleCandidate(candidate: RTCIceCandidate): Promise<void> {
@@ -93,15 +86,11 @@ export class CallService {
 
   private _registerConnectionListeners(): void {
     this.connection.onicegatheringstatechange = (ev: Event) => {
-      console.log(
-        `ICE gathering state changed: ${this.connection.iceGatheringState}`,
-      );
+      console.log(`ICE gathering state changed: ${this.connection.iceGatheringState}`);
     };
 
     this.connection.onconnectionstatechange = () => {
-      console.log(
-        `Connection state change: ${this.connection.connectionState}`,
-      );
+      console.log(`Connection state change: ${this.connection.connectionState}`);
     };
 
     this.connection.onsignalingstatechange = () => {
@@ -109,9 +98,7 @@ export class CallService {
     };
 
     this.connection.oniceconnectionstatechange = () => {
-      console.log(
-        `ICE connection state change: ${this.connection.iceConnectionState}`,
-      );
+      console.log(`ICE connection state change: ${this.connection.iceConnectionState}`);
     };
     this.connection.onicecandidate = (event) => {
       if (event.candidate) {
