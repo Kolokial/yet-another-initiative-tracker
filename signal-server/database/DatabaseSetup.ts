@@ -2,6 +2,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import sqlite3, { Database } from "sqlite3";
+import { User } from "./DatabaseTypes";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -35,5 +36,9 @@ export class DatabaseSetup {
       .run((err) => {
         console.log("ran the query, now what?", err);
       });
+  }
+
+  public updateUserData(auth0Id: string, user: User) {
+    /*TODO: iterate over object keys and values to construct SQL */
   }
 }

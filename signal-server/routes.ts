@@ -54,8 +54,12 @@ export function setupRoutes(app: Express, database: DatabaseSetup) {
   app.post("/api/user", checkJwt, (req: Request, res: Response) => {
     console.log(`req.body = ` + JSON.stringify(req.body));
     database.insertUserData(req.body.auth0Id);
+    /* TODO: send back userId */
     res.send("null");
     res.status(201).end();
+  });
+  app.patch("/api/user/:id", checkJwt, (req: Request, res: Response) => {
+    database.updateUserData(req.params.id, req.body);
   });
   app.get(`/api/user`, checkJwt, (req, res) => {
     console.log(req);

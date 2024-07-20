@@ -15,11 +15,23 @@ export class UserService {
   ) {}
 
   public canActivate(): Observable<boolean> {
+    /* TODO: need to move this out of the service */
     return this.auth.isAuthenticated$;
   }
 
-  public createUser(id: number) {
-    this.postRequest(`${API_FULL_URL}/api/user`, `{"auth0Id": "${id}"}`).subscribe({
+  public createUser(auth0Id: number) {
+    this.postRequest(`${API_FULL_URL}/api/user`, `{"auth0Id": "${auth0Id}"}`).subscribe({
+      next: (response) => {
+        console.log(response);
+      },
+    });
+  }
+
+  public updateUserDisplayName(displayName: string) {
+    this.patchRequest(
+      `${API_FULL_URL}/api/user/${auth0Id}/display-name`,
+      `{"displayName":${displayName}}`
+    ).subscribe({
       next: (response) => {
         console.log(response);
       },
@@ -52,6 +64,19 @@ export class UserService {
     return this.auth.getAccessTokenSilently().pipe(
       mergeMap((token: string) => {
         return this.http.post(url, body, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      })
+    );
+  }
+
+  private patchRequest<T>(url: string, body: T): Observable<any> {
+    return this.auth.getAccessTokenSilently().pipe(
+      mergeMap((token: string) => {
+        return this.http.patch(url, body, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
