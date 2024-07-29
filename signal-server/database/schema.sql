@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS PlayerCharacter(
     UserId TEXT NOT NULL,
     CharacterName TEXT NOT NULL,
     DexterityMod INTEGER NULL,
+    LuckStone INTEGER DEFAULT 0, -- Bool, defaults to false
+    AlertFeat INTEGER DEFAULT 0, -- Bool, defaults to false
     FOREIGN KEY(UserId) REFERENCES User(UserId)
 );
 
