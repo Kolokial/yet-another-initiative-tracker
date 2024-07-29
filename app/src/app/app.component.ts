@@ -9,6 +9,7 @@ import { InitiativeListComponent } from './components/initiative-list/initiative
 import { InitiativeTrackerComponent } from './components/initiative-tracker/initiative-tracker.component';
 import { take } from 'rxjs';
 import { HasTitle } from './types/title';
+import { MediaMatcher } from '@angular/cdk/layout';
 
 //const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
 const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
@@ -24,6 +25,8 @@ export class AppComponent {
   receivedMessages: { sender: string; message: string }[] = [];
   myPeerId!: string;
   activeLink: any;
+  mobileQuery: MediaQueryList;
+  private _mobileQueryListener: () => void;
 
   get players(): string[] {
     return [...this.signalService.players, this.myPeerId];
@@ -44,8 +47,12 @@ export class AppComponent {
     private messagingService: MessagingService,
     private roomService: RoomService,
     private qrScanner: QrScannerService,
-    private ref: ChangeDetectorRef
+    private ref: ChangeDetectorRef,
+    media: MediaMatcher
   ) {
+    this.mobileQuery = media.matchMedia('(max-width: 600px)');
+    this._mobileQueryListener = () => ref.detectChanges();
+    this.mobileQuery.addListener(this._mobileQueryListener);
     // Camera.getPhoto({
     //   quality: 90,
     //   allowEditing: true,

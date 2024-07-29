@@ -14,11 +14,11 @@ import { debounceTime } from 'rxjs';
 })
 export class UserComponent {
   /* TODO: Add user displayname to initiative order, under character name.*/
-  public userDisplayName$: FormControl = new FormControl();
+  public userDisplayName: FormControl = new FormControl();
   constructor(private user: UserService) {}
 
   ngOnInit() {
-    this.userDisplayName$.valueChanges
+    this.userDisplayName.valueChanges
       .pipe(debounceTime(1000))
       .subscribe((displayName) => {
         this.user.updateUserDisplayName(displayName);

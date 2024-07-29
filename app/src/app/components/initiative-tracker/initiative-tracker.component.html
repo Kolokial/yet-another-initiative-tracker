@@ -12,23 +12,3 @@
 />
 
 <button (click)="sendInitiative(initiativeValue)">Fight!</button>
-
-<mat-form-field class="dexterity-mod">
-  <mat-label>Dexterity Modifier</mat-label>
-  <input [(ngModel)]="dexterityModifier" matInput type="number" />
-</mat-form-field>
-
-<section>
-  <span>
-    <ul>
-      <li>
-        <mat-checkbox [(ngModel)]="alertFeat"> Alert Feat </mat-checkbox>
-      </li>
-      <li>
-        <mat-checkbox [(ngModel)]="luckStone">
-          Stone of Good Luck (Luckstone)</mat-checkbox
-        >
-      </li>
-    </ul>
-  </span>
-</section>

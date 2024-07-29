@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 import { AppComponent } from './app.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { MatTabsModule } from '@angular/material/tabs';
+import { MatTabNav, MatTabsModule } from '@angular/material/tabs';
 import { InitiativeTrackerComponent } from './components/initiative-tracker/initiative-tracker.component';
 import { CommonModule } from '@angular/common';
 import { QrScannerService } from './components/qr-scanner/qr-scanner.service';
@@ -24,7 +24,9 @@ import { routes } from './app.routes';
 import { RoomService } from './components/room/room.service';
 import { AuthButtonComponent } from './components/auth0/auth0.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { API_DOMAIN, API_SCHEME } from './constants';
+import { MatListModule } from '@angular/material/list';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatToolbarModule } from '@angular/material/toolbar';
 
 //const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
 const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
@@ -46,6 +48,10 @@ const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
     RouterLinkActive,
     RoomComponent,
     AuthButtonComponent,
+    MatToolbarModule,
+    MatSidenavModule,
+    MatListModule,
+    MatTabNav,
   ],
   providers: [
     provideAnimationsAsync(),

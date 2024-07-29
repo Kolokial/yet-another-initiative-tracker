@@ -2,11 +2,7 @@
     display: none;
     text-align: center;
 }
-@media screen and (max-width: 505px){
-    .nav-label{
-        display:none;
-    }
-
+@media screen and (max-width: 550px){
     .nav-title {
         display: block;
     }

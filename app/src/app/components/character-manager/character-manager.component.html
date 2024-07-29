@@ -1,1 +1,25 @@
-<p>character-manager works!</p>
+<div [formGroup]="characterForm">
+  <mat-form-field class="initiatve-input">
+    <mat-label>Character name</mat-label>
+    <input formControlName="CharacterName" matInput type="text" />
+  </mat-form-field>
+  <mat-form-field class="dexterity-mod">
+    <mat-label>Dexterity Modifier</mat-label>
+    <input formControlName="DexterityModifier" matInput type="number" />
+  </mat-form-field>
+
+  <section>
+    <span>
+      <ul class="init-bonuses">
+        <li>
+          <mat-slide-toggle formControlName="HasAlertFeat"> Alert Feat </mat-slide-toggle>
+        </li>
+        <li>
+          <mat-slide-toggle formControlName="HasLuckStone">
+            Stone of Good Luck (Luckstone)</mat-slide-toggle
+          >
+        </li>
+      </ul>
+    </span>
+  </section>
+</div>

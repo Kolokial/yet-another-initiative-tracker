@@ -17,9 +17,11 @@ export class LoginComponent {
     private user: UserService
   ) {
     this.auth.idTokenClaims$.subscribe({
-      next: (obj) => {
-        console.log(obj);
-        this.user.createUser(obj?.['sub']);
+      next: (idToken) => {
+        console.log(idToken);
+        if (idToken) {
+          this.user.createUser(idToken['sub'], idToken['name']);
+        }
       },
     });
     //this.auth.user$;

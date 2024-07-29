@@ -7,6 +7,7 @@ export type Envelope = {
   diceRoll: number;
   timestamp: number;
   displayName: string;
+  playerCharacterName?: string;
   isProfileUpdate?: boolean;
   isTurnFinished?: boolean;
 };
