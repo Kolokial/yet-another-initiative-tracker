@@ -6,14 +6,10 @@ export function setupCharacterRoutes(
   database: DatabaseSetup,
   checkJwt: e.Handler
 ) {
-  app.get(
-    "/api/user/:id/characters",
-    checkJwt,
-    (req: Request, res: Response) => {
-      console.log(`Header: ${req.headers.authorization}`);
-      res.send(`{"good": "job"}`);
-    }
-  );
+  app.get("/api/user/characters", checkJwt, (req: Request, res: Response) => {
+    console.log(`Header: ${req.headers.authorization}`);
+    res.send(`{"good": "job"}`);
+  });
   app.get(
     "/api/user/:id/character/:characterId",
     checkJwt,
@@ -23,22 +19,27 @@ export function setupCharacterRoutes(
     }
   );
 
-  app.post(
-    "/api/user/:id/character",
+  app.post("/api/user/character", checkJwt, (req: Request, res: Response) => {
+    console.log(`req.body = ` + JSON.stringify(req.body));
+    database.createCharacter(req.auth?.payload.sub as string, req.body);
+    /* TODO: send back userId */
+    res.send("null");
+    res.status(201).end();
+  });
+  app.patch(
+    "/api/user/character/:characterId",
     checkJwt,
     (req: Request, res: Response) => {
-      console.log(`req.body = ` + JSON.stringify(req.body));
-      database.createCharacter(req.body.auth0Id, req.body);
-      /* TODO: send back userId */
-      res.send("null");
-      res.status(201).end();
+      database.updateCharacter(req.auth?.payload.sub as string, req.body);
+      res.status(200).end();
     }
   );
-  app.patch(
-    "/api/user/:id/character/:characterId",
+
+  app.delete(
+    "api/user/character/:characterId",
     checkJwt,
     (req: Request, res: Response) => {
-      database.updateUserData(req.params.id, req.body);
+      database.deleteCharacter(req.auth?.payload.sub as string, req.body);
       res.status(200).end();
     }
   );

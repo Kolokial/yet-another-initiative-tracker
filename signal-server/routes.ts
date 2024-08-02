@@ -1,8 +1,8 @@
 import { Express, Request, Response } from "express";
 import { auth } from "express-oauth2-jwt-bearer";
 import { DatabaseSetup } from "./database/DatabaseSetup";
-import { setupUserRoutes } from "./routes/user.routes";
-import { setupCharacterRoutes } from "./routes/character.routes";
+import { setupUserRoutes } from "./routes/user.routes.js";
+import { setupCharacterRoutes } from "./routes/character.routes.js";
 
 export function setupRoutes(app: Express, database: DatabaseSetup) {
   app.use(function (req, res, next) {

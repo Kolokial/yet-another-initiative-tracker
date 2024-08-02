@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS PlayerCharacter(
     DexterityMod INTEGER NULL,
     LuckStone INTEGER DEFAULT 0, -- Bool, defaults to false
     AlertFeat INTEGER DEFAULT 0, -- Bool, defaults to false
+    IsDeleted INTEGER DEFUALT 0,
     FOREIGN KEY(UserId) REFERENCES User(UserId)
 );
 
