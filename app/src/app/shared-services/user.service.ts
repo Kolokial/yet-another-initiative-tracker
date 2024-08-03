@@ -49,8 +49,8 @@ export class UserService {
       });
   }
 
-  public getUser(id: number): any /*todo: create proper type */ {
-    this.getRequest(`${API_FULL_URL}/api/user/${id}`).subscribe({
+  public getUser(): any {
+    this.getRequest(`${API_FULL_URL}/api/user`).subscribe({
       next: (response) => {
         console.log(response);
       },

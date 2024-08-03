@@ -21,6 +21,7 @@ export class LoginComponent {
         console.log(idToken);
         if (idToken) {
           this.user.createUser(idToken['sub'], idToken['name']);
+          this.user.getUser();
         }
       },
     });

@@ -1,5 +1,5 @@
 import sqlite3, { Database } from "sqlite3";
-import { PlayerCharacter } from "./DatabaseTypes";
+import { PlayerCharacter, User } from "./DatabaseTypes";
 
 const DATABASE_PATH = `${process.cwd()}/database/myTestDatabase.db`;
 
@@ -20,11 +20,30 @@ export class DatabaseSetup {
         }
       }
     );
-    //this.databaseConnection.configure()
-    //this.insertUserData();
   }
 
-  public upsertUserData($auth0Id: string, $displayName: string) {
+  public readUser(auth0Id: string): Promise<User> {
+    return new Promise((resolve, reject) => {
+      this.databaseConnection.get(
+        `SELECT DisplayName 
+         FROM User
+        WHERE Auth0Id = $Auth0Id`,
+        {
+          $Auth0Id: auth0Id,
+        },
+        (err, row: User) => {
+          if (err) {
+            console.log(err);
+            reject(err);
+          }
+          console.log(`User result set:`, row);
+          resolve(row);
+        }
+      );
+    });
+  }
+
+  public upsertUser($auth0Id: string, $displayName: string) {
     console.log(`inserting ${$auth0Id}`);
     this.databaseConnection
       .prepare(
@@ -87,6 +106,9 @@ export class DatabaseSetup {
           }
           console.log(row);
           results.push(row);
+        },
+        (err, count) => {
+          resolve(results);
         }
       );
     });

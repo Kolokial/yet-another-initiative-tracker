@@ -43,7 +43,7 @@ export class CharacterManagerComponent {
     this.characterForm.statusChanges
       .pipe(debounceTime(2000))
       .subscribe((value: FormControlStatus) => {
-        console.log(value);
+        console.log(value, this.characterForm.value);
       });
   }
 }
