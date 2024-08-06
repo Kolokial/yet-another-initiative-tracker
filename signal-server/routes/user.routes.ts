@@ -1,6 +1,6 @@
 import e, { Express, Request, Response } from "express";
 import { DatabaseSetup } from "../database/DatabaseSetup";
-import { User } from "../database/DatabaseTypes";
+import { User } from "@shared-types/User";
 
 export function setupUserRoutes(
   app: Express,
