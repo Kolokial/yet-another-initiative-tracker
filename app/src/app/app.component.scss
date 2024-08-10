@@ -1,9 +1,20 @@
 .nav-title {
-    display: none;
-    text-align: center;
+  display: none;
+  text-align: center;
 }
-@media screen and (max-width: 550px){
-    .nav-title {
-        display: block;
-    }
+
+.mat-mdc-list-item-unscoped-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+
+  .nav-label {
+    margin: auto;
+  }
+}
+@media screen and (max-width: 550px) {
+  .nav-title {
+    display: block;
+  }
 }
