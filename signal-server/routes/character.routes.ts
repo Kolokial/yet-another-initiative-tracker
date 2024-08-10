@@ -8,14 +8,25 @@ export function setupCharacterRoutes(
 ) {
   app.get("/api/user/characters", checkJwt, (req: Request, res: Response) => {
     console.log(`Header: ${req.headers.authorization}`);
-    res.send(`{"good": "job"}`);
+    database
+      .readCharacters(req.auth?.payload.sub as string)
+      .then((playerCharacters) => {
+        res.send(JSON.stringify(playerCharacters));
+      });
   });
   app.get(
     "/api/user/:id/character/:characterId",
     checkJwt,
     (req: Request, res: Response) => {
       console.log(`Header: ${req.headers.authorization}`);
-      res.send(`{"good": "job"}`);
+      database
+        .readCharacter(
+          req.auth?.payload.sub as string,
+          req.params.characterId as string
+        )
+        .then((playerCharacter) => {
+          res.send(JSON.stringify(playerCharacter));
+        });
     }
   );
 

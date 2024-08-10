@@ -42,13 +42,13 @@ export function setupUserRoutes(
     console.log(`req.body = ` + JSON.stringify(req.body));
     console.log(`Header: ${req.auth?.payload.sub}`);
     /* TODO: Can remove the auth0Id from body and just use req.auth.payload.sub */
-    database.upsertUser(req.auth?.payload.sub as string, req.body.displayName);
+    database.upsertUser(req.auth?.payload.sub as string, req.body.DisplayName);
     /* TODO: send back userId */
     res.send("null");
     res.status(201).end();
   });
   app.patch("/api/user/", checkJwt, (req: Request, res: Response) => {
-    database.upsertUser(req.headers.authorization as string, req.body);
+    database.upsertUser(req.auth?.payload.sub as string, req.body);
     res.status(200).end();
   });
   app.get(`/api/user`, checkJwt, (req, res) => {
