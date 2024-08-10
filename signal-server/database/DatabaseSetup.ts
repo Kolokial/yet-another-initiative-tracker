@@ -1,5 +1,6 @@
 import sqlite3, { Database } from "sqlite3";
-import { PlayerCharacter, User } from "./DatabaseTypes";
+import { User } from "@shared-types/User";
+import { PlayerCharacter } from "@shared-types/Character";
 
 const DATABASE_PATH = `${process.cwd()}/database/myTestDatabase.db`;
 
@@ -43,25 +44,52 @@ export class DatabaseSetup {
     });
   }
 
-  public upsertUser($auth0Id: string, $displayName: string) {
-    console.log(`inserting ${$auth0Id}`);
-    this.databaseConnection
-      .prepare(
-        `INSERT OR IGNORE 
+  public upsertUser(auth0Id: string, displayName: string) {
+    console.log(`inserting ${displayName}, ${auth0Id}`);
+    this.databaseConnection.run(
+      `INSERT OR IGNORE 
          INTO User (Auth0Id, DisplayName) VALUES($auth0Id, $displayName)
          ON CONFLICT (Auth0Id) DO UPDATE 
          SET DisplayName = $displayName
-         WHERE Auth0Id = $auth0Id`
-      )
-      .bind($auth0Id, $displayName)
-      .run((err) => {
+         WHERE Auth0Id = $auth0Id`,
+      {
+        $auth0Id: auth0Id,
+        $displayName: displayName,
+      },
+      (err) => {
         console.log("ran the query, now what?", err);
-      });
+      }
+    );
   }
 
-  public readCharacter(auth0Id: string, characterId: number) {
+  public createCharacter(auth0Id: string, character: PlayerCharacter) {
     this.databaseConnection.run(
-      `SELECT CharacterName,
+      `
+      INSERT INTO PlayerCharacter (UserId, CharacterName, DexterityMod)
+      SELECT UserId,
+             $CharacterName AS CharacterName,
+             $DextirityMod AS DexterityMod
+        FROM User
+       WHERE Auth0Id = $auth0Id
+    `,
+      {
+        $CharacterName: character.CharacterName,
+        $DextirityMod: character.DexterityMod,
+        $auth0Id: auth0Id,
+      },
+      (err) => {
+        console.log(err);
+      }
+    );
+  }
+
+  public readCharacter(
+    auth0Id: string,
+    characterId: string
+  ): Promise<PlayerCharacter | Error> {
+    return new Promise((resolve, reject) => {
+      this.databaseConnection.get(
+        `SELECT CharacterName,
               DexterityMod,
               LuckStone,
               AlertFeat
@@ -72,17 +100,24 @@ export class DatabaseSetup {
         WHERE U.Auth0Id = $auth0Id
           AND PC.PlayerCharacterId = $CharacterId
           `,
-      {
-        $Auth0Id: auth0Id,
-        $CharacterId: characterId,
-      },
-      (err) => {
-        console.log(err);
-      }
-    );
+        {
+          $Auth0Id: auth0Id,
+          $CharacterId: characterId,
+        },
+        (err, result: PlayerCharacter) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+
+          console.log(err);
+        }
+      );
+    });
   }
 
-  public async readCharacters(auth0Id: string) {
+  public async readCharacters(auth0Id: string): Promise<PlayerCharacter[]> {
     return new Promise((resolve, reject) => {
       const results: PlayerCharacter[] = [];
 
@@ -108,31 +143,17 @@ export class DatabaseSetup {
           results.push(row);
         },
         (err, count) => {
+          if (err) {
+            reject(err);
+          }
+
+          if (count <= 0) {
+            reject("Zero rows returned");
+          }
           resolve(results);
         }
       );
     });
-  }
-
-  public createCharacter(auth0Id: string, character: PlayerCharacter) {
-    this.databaseConnection.run(
-      `
-      INSERT INTO PlayerCharacter (UserId, CharacterName, DexterityMod)
-      SELECT UserId,
-             $CharacterName AS CharacterName,
-             $DextirityMod AS DexterityMod
-        FROM User
-       WHERE Auth0Id = $auth0Id
-    `,
-      {
-        $CharacterName: character.CharacterName,
-        $DextirityMod: character.DexterityMod,
-        $auth0Id: auth0Id,
-      },
-      (err) => {
-        console.log(err);
-      }
-    );
   }
 
   public updateCharacter(auth0Id: string, character: PlayerCharacter) {
