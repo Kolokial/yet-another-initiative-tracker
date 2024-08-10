@@ -1,11 +1,11 @@
 export type PlayerCharacter = {
-  PlayerCharacterId: number;
+  PlayerCharacterId?: number;
   UserId: number;
   CharacterName: string;
   DexterityMod: number;
   LuckStone: boolean;
   AlertFeat: boolean;
-  IsDeleted: boolean;
+  IsDeleted?: boolean;
 };
 
 export type PlayerCharacterDiceRoll = {
