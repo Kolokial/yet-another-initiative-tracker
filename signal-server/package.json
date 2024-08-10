@@ -10,7 +10,7 @@
     "swagger-ui-express": "^5.0.1"
   },
   "scripts": {
-    "start": "npm run compile && node ./dist/server.js",
+    "start": "npm run compile && node ./dist/signal-server/server.js",
     "compile": "npx tsc"
   },
   "type": "module",
