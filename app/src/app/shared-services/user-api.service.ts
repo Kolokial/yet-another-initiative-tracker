@@ -14,7 +14,7 @@ export class UserApiService extends BaseApi {
   }
 
   public canActivate(): Observable<boolean> {
-    /* TODO: need to move this out of the service */
+    /* TODO: need to see if this can live somewhere else */
     return this.auth.isAuthenticated$;
   }
 
@@ -33,7 +33,7 @@ export class UserApiService extends BaseApi {
     this.auth.user$
       .pipe(
         mergeMap((user: AuthUser | null | undefined) => {
-          return this.postRequest(`/api/user`, `{"DisplayName":"${displayName}"}`);
+          return this.postRequest(`/api/user`, { DisplayName: displayName });
         })
       )
       .subscribe({

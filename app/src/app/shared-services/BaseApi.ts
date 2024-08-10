@@ -26,7 +26,7 @@ export abstract class BaseApi {
   protected postRequest<T, R>(url: string, body: T): Observable<R> {
     return this.auth.getAccessTokenSilently().pipe(
       mergeMap((token: string) => {
-        return this.http.post<R>(`${API_FULL_URL}${url}`, body, {
+        return this.http.post<R>(`${API_FULL_URL}${url}`, JSON.stringify(body), {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
