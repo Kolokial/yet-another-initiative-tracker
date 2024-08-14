@@ -1,6 +1,21 @@
-<div formArrayName="characterForm">
-  <template *ngFor="let chars; in: characterForm.controls">
-    <div [formGroup]="chars">
+<div>
+  <mat-expansion-panel *ngFor="let char of characterForm; let i = index" hideToggle>
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        {{ char.characterName.value }} <mat-spinner *ngIf="char.isUpdating"></mat-spinner
+      ></mat-panel-title>
+      <mat-panel-description>
+        {{ getCharacterSummary(char.formGroup) }} |
+        <mat-icon
+          *ngIf="char.hasAlertFeat.value"
+          aria-hidden="false"
+          aria-label="Alert Feat"
+          fontIcon="crisis_alert"
+        ></mat-icon>
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+    <div [formGroup]="char.formGroup">
+      <input type="hidden" formControlName="PlayerCharacterId" />
       <mat-form-field class="initiatve-input">
         <mat-label>Character name</mat-label>
         <input formControlName="CharacterName" matInput type="text" />
@@ -11,6 +26,7 @@
       </mat-form-field>
 
       <section>
+        <h4>Bonuses</h4>
         <span>
           <ul class="init-bonuses">
             <li>
@@ -25,8 +41,8 @@
             </li>
           </ul>
         </span>
-        {{ characterForm.value | json }}
+        <!-- {{ chars.value | json }} -->
       </section>
     </div>
-  </template>
+  </mat-expansion-panel>
 </div>

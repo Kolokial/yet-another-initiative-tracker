@@ -19,10 +19,10 @@ export class UserApiService extends BaseApi {
   }
 
   public createUser(auth0Id: string, displayName?: string) {
-    this.postRequest(
-      `/api/user`,
-      `{"auth0Id": "${auth0Id}", "displayName": "${displayName}"}`
-    ).subscribe({
+    this.postRequest(`/api/user`, {
+      auth0Id: auth0Id,
+      displayName: displayName,
+    }).subscribe({
       next: (response) => {
         console.log(response);
       },

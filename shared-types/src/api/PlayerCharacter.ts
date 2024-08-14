@@ -3,7 +3,7 @@ export interface PlayerCharacter {
   CharacterName: string;
   AlertFeat: boolean;
   LuckStone: boolean;
-  DexterityMod: number;
+  DexterityModifier: number;
 }
 
 export interface CreatePlayerCharacterRequest {
@@ -31,9 +31,7 @@ export interface ReadPlayerCharacterResponse {
 
 export interface ReadPlayerCharactersRequest {}
 
-export interface ReadPlayerCharactersResponse {
-  PlayerCharacters: PlayerCharacter[];
-}
+export type ReadPlayerCharactersResponse = PlayerCharacter[];
 
 export interface UpdatePlayerCharacterRequest {
   PlayerCharacterId: number;

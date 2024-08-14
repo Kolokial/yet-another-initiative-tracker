@@ -1,5 +1,5 @@
 export type PlayerCharacter = {
-  PlayerCharacterId?: number;
+  PlayerCharacterId: number;
   UserId: number;
   CharacterName: string;
   DexterityMod: number;

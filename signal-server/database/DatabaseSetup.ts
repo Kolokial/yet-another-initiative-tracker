@@ -1,8 +1,9 @@
 import sqlite3, { Database } from "sqlite3";
 import { User } from "@shared-types/User";
 import { PlayerCharacter } from "@shared-types/Character";
+import { auth } from "express-oauth2-jwt-bearer";
 
-const DATABASE_PATH = `${process.cwd()}/database/myTestDatabase.db`;
+const DATABASE_PATH = `${process.cwd()}/database/myTestDatabase2.db`;
 
 export class DatabaseSetup {
   private databaseConnection: Database;
@@ -62,25 +63,36 @@ export class DatabaseSetup {
     );
   }
 
-  public createCharacter(auth0Id: string, character: PlayerCharacter) {
-    this.databaseConnection.run(
-      `
+  public createCharacter(
+    auth0Id: string,
+    character: PlayerCharacter
+  ): Promise<number | Error> {
+    return new Promise((resolve, reject) => {
+      this.databaseConnection.get(
+        `
       INSERT INTO PlayerCharacter (UserId, CharacterName, DexterityMod)
       SELECT UserId,
              $CharacterName AS CharacterName,
              $DextirityMod AS DexterityMod
         FROM User
-       WHERE Auth0Id = $auth0Id
+       WHERE Auth0Id = $auth0Id;
     `,
-      {
-        $CharacterName: character.CharacterName,
-        $DextirityMod: character.DexterityMod,
-        $auth0Id: auth0Id,
-      },
-      (err) => {
-        console.log(err);
-      }
-    );
+        {
+          $CharacterName: character.CharacterName,
+          $DextirityMod: character.DexterityMod,
+          $auth0Id: auth0Id,
+        },
+        (err: Error | null, row: number) => {
+          if (err) {
+            console.log(err);
+            reject(err);
+          } else {
+            console.log(row);
+            resolve(this.getLastInsertedId());
+          }
+        }
+      );
+    });
   }
 
   public readCharacter(
@@ -104,11 +116,14 @@ export class DatabaseSetup {
           $Auth0Id: auth0Id,
           $CharacterId: characterId,
         },
-        (err, result: PlayerCharacter) => {
+        (err, row: PlayerCharacter) => {
           if (err) {
             reject(err);
           } else {
-            resolve(result);
+            row.AlertFeat = Boolean(row.AlertFeat);
+            row.LuckStone = Boolean(row.LuckStone);
+            row.IsDeleted = Boolean(row.IsDeleted);
+            resolve(row);
           }
 
           console.log(err);
@@ -122,15 +137,17 @@ export class DatabaseSetup {
       const results: PlayerCharacter[] = [];
 
       this.databaseConnection.each(
-        `SELECT CharacterName,
-              DexterityMod,
-              LuckStone,
-              AlertFeat
-              IsDeleted
+        `SELECT 
+              PC.PlayerCharacterId,
+              PC.CharacterName,
+              PC.DexterityMod,
+              PC.LuckStone,
+              PC.AlertFeat,
+              PC.IsDeleted
          FROM PlayerCharacter AS PC
         INNER JOIN User AS U
            ON U.UserId = PC.UserId
-        WHERE U.Auth0Id = $auth0Id
+        WHERE U.Auth0Id = $Auth0Id
           `,
         {
           $Auth0Id: auth0Id,
@@ -139,6 +156,10 @@ export class DatabaseSetup {
           if (err) {
             console.log(err);
           }
+
+          row.AlertFeat = Boolean(row.AlertFeat);
+          row.LuckStone = Boolean(row.LuckStone);
+          row.IsDeleted = Boolean(row.IsDeleted);
           console.log(row);
           results.push(row);
         },
@@ -157,22 +178,28 @@ export class DatabaseSetup {
   }
 
   public updateCharacter(auth0Id: string, character: PlayerCharacter) {
+    const dbBind = {
+      $CharacterName: character.CharacterName,
+      $DexterityMod: character.DexterityMod,
+      $PlayerCharacterId: character.PlayerCharacterId,
+      $AlertFeat: character.AlertFeat ? 1 : 0,
+      $LuckStone: character.LuckStone ? 1 : 0,
+      $auth0Id: auth0Id,
+    };
+    console.log(auth0Id, dbBind);
     this.databaseConnection.run(
       `
       UPDATE PlayerCharacter
       SET 
-        CharacterName = $CharacterName
-        DexterityMod = $DexterityMod
+        CharacterName = $CharacterName,
+        DexterityMod = $DexterityMod,
+        LuckStone = $LuckStone,
+        AlertFeat = $AlertFeat
       FROM (SELECT Auth0Id FROM User) AS u
       WHERE PlayerCharacterId = $PlayerCharacterId
         AND u.Auth0Id = $auth0Id
     `,
-      {
-        $CharacterName: character.CharacterName,
-        $DexterityMod: character.DexterityMod,
-        $PlayerCharacterId: character.PlayerCharacterId,
-        $auth0Id: auth0Id,
-      },
+      dbBind,
       (err) => {
         console.log(err);
       }
@@ -197,5 +224,21 @@ export class DatabaseSetup {
         /* TODO; better error handling, less dupes */
       }
     );
+  }
+
+  private getLastInsertedId(): Promise<number | Error> {
+    return new Promise((resolve, reject) => {
+      this.databaseConnection.get(
+        `SELECT last_insert_rowid() AS Id;`,
+        (error: Error | null, row: number) => {
+          if (error) {
+            reject(error);
+          } else {
+            console.log(row);
+            resolve(row);
+          }
+        }
+      );
+    });
   }
 }

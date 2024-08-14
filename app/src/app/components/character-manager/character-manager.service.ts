@@ -54,7 +54,7 @@ export class CharacterManagerApiService extends BaseApi {
     dexMod: number
   ): Observable<ReadPlayerCharacterResponse> {
     return this.patchRequest<UpdatePlayerCharacterRequest, ReadPlayerCharacterResponse>(
-      `api/user/character/${characterId}`,
+      `/api/user/character/${characterId}`,
       {
         PlayerCharacterId: characterId,
         CharacterName: name,

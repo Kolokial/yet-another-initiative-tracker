@@ -42,7 +42,7 @@ export function setupUserRoutes(
     console.log(`req.body = ` + JSON.stringify(req.body));
     console.log(`Header: ${req.auth?.payload.sub}`);
     /* TODO: Can remove the auth0Id from body and just use req.auth.payload.sub */
-    database.upsertUser(req.auth?.payload.sub as string, req.body.DisplayName);
+    database.upsertUser(req.auth?.payload.sub as string, req.body.displayName);
     /* TODO: send back userId */
     res.send("null");
     res.status(201).end();
