@@ -38,7 +38,7 @@ export interface UpdatePlayerCharacterRequest {
   CharacterName: string;
   AlertFeat: boolean;
   LuckStone: boolean;
-  DexterityMod: number;
+  DexterityModifier: number;
 }
 
 export interface DeletePlayerCharacterRequest {

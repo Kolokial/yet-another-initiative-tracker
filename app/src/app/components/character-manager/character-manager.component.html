@@ -2,16 +2,20 @@
   <mat-expansion-panel *ngFor="let char of characterForm; let i = index" hideToggle>
     <mat-expansion-panel-header>
       <mat-panel-title>
-        {{ char.characterName.value }} <mat-spinner *ngIf="char.isUpdating"></mat-spinner
-      ></mat-panel-title>
+        {{ char.characterName.value }}
+      </mat-panel-title>
       <mat-panel-description>
-        {{ getCharacterSummary(char.formGroup) }} |
-        <mat-icon
-          *ngIf="char.hasAlertFeat.value"
-          aria-hidden="false"
-          aria-label="Alert Feat"
-          fontIcon="crisis_alert"
-        ></mat-icon>
+        {{ getCharacterSummary(char.formGroup) }}
+        <span *ngIf="char.hasAlertFeat.value"
+          >|
+          <mat-icon
+            aria-hidden="false"
+            aria-label="Alert Feat"
+            fontIcon="crisis_alert"
+          ></mat-icon>
+        </span>
+        <span *ngIf="char.hasLuckStone.value">| LS</span>
+        <mat-spinner diameter="30" *ngIf="char.isUpdating"></mat-spinner>
       </mat-panel-description>
     </mat-expansion-panel-header>
     <div [formGroup]="char.formGroup">

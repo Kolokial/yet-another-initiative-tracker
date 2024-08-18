@@ -107,6 +107,6 @@ export class CharacterManagerComponent {
   }
 
   public getCharacterSummary(character: FormGroup<CharacterFormGroup>) {
-    return `Dex: ${character.controls.DexterityModifier.value}  | ` + ``;
+    return `Dex: ${character.controls.DexterityModifier.value}` + ``;
   }
 }

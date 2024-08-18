@@ -2,7 +2,7 @@ export type PlayerCharacter = {
   PlayerCharacterId: number;
   UserId: number;
   CharacterName: string;
-  DexterityMod: number;
+  DexterityModifier: number;
   LuckStone: boolean;
   AlertFeat: boolean;
   IsDeleted?: boolean;

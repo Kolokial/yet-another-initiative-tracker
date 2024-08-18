@@ -79,7 +79,7 @@ export class DatabaseSetup {
     `,
         {
           $CharacterName: character.CharacterName,
-          $DextirityMod: character.DexterityMod,
+          $DextirityMod: character.DexterityModifier,
           $auth0Id: auth0Id,
         },
         (err: Error | null, row: number) => {
@@ -102,7 +102,7 @@ export class DatabaseSetup {
     return new Promise((resolve, reject) => {
       this.databaseConnection.get(
         `SELECT CharacterName,
-              DexterityMod,
+              DexterityMod AS DexterityModifier,
               LuckStone,
               AlertFeat
               IsDeleted
@@ -140,7 +140,7 @@ export class DatabaseSetup {
         `SELECT 
               PC.PlayerCharacterId,
               PC.CharacterName,
-              PC.DexterityMod,
+              PC.DexterityMod AS DexterityModifier,
               PC.LuckStone,
               PC.AlertFeat,
               PC.IsDeleted
@@ -180,7 +180,7 @@ export class DatabaseSetup {
   public updateCharacter(auth0Id: string, character: PlayerCharacter) {
     const dbBind = {
       $CharacterName: character.CharacterName,
-      $DexterityMod: character.DexterityMod,
+      $DexterityMod: character.DexterityModifier,
       $PlayerCharacterId: character.PlayerCharacterId,
       $AlertFeat: character.AlertFeat ? 1 : 0,
       $LuckStone: character.LuckStone ? 1 : 0,

@@ -1,5 +1,6 @@
 import e, { Express, Request, Response } from "express";
 import { DatabaseSetup } from "../database/DatabaseSetup";
+import { PlayerCharacter } from "@shared-types/Character";
 
 export function setupCharacterRoutes(
   app: Express,
@@ -11,7 +12,7 @@ export function setupCharacterRoutes(
     console.log(`Header: ${req.headers.authorization}`);
     database
       .readCharacters(req.auth?.payload.sub as string)
-      .then((playerCharacters) => {
+      .then((playerCharacters: PlayerCharacter[]) => {
         res.send(JSON.stringify(playerCharacters));
         console.log(playerCharacters);
       })
