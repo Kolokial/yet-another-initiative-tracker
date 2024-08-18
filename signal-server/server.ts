@@ -1,10 +1,9 @@
 import express, { Express } from "express";
-import { auth } from "express-oauth2-jwt-bearer";
 import swaggerUI from "swagger-ui-express";
 import { Server, Socket } from "socket.io";
 import { ClientToServerEvents, ServerToClientEvents } from "./signals";
 import { DatabaseSetup } from "./database/DatabaseSetup.js";
-import { createServer } from "http2";
+import { createServer } from "http";
 import { swaggerSpec } from "./swagger.js";
 import { setupRoutes } from "./routes.js";
 
@@ -90,7 +89,7 @@ function removePeerFromRooms(peerId: string) {
   }
 }
 
-const SOCKET_IO_PORT = process.env.PORT || 3001;
+const SOCKET_IO_PORT = process.env.PORT || 3000;
 const API_PORT = 8080;
 httpServer.listen(SOCKET_IO_PORT, () =>
   console.log(`Socket IO Server running on port ${SOCKET_IO_PORT}`)
