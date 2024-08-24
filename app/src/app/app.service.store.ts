@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subject, take } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AppServiceStore {
-  public myPeerId: Observable<string> = new Observable<string>();
+  public displayName: BehaviorSubject<string> = new BehaviorSubject('');
 
-  public roomId: Observable<string> = new Observable<string>();
+  constructor() {}
 }

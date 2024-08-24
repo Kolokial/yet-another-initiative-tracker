@@ -27,6 +27,7 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { AppServiceStore } from './app.service.store';
 
 //const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
 const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
@@ -54,6 +55,7 @@ const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
     MatTabNav,
   ],
   providers: [
+    AppServiceStore,
     provideAnimationsAsync(),
     QrScannerService,
     provideRouter(routes, withComponentInputBinding()),
