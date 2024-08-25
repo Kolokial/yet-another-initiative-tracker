@@ -5,31 +5,43 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { debounceTime } from 'rxjs';
 import { User } from '@shared-types/User';
+import { AppServiceStore } from 'src/app/app.service.store';
+import { RoomService } from '../room/room.service';
 
 @Component({
-  selector: 'user',
+  selector: 'account',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, MatInputModule],
-  templateUrl: './user.component.html',
-  styleUrl: './user.component.scss',
+  templateUrl: './account.component.html',
+  styleUrl: './account.component.scss',
 })
-export class UserComponent {
+export class AccountComponent {
   /* TODO: Add user displayname to initiative order, under character name.*/
-  public userDisplayName: FormControl = new FormControl();
-  constructor(private user: UserApiService) {}
+  public userDisplayName: FormControl<string> = new FormControl();
+  constructor(
+    private user: UserApiService,
+    private appServiceStore: AppServiceStore,
+    private room: RoomService
+  ) {}
 
   ngOnInit() {
     this.userDisplayName.valueChanges
       .pipe(debounceTime(1000))
       .subscribe((displayName) => {
         this.user.updateUserDisplayName(displayName);
+        this.appServiceStore.displayName.next(displayName);
+        if (this.room.roomId && this.room.myPeerId) {
+          //this.sendProfileUpdate()
+        }
       });
     this.readUser();
   }
 
   private readUser() {
     this.user.getUser().subscribe((user: User) => {
-      this.userDisplayName.setValue(user.DisplayName);
+      if (user && user.DisplayName) {
+        this.userDisplayName.setValue(user.DisplayName);
+      }
     });
   }
 }
