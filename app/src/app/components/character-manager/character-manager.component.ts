@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import {
-  FormArray,
-  FormControl,
   FormControlStatus,
   FormGroup,
   FormsModule,
@@ -17,6 +15,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CharacterListeItem as CharacterListItem } from 'src/app/types/formGroups/CharacterListItem';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'character-manager',
@@ -29,6 +28,7 @@ import { CharacterListeItem as CharacterListItem } from 'src/app/types/formGroup
     MatSlideToggleModule,
     MatExpansionModule,
     MatIcon,
+    MatButtonModule,
     MatProgressSpinnerModule,
   ],
   templateUrl: './character-manager.component.html',
@@ -41,15 +41,7 @@ export class CharacterManagerComponent {
     set character musical cue?
     Set initiative bonuses
   */
-  public characterForm: CharacterListItem[] = [
-    new CharacterListItem({
-      PlayerCharacterId: 0,
-      CharacterName: '',
-      DexterityModifier: 0,
-      AlertFeat: false,
-      LuckStone: false,
-    }),
-  ];
+  public characterForm: CharacterListItem[] = [];
 
   constructor(private characterService: CharacterManagerApiService) {}
 
@@ -71,10 +63,49 @@ export class CharacterManagerComponent {
     //   });
   }
 
+  addCharacterForm() {
+    this.characterForm.unshift(
+      new CharacterListItem({
+        PlayerCharacterId: 0,
+        CharacterName: '',
+        DexterityModifier: 0,
+        AlertFeat: false,
+        LuckStone: false,
+      })
+    );
+  }
+
+  createCharacter(character: CharacterListItem) {
+    character.isUpdating = true;
+    this.characterService
+      .createCharacter(
+        character.characterName.value,
+        character.hasAlertFeat.value,
+        character.hasLuckStone.value,
+        character.dexterityModifier.value
+      )
+      .subscribe((createCharacterResponse) => {
+        character.characterId = createCharacterResponse.PlayerCharacterId;
+        character.isUpdating = false;
+        this.characterForm = [...this.characterForm];
+      });
+  }
+
+  deleteCharacter(character: CharacterListItem) {
+    this.characterService
+      .deleteCharacter(character.characterId as number)
+      .subscribe(() => {
+        const index = this.characterForm.findIndex((char) => char === character);
+        if (index > -1) {
+          this.characterForm.splice(index, 1);
+        }
+      });
+  }
+
   private setupCharacterList(): void {
     this.characterService.readCharacters().subscribe((readCharacterResponse) => {
       readCharacterResponse.forEach((x) => {
-        const characterGroup = new CharacterListItem(x);
+        const characterGroup = new CharacterListItem(x, x.PlayerCharacterId);
         this.setCharacterGroupStatusChange(characterGroup, x.PlayerCharacterId);
         this.characterForm.push(characterGroup);
       });

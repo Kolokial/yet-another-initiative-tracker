@@ -1,5 +1,12 @@
 <div>
-  <mat-expansion-panel *ngFor="let char of characterForm; let i = index" hideToggle>
+  <button mat-fab extended (click)="addCharacterForm()">
+    <mat-icon>add</mat-icon>
+    Add Character
+  </button>
+  <mat-expansion-panel
+    *ngFor="let char of characterForm; let i = index"
+    [expanded]="!char.characterId"
+  >
     <mat-expansion-panel-header>
       <mat-panel-title>
         {{ char.characterName.value }}
@@ -47,6 +54,13 @@
         </span>
         <!-- {{ chars.value | json }} -->
       </section>
+      <button *ngIf="!char.characterId" mat-fab extended (click)="createCharacter(char)">
+        <mat-icon>save</mat-icon>
+        Create Character
+      </button>
+      <button mat-fab (click)="deleteCharacter(char)">
+        <mat-icon>delete</mat-icon>
+      </button>
     </div>
   </mat-expansion-panel>
 </div>

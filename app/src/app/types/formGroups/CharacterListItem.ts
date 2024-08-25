@@ -22,7 +22,10 @@ export class CharacterListeItem {
     return this.formGroup.controls.HasLuckStone as FormControl<boolean>;
   }
 
-  constructor(character: PlayerCharacter) {
+  constructor(
+    character: PlayerCharacter,
+    public characterId?: number
+  ) {
     this.formGroup = new FormGroup<CharacterFormGroup>({
       PlayerCharacterId: new FormControl<number>(character.PlayerCharacterId),
       CharacterName: new FormControl<string>(character.CharacterName),

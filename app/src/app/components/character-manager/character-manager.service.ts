@@ -5,6 +5,7 @@ import { BaseApi } from 'src/app/shared-services/BaseApi';
 import {
   CreatePlayerCharacterRequest,
   CreatePlayerCharacterResponse,
+  DeletePlayerCharacterRequest,
   ReadPlayerCharacterResponse,
   ReadPlayerCharactersResponse,
   UpdatePlayerCharacterRequest,
@@ -63,5 +64,9 @@ export class CharacterManagerApiService extends BaseApi {
         DexterityModifier: dexMod,
       }
     );
+  }
+
+  public deleteCharacter(characterId: number): Observable<DeletePlayerCharacterRequest> {
+    return this.deleteRequest(`/api/user/character/${characterId}`);
   }
 }
