@@ -88,7 +88,7 @@ export class DatabaseSetup {
             reject(err);
           } else {
             console.log(row);
-            resolve(this.getLastInsertedId());
+            resolve(this.getLastInsertedId("PlayerCharacterId"));
           }
         }
       );
@@ -168,9 +168,6 @@ export class DatabaseSetup {
             reject(err);
           }
 
-          if (count <= 0) {
-            reject("Zero rows returned");
-          }
           resolve(results);
         }
       );
@@ -226,10 +223,12 @@ export class DatabaseSetup {
     );
   }
 
-  private getLastInsertedId(): Promise<number | Error> {
+  private getLastInsertedId(
+    columnName: string = "Id"
+  ): Promise<number | Error> {
     return new Promise((resolve, reject) => {
       this.databaseConnection.get(
-        `SELECT last_insert_rowid() AS Id;`,
+        `SELECT last_insert_rowid() AS ${columnName};`,
         (error: Error | null, row: number) => {
           if (error) {
             reject(error);

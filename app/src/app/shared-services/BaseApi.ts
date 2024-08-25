@@ -7,9 +7,7 @@ export abstract class BaseApi {
   constructor(
     protected http: HttpClient,
     protected auth: AuthService
-  ) {
-    this.http.head;
-  }
+  ) {}
 
   protected getRequest<T>(url: string): Observable<T> {
     return this.auth.getAccessTokenSilently().pipe<T>(
@@ -47,6 +45,18 @@ export abstract class BaseApi {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
+          },
+        });
+      })
+    );
+  }
+
+  protected deleteRequest<T>(url: string): Observable<T> {
+    return this.auth.getAccessTokenSilently().pipe<T>(
+      mergeMap((token: string) => {
+        return this.http.delete<T>(`${API_FULL_URL}/${this.cleanUpUrl(url)}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
         });
       })

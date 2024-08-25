@@ -20,7 +20,11 @@ export class LoginComponent {
       next: (idToken) => {
         console.log(idToken);
         if (idToken) {
-          this.user.createUser(idToken['sub'], idToken['name']);
+          const userDisplayName: string = idToken.name
+            ? idToken.name
+            : (idToken.nickname as string);
+          this.user.createUser(idToken['sub'], userDisplayName);
+
           this.user.getUser();
         }
       },

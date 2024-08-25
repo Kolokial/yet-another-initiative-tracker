@@ -1,13 +1,16 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
-import { Envelope, MessagingService } from '../../shared-services/messaging.service';
+import { MessagingService } from '../../shared-services/messaging.service';
 import { AsyncPipe, NgFor } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
-import { Observable, Subscription, map, switchMap, take } from 'rxjs';
+import { Observable, Subscription, map, of, take } from 'rxjs';
 import { HasTitle } from '../../types/title';
+import { AppServiceStore } from 'src/app/app.service.store';
+import { Envelope, DiceRollMessage, ProfileUpdateMessage } from 'src/app/types/messages';
 
 type InitiativeDetail = {
   peerId: string;
   displayName: string;
+  playerCharacterName: string;
   initiativeValue: number;
 };
 
@@ -25,27 +28,37 @@ export class InitiativeListComponent implements HasTitle {
   public displayedColumns: string[] = ['displayName', 'initiativeValue'];
 
   private messagingSubscription!: Subscription;
+  private profileMessagingSubscription!: Subscription;
   private dataChannelClosingSubscription!: Subscription;
+
+  private get diceMessageStream(): Observable<Envelope<DiceRollMessage>> {
+    return this.messagingService.messageStream;
+  }
+
+  private get profileMessageStream(): Observable<Envelope<ProfileUpdateMessage>> {
+    return this.messagingService.profileMessageStream;
+  }
 
   constructor(
     private messagingService: MessagingService,
-    private ref: ChangeDetectorRef
+    private ref: ChangeDetectorRef,
+    private appServiceStore: AppServiceStore
   ) {
     this.refreshTurnOrder();
   }
   readonly title: string = 'Initiative List';
 
   ngOnInit() {
-    this.messagingService.myPeerId.pipe(take(1)).subscribe({
-      next: (peerId: string) => {
-        this.initiatives.push({
-          displayName: this.messagingService.displayName,
-          peerId: peerId,
-          initiativeValue: 0,
-        });
-        this.setupMessageStreamSubscription();
-        this.setupDataChannelClosingSubscription();
-      },
+    this.messagingService.myPeerId.pipe(take(1)).subscribe((peerId: string) => {
+      this.initiatives.push({
+        displayName: this.appServiceStore.displayName.getValue(),
+        peerId: peerId,
+        initiativeValue: 0,
+        playerCharacterName: 'test',
+      });
+      this.setupDiceMessageStreamSubscription();
+      this.setupProfileMessageStreamSubscription();
+      this.setupDataChannelClosingSubscription();
     });
   }
 
@@ -59,8 +72,9 @@ export class InitiativeListComponent implements HasTitle {
     if (index === -1) {
       this.initiatives.push({
         peerId: peerId,
-        displayName: '',
+        displayName: this.appServiceStore.displayName.getValue(),
         initiativeValue: 0,
+        playerCharacterName: 'test',
       });
       return this.initiatives[this.initiatives.length - 1];
     } else {
@@ -73,14 +87,15 @@ export class InitiativeListComponent implements HasTitle {
     this.refreshTurnOrder();
   }
 
-  private setupMessageStreamSubscription(): void {
+  private setupDiceMessageStreamSubscription(): void {
     this.messagingSubscription = this.messagingService.messageStream.subscribe({
-      next: (envelope: Envelope) => {
+      next: (envelope: Envelope<DiceRollMessage>) => {
         const detail = this.findInitiativeByPeerId(envelope.peerId);
 
-        detail.displayName = envelope.displayName;
         detail.initiativeValue =
-          envelope.diceRoll === 0 ? detail.initiativeValue : envelope.diceRoll;
+          envelope.message.diceRoll === 0
+            ? detail.initiativeValue
+            : envelope.message.diceRoll;
         if (envelope.isTurnFinished) {
           const currentPlayersTurn = this.initiatives.splice(0, 1);
           this.initiatives.push(currentPlayersTurn[0]);
@@ -91,10 +106,32 @@ export class InitiativeListComponent implements HasTitle {
           ];
         }
 
-        this.ref.detectChanges();
+        //this.ref.detectChanges();
         this.refreshTurnOrder();
       },
     });
+  }
+
+  private setupProfileMessageStreamSubscription(): void {
+    this.profileMessagingSubscription = this.profileMessageStream.subscribe(
+      (profileMessage: Envelope<ProfileUpdateMessage>) => {
+        const initItem = this.initiatives.find((x) => x.peerId === profileMessage.peerId);
+        if (initItem && initItem.peerId == profileMessage.peerId) {
+          initItem.displayName = profileMessage.message.displayName;
+          initItem.playerCharacterName = profileMessage.message
+            .playerCharacterName as string;
+        } else {
+          const player: InitiativeDetail = {
+            displayName: profileMessage.message.displayName,
+            peerId: profileMessage.peerId,
+            playerCharacterName: profileMessage.message.playerCharacterName as string,
+            initiativeValue: 0,
+          };
+          this.initiatives = [...this.initiatives, player];
+          this.refreshTurnOrder();
+        }
+      }
+    );
   }
 
   private setupDataChannelClosingSubscription(): void {

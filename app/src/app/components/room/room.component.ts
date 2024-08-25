@@ -1,15 +1,14 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
-import { Envelope, MessagingService } from '../../shared-services/messaging.service';
-import { SignalingService } from '../../shared-services/signaling.service';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { MessagingService } from '../../shared-services/messaging.service';
 import { FormsModule } from '@angular/forms';
-import { CommonModule, Location } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { RoomService } from './room.service';
-import { ROOM_ID } from '../../constants';
 import { Observable, combineLatest, take } from 'rxjs';
 import { AuthService } from '@auth0/auth0-angular';
 import { HasTitle } from '../../types/title';
+import { AppServiceStore } from 'src/app/app.service.store';
 
 @Component({
   selector: 'room',
@@ -45,22 +44,15 @@ export class RoomComponent implements HasTitle {
     return this.roomService.roomId;
   }
 
-  get displayName(): string {
-    return this.messagingService.displayName;
+  private get displayName(): string {
+    return this.appServiceStore.displayName.getValue();
   }
-
-  set displayName(displayName: string) {
-    this.messagingService.displayName = displayName;
-  }
-
-  public messageStream: Envelope[] = [];
 
   constructor(
-    private signalService: SignalingService,
+    private appServiceStore: AppServiceStore,
     private messagingService: MessagingService,
     private roomService: RoomService,
-    private location: Location,
-    private ref: ChangeDetectorRef,
+
     public auth: AuthService
   ) {}
 

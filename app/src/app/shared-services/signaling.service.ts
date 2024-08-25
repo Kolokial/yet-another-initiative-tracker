@@ -1,18 +1,27 @@
 import { Injectable } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
-import { BehaviorSubject, Observable, Subject, combineLatest, take } from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Observable, Subject, combineLatest, take } from 'rxjs';
 import { RoomService } from '../components/room/room.service';
-import { AppServiceStore } from '../app.service.store';
+import { DiceRollMessage, Envelope, ProfileUpdateMessage } from '../types/messages';
 
-export type DataChannelEvents = {
+export type DataChannelEvents<T> = {
   readonly peerId: string;
 
   onOpen: Observable<Event>;
-  onMessage: Observable<MessageEvent>;
+  onMessage: Observable<MessageEvent<Envelope<T>>>;
   onClosing: Observable<Event>;
   onClose: Observable<Event>;
   onError: Observable<Event>;
+};
+
+export type DataChannelEventsCollection = {
+  ProfileChannel: DataChannelEvents<ProfileUpdateMessage>;
+  DiceChannel: DataChannelEvents<DiceRollMessage>;
+};
+
+export type RTCDataChannelCollection = {
+  ProfileChannel: RTCDataChannel | null;
+  DiceChannel: RTCDataChannel | null;
 };
 
 type YAITCustomOffer = {
@@ -34,9 +43,24 @@ export class SignalingService {
   }
 
   public peerConnections: { [key: string]: RTCPeerConnection } = {};
-  public dataChannels: { [key: string]: RTCDataChannel } = {};
-  public dataChannelEvents$ = new Subject<DataChannelEvents>();
-  private dataChannelEvents: DataChannelEvents[] = [];
+
+  public dataChannels: { [key: string]: RTCDataChannelCollection } = {};
+  private _onDataChannelAdded$ = new Subject<DataChannelEventsCollection>();
+  public get onDataChannelAdded$(): Observable<DataChannelEventsCollection> {
+    return this._onDataChannelAdded$.asObservable();
+  }
+
+  // public diceRollDataChannels: { [key: string]: RTCDataChannel } = {};
+  // private _onDiceRollChannelAdded$ = new Subject<DataChannelEvents>();
+  // public get onDiceRollChannelAdded$(): Observable<DataChannelEvents> {
+  //   return this._onDiceRollChannelAdded$.asObservable();
+  // }
+
+  // private profileDataChannels: { [key: string]: RTCDataChannel } = {};
+  // private _onProfileChannelAdded$ = new Subject<DataChannelEvents>();
+  // public get onProfileChannelAdded$(): Observable<DataChannelEvents> {
+  //   return this._onProfileChannelAdded$.asObservable();
+  // }
 
   private _dataChannelClosingSubject = new Subject<string>();
   public get dataChannelClosing$(): Observable<string> {
@@ -81,7 +105,7 @@ export class SignalingService {
     this.peerConnections[peerId] = this.createPeerConnection(peerId, myPeerId, roomId);
 
     const peerConnection = this.peerConnections[peerId];
-    this.setupDataChannel(peerConnection, peerId, myPeerId);
+    this.setupDataChannelCollection(peerConnection, peerId, myPeerId);
 
     peerConnection
       .createOffer()
@@ -113,13 +137,36 @@ export class SignalingService {
     };
 
     peerConnection.ondatachannel = (event) => {
-      this.dataChannels[peerId] = event.channel;
+      const channelLabel = event.channel.label;
+      if (!this.dataChannels[peerId]) {
+        this.dataChannels[peerId] = {
+          DiceChannel: null,
+          ProfileChannel: null,
+        };
+      }
+
+      if (channelLabel.endsWith('diceRoll')) {
+        this.dataChannels[peerId].DiceChannel = event.channel;
+      }
+
+      if (channelLabel.endsWith('profileUpdate')) {
+        this.dataChannels[peerId].ProfileChannel = event.channel;
+      }
+
+      const diceChannel = this.dataChannels[peerId].DiceChannel;
+      const profileChannel = this.dataChannels[peerId].ProfileChannel;
+      if (diceChannel && profileChannel) {
+        this._onDataChannelAdded$.next({
+          DiceChannel: this.setupDataChannelEvents(diceChannel, peerId, myPeerId),
+          ProfileChannel: this.setupDataChannelEvents(profileChannel, peerId, myPeerId),
+        });
+      }
 
       //this.setupDataChannel(this.dataChannels[peerId]);
-      this.dataChannelEvents$.next(
-        this.setupDataChannelEvents(this.dataChannels[peerId], peerId, myPeerId)
-      );
-      console.log(`createDataChannel called by Peer: ${peerId}`);
+      // this._onDiceRollChannelAdded$.next(
+      //   this.setupDataChannelEvents(this.diceRollDataChannels[peerId], peerId, myPeerId)
+      // );
+      console.log(`createDataChannel called by Peer: ${peerId}`, event);
     };
 
     return peerConnection;
@@ -179,27 +226,39 @@ export class SignalingService {
     this.peerConnections[peerId].addIceCandidate(candidate);
   }
 
-  private setupDataChannel(
+  private setupDataChannelCollection(
     peerConnection: RTCPeerConnection,
     peerId: string,
     myPeerId: string
   ): void {
-    const dataChannelLabel = this.getDataChannelLabel(peerId, myPeerId);
-    this.dataChannels[peerId] = peerConnection.createDataChannel(dataChannelLabel);
-    const dataChannel = this.dataChannels[peerId];
+    const diceRollLabel = this.getDataChannelLabel(peerId, myPeerId, 'diceRoll');
+    const profileUpdateLabel = this.getDataChannelLabel(
+      peerId,
+      myPeerId,
+      'profileUpdate'
+    );
 
-    const events = this.setupDataChannelEvents(dataChannel, peerId, myPeerId);
-    this.dataChannelEvents.push(events);
-    this.dataChannelEvents$.next(events);
+    const diceRollChannel = peerConnection.createDataChannel(diceRollLabel);
+    const profileUpdateChannel = peerConnection.createDataChannel(profileUpdateLabel);
+
+    this.dataChannels[peerId] = {
+      DiceChannel: diceRollChannel,
+      ProfileChannel: profileUpdateChannel,
+    };
+
+    this._onDataChannelAdded$.next({
+      DiceChannel: this.setupDataChannelEvents(diceRollChannel, peerId, myPeerId),
+      ProfileChannel: this.setupDataChannelEvents(profileUpdateChannel, peerId, myPeerId),
+    });
   }
 
-  private setupDataChannelEvents(
+  private setupDataChannelEvents<T>(
     dataChannel: RTCDataChannel,
     peerId: string,
     myPeerId: string
-  ): DataChannelEvents {
-    const onOpen: Subject<Event> = new Subject<Event>();
-    const onMessage: Subject<MessageEvent> = new Subject<MessageEvent>();
+  ): DataChannelEvents<T> {
+    const onOpen = new Subject<Event>();
+    const onMessage = new Subject<MessageEvent<Envelope<T>>>();
     const onClosing: Subject<Event> = new Subject<Event>();
     const onClose: Subject<Event> = new Subject<Event>();
     const onError: Subject<Event> = new Subject<Event>();
@@ -253,7 +312,8 @@ export class SignalingService {
 
   public disconnect(): void {
     Object.keys(this.dataChannels).forEach((key) => {
-      this.dataChannels[key].close();
+      this.dataChannels[key].ProfileChannel?.close();
+      this.dataChannels[key].DiceChannel?.close();
       delete this.dataChannels[key];
     });
     Object.keys(this.peerConnections).forEach((key) => {
@@ -263,8 +323,8 @@ export class SignalingService {
     this.socket.disconnect();
   }
 
-  private getDataChannelLabel(peerId: string, myPeerId: string): string {
-    return `${peerId}-${myPeerId}`;
+  private getDataChannelLabel(peerId: string, myPeerId: string, suffix: string): string {
+    return `${peerId}-${myPeerId}-${suffix}`;
   }
 
   private doesDataChannelLabelMatch(
@@ -272,7 +332,11 @@ export class SignalingService {
     myPeerId: string,
     label: string
   ): boolean {
-    return `${peerId}-${myPeerId}` === label || `${myPeerId}-${peerId}` === label;
+    const sections = label.split('-');
+    const parsedLabel = `${sections[0]}-${sections[1]}`;
+    return (
+      `${peerId}-${myPeerId}` === parsedLabel || `${myPeerId}-${peerId}` === parsedLabel
+    );
   }
 
   private getLatestRoomIdAndPeerId(): Observable<{ myPeerId: string; roomId: string }> {

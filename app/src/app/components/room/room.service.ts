@@ -4,6 +4,8 @@ import { ROOM_ID } from '../../constants';
 import { BehaviorSubject, Observable, Subject, take } from 'rxjs';
 import { Socket } from 'ngx-socket-io';
 import { Location } from '@angular/common';
+import { AppServiceStore } from 'src/app/app.service.store';
+import { Auth0ClientFactory, AuthService } from '@auth0/auth0-angular';
 
 @Injectable({
   providedIn: 'root',
@@ -22,9 +24,14 @@ export class RoomService {
   private joinRoomSuccess$!: Observable<string>;
   constructor(
     private location: Location,
-    private socket: Socket
+    private socket: Socket,
+    private auth0: AuthService
   ) {
-    this.attemptToAutoJoinRoom();
+    this.auth0.isAuthenticated$.subscribe((isAuthenticated) => {
+      if (isAuthenticated) {
+        this.attemptToAutoJoinRoom();
+      }
+    });
   }
 
   private attemptToAutoJoinRoom() {

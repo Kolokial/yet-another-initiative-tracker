@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AuthService, User as AuthUser } from '@auth0/auth0-angular';
-import { Observable, mergeMap } from 'rxjs';
+import { Observable, mergeMap, tap } from 'rxjs';
 import { User } from '@shared-types/User';
 import { BaseApi } from './BaseApi';
 

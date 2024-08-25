@@ -1,4 +1,5 @@
 import express, { Express } from "express";
+import cors from "cors";
 import swaggerUI from "swagger-ui-express";
 import { Server, Socket } from "socket.io";
 import { ClientToServerEvents, ServerToClientEvents } from "./signals";
@@ -13,6 +14,12 @@ const app: Express = express();
 const database = new DatabaseSetup();
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 app.use(express.json());
+app.options(
+  "*",
+  cors({
+    origin: "*",
+  })
+);
 
 const httpServer = createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {

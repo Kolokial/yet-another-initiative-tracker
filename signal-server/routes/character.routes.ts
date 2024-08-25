@@ -67,12 +67,11 @@ export function setupCharacterRoutes(
     "api/user/character/:characterId",
     checkJwt,
     (req: Request, res: Response) => {
-      database.deleteCharacter(req.auth?.payload.sub as string, req.body);
+      database.deleteCharacter(
+        req.auth?.payload.sub as string,
+        +req.params.characterId
+      );
       res.status(200).end();
     }
   );
-  app.get(`/api/user`, checkJwt, (req, res) => {
-    console.log(req);
-    res.send("test");
-  });
 }

@@ -9,9 +9,17 @@ import { MessagingService } from '../../shared-services/messaging.service';
 import { FormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { Subject, Subscription, debounceTime, distinctUntilChanged, tap } from 'rxjs';
+import {
+  Observable,
+  Subject,
+  Subscription,
+  debounceTime,
+  distinctUntilChanged,
+  tap,
+} from 'rxjs';
 import { InitiativeTrackerStoreService } from './initiative-tracker.store.service';
 import { HasTitle } from '../../types/title';
+import { AppServiceStore } from 'src/app/app.service.store';
 
 @Component({
   selector: 'initiative-tracker',
@@ -34,8 +42,8 @@ export class InitiativeTrackerComponent implements HasTitle {
   @Input() public playerName: string = '';
   title: string = 'Initiative Tracker';
 
-  public get displayName(): string {
-    return this.messagingService.displayName;
+  public get displayName(): Observable<string> {
+    return this.appServiceStore.displayName;
   }
 
   public get dexterityModifier(): number {
@@ -81,7 +89,8 @@ export class InitiativeTrackerComponent implements HasTitle {
 
   constructor(
     private messagingService: MessagingService,
-    private dataStore: InitiativeTrackerStoreService
+    private dataStore: InitiativeTrackerStoreService,
+    private appServiceStore: AppServiceStore
   ) {}
 
   ngOnInit() {
