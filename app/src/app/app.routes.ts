@@ -3,7 +3,7 @@ import { InitiativeTrackerComponent } from './components/initiative-tracker/init
 import { RoomComponent } from './components/room/room.component';
 import { InitiativeListComponent } from './components/initiative-list/initiative-list.component';
 import { LoginComponent } from './components/login/login.component';
-import { UserComponent } from './components/user/user.component';
+import { AccountComponent } from './components/account/account.component';
 import { canActivateUserGuard } from './guards/can-activate-user.guard';
 import { CharacterManagerComponent } from './components/character-manager/character-manager.component';
 
@@ -16,7 +16,7 @@ export const routes: Routes = [
   {
     title: 'My Account',
     path: 'user',
-    component: UserComponent,
+    component: AccountComponent,
     canActivate: [canActivateUserGuard],
   },
   {
