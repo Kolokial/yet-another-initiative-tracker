@@ -13,6 +13,11 @@
     margin: auto;
   }
 }
+
+mat-sidenav {
+  width: 210px;
+}
+
 @media screen and (max-width: 550px) {
   .nav-title {
     display: block;

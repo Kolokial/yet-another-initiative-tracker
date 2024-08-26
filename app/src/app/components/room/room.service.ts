@@ -4,8 +4,8 @@ import { ROOM_ID } from '../../constants';
 import { BehaviorSubject, Observable, Subject, take } from 'rxjs';
 import { Socket } from 'ngx-socket-io';
 import { Location } from '@angular/common';
-import { AppServiceStore } from 'src/app/app.service.store';
-import { Auth0ClientFactory, AuthService } from '@auth0/auth0-angular';
+import { AuthService } from '@auth0/auth0-angular';
+import { RoomData } from 'src/app/types/roomInfo';
 
 @Injectable({
   providedIn: 'root',
@@ -48,15 +48,18 @@ export class RoomService {
     }
   }
 
-  private joinRoom(roomId: string): Observable<string> {
-    const subject = new Subject<string>();
+  public joinRoom(roomId: string): Observable<RoomData> {
+    const subject = new Subject<RoomData>();
 
     if (!roomId) {
       subject.complete();
     } else {
       const intervalId = setInterval(() => {
         if (this.socket.ioSocket.connected) {
-          subject.next(this.emitJoinRoom(roomId));
+          subject.next({
+            myPeerId: this.emitJoinRoom(roomId),
+            roomId: roomId,
+          });
           clearInterval(intervalId);
         } else {
           this.socket.connect();
@@ -84,32 +87,29 @@ export class RoomService {
   createRoom() {
     const roomId = Math.random().toString(36).substring(7);
     this.location.replaceState(`room`);
-    this.joinRoom(roomId).subscribe((peerId: string) => {
-      this._myPeerId.next(peerId);
-    });
+    return this.joinRoom(roomId);
     //alert(`Room created with ID: ${this.roomId}`);
   }
 
-  joinRoomWithId(roomId: string) {
-    if (roomId) {
-      localStorage.setItem(ROOM_ID, roomId);
-      this.joinRoomSuccess$ = this.joinRoom(roomId);
-      this.joinRoomSuccess$.subscribe((peerId: string) => {
-        this._myPeerId.next(peerId);
-      });
-    }
-  }
+  // joinRoomWithId(roomId: string) {
+  //   if (roomId) {
+  //     localStorage.setItem(ROOM_ID, roomId);
+  //     this.joinRoomSuccess$ = this.joinRoom(roomId);
+  //     this.joinRoomSuccess$.subscribe((peerId: string) => {
+  //       this._myPeerId.next(peerId);
+  //     });
+  //   }
+  // }
 
-  joinRoomWithoutId() {
-    const roomId = prompt('Enter the room ID to join:');
-    if (roomId) {
-      localStorage.setItem(ROOM_ID, roomId);
-      this.location.replaceState(`room`);
-      this.joinRoom(roomId).subscribe((peerId) => {
-        this._myPeerId.next(peerId);
-      });
-    }
-  }
+  // joinRoom(roomId: string): Observable<RoomData> {
+  //   //const roomId = prompt('Enter the room ID to join:');
+  //   if (roomId) {
+  //     localStorage.setItem(ROOM_ID, roomId);
+  //     this.location.replaceState(`room`);
+  //     return this.joinRoom(roomId);
+  //   }
+  //   return of();
+  // }
 
   private updateRoomHistory(): void {
     /* Todo: add room history functionality */

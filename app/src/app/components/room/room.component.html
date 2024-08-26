@@ -1,20 +1,32 @@
 <div>
-  <p>RoomId: {{ roomId | async }}</p>
-  <p>PeerId: {{ myPeerId | async }}</p>
+  <div class="flex-container">
+    <div class="flex-container flex-item card">
+      <mat-form-field class="flex-item">
+        <mat-label>Room Code</mat-label>
+        <input [(ngModel)]="roomCode" matInput placeholder="Ex. l33tdnd" />
+      </mat-form-field>
+      <button
+        class="flex-item"
+        mat-flat-button
+        color="primary"
+        (click)="joinRoom(roomCode)"
+        [disabled]="!roomCode"
+      >
+        Join Room
+      </button>
+      <div class="flex-item">Join your friends room!</div>
+    </div>
 
-  <button mat-flat-button color="primary" (click)="joinRoom()">Join Room</button>
-  <button mat-flat-button color="primary" (click)="createRoom()">Create Room</button>
-
-  <button
-    mat-flat-button
-    color="primary"
-    [disabled]="!myPeerId && !roomId"
-    (click)="leaveRoom()"
-  >
-    Leave Room
-  </button>
+    <div class="flex-container flex-item card">
+      <button class="flex-item" mat-flat-button color="primary" (click)="createRoom()">
+        Create Room
+      </button>
+      <div class="flex-item">Make a brand new room!</div>
+    </div>
+  </div>
 </div>
+
 <div>
-  <input #message type="number" placeholder="Type a message" />
-  <button (click)="sendMessage(message.value)">Send</button>
+  <!-- <input #message type="number" placeholder="Type a message" />
+  <button (click)="sendMessage(message.value)">Send</button> -->
 </div>

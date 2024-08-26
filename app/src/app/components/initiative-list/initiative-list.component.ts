@@ -1,11 +1,24 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { MessagingService } from '../../shared-services/messaging.service';
-import { AsyncPipe, NgFor } from '@angular/common';
+import { AsyncPipe, CommonModule, NgFor } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
-import { Observable, Subscription, map, of, take } from 'rxjs';
+import {
+  Observable,
+  Subscription,
+  combineLatest,
+  combineLatestWith,
+  map,
+  take,
+} from 'rxjs';
 import { HasTitle } from '../../types/title';
 import { AppServiceStore } from 'src/app/app.service.store';
 import { Envelope, DiceRollMessage, ProfileUpdateMessage } from 'src/app/types/messages';
+import { RoomComponent } from '../room/room.component';
+import { RoomData } from 'src/app/types/roomInfo';
+import { RoomService } from '../room/room.service';
+import { MatIcon, MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
 
 type InitiativeDetail = {
   peerId: string;
@@ -17,7 +30,16 @@ type InitiativeDetail = {
 @Component({
   selector: 'initiative-list',
   standalone: true,
-  imports: [NgFor, MatTableModule, AsyncPipe],
+  imports: [
+    CommonModule,
+    NgFor,
+    MatTableModule,
+    AsyncPipe,
+    RoomComponent,
+    MatIconModule,
+    MatButtonModule,
+    MatInputModule,
+  ],
   templateUrl: './initiative-list.component.html',
   styleUrl: './initiative-list.component.scss',
 })
@@ -26,6 +48,23 @@ export class InitiativeListComponent implements HasTitle {
   public turnFinishedButtonEnabled$!: Observable<boolean>;
   public initiatives: InitiativeDetail[] = [];
   public displayedColumns: string[] = ['displayName', 'initiativeValue'];
+
+  public get roomId$(): Observable<string> {
+    return this.roomService.roomId;
+  }
+
+  public get myPeerId$(): Observable<string> {
+    return this.roomService.myPeerId;
+  }
+
+  public get hasJoinedRoom$(): Observable<boolean> {
+    return this.myPeerId$.pipe(
+      combineLatestWith(this.roomId$),
+      map(([myPeerId, roomId]) => {
+        return myPeerId !== '' && roomId !== '';
+      })
+    );
+  }
 
   private messagingSubscription!: Subscription;
   private profileMessagingSubscription!: Subscription;
@@ -41,6 +80,7 @@ export class InitiativeListComponent implements HasTitle {
 
   constructor(
     private messagingService: MessagingService,
+    private roomService: RoomService,
     private ref: ChangeDetectorRef,
     private appServiceStore: AppServiceStore
   ) {
@@ -65,6 +105,12 @@ export class InitiativeListComponent implements HasTitle {
   ngOnDestroy() {
     this.messagingSubscription.unsubscribe();
     this.dataChannelClosingSubscription.unsubscribe();
+  }
+
+  onJoinRoom(roomData: RoomData) {}
+
+  leaveRoom() {
+    this.roomService.leaveRoom();
   }
 
   private findInitiativeByPeerId(peerId: string): InitiativeDetail {

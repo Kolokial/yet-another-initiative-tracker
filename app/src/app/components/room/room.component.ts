@@ -1,14 +1,15 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { MessagingService } from '../../shared-services/messaging.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { RoomService } from './room.service';
-import { Observable, combineLatest, take } from 'rxjs';
+import { Observable } from 'rxjs';
 import { AuthService } from '@auth0/auth0-angular';
 import { HasTitle } from '../../types/title';
 import { AppServiceStore } from 'src/app/app.service.store';
+import { RoomData } from 'src/app/types/roomInfo';
 
 @Component({
   selector: 'room',
@@ -18,23 +19,25 @@ import { AppServiceStore } from 'src/app/app.service.store';
   styleUrl: './room.component.scss',
 })
 export class RoomComponent implements HasTitle {
-  @Input()
-  set roomId(id: string) {
-    combineLatest([this.roomId, this.myPeerId])
-      .pipe(take(1))
-      .subscribe({
-        next: ([roomId, myPeerId]) => {
-          if ((roomId !== id && id) || !myPeerId) {
-            this.roomService.joinRoomWithId(id);
-          }
-        },
-      });
-  }
+  // @Input()
+  // set roomId(id: string) {
+  //   combineLatest([this.roomId, this.myPeerId])
+  //     .pipe(take(1))
+  //     .subscribe({
+  //       next: ([roomId, myPeerId]) => {
+  //         if ((roomId !== id && id) || !myPeerId) {
+  //           this.roomService.joinRoomWithId(id);
+  //         }
+  //       },
+  //     });
+  // }
 
   @Output() onLeaveRoom: EventEmitter<void> = new EventEmitter<void>();
+  @Output() onJoinRoom: EventEmitter<RoomData> = new EventEmitter<RoomData>();
 
   activeLink: any;
   readonly title: string = 'Room Manager';
+  public roomCode: string = '';
 
   get myPeerId(): Observable<string> {
     return this.roomService.myPeerId;
@@ -58,13 +61,17 @@ export class RoomComponent implements HasTitle {
 
   createRoom() {
     if (this.displayName.length) {
-      this.roomService.createRoom();
+      this.roomService.createRoom().subscribe((roomData: RoomData) => {
+        this.onJoinRoom.emit(roomData);
+      });
     }
   }
 
-  joinRoom() {
+  joinRoom(roomId: string) {
     if (this.displayName.length) {
-      this.roomService.joinRoomWithoutId();
+      this.roomService.joinRoom(roomId).subscribe((roomData: RoomData) => {
+        this.onJoinRoom.emit(roomData);
+      });
     }
   }
 

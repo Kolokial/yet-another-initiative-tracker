@@ -3,6 +3,7 @@ import { Socket } from 'ngx-socket-io';
 import { Observable, Subject, combineLatest, take } from 'rxjs';
 import { RoomService } from '../components/room/room.service';
 import { DiceRollMessage, Envelope, ProfileUpdateMessage } from '../types/messages';
+import { RoomData } from '../types/roomInfo';
 
 export type DataChannelEvents<T> = {
   readonly peerId: string;
@@ -339,7 +340,7 @@ export class SignalingService {
     );
   }
 
-  private getLatestRoomIdAndPeerId(): Observable<{ myPeerId: string; roomId: string }> {
+  private getLatestRoomIdAndPeerId(): Observable<RoomData> {
     return combineLatest({ myPeerId: this.myPeerId, roomId: this.roomId }).pipe(take(1));
   }
 }
