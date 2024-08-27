@@ -8,7 +8,9 @@ import {
   combineLatest,
   combineLatestWith,
   map,
+  of,
   take,
+  tap,
 } from 'rxjs';
 import { HasTitle } from '../../types/title';
 import { AppServiceStore } from 'src/app/app.service.store';
@@ -22,8 +24,8 @@ import { MatInputModule } from '@angular/material/input';
 
 type InitiativeDetail = {
   peerId: string;
-  displayName: string;
-  playerCharacterName: string;
+  displayName: Observable<string>;
+  playerCharacterName: Observable<string>;
   initiativeValue: number;
 };
 
@@ -91,10 +93,17 @@ export class InitiativeListComponent implements HasTitle {
   ngOnInit() {
     this.messagingService.myPeerId.pipe(take(1)).subscribe((peerId: string) => {
       this.initiatives.push({
-        displayName: this.appServiceStore.displayName.getValue(),
+        displayName: this.appServiceStore.displayName.pipe(
+          tap((x) => console.log('tapping displayName'))
+        ),
         peerId: peerId,
         initiativeValue: 0,
-        playerCharacterName: 'test',
+        playerCharacterName: this.appServiceStore.selectedCharacter.pipe(
+          tap((x) => {
+            console.log('oof', x);
+          }),
+          map((x) => x!.CharacterName as string)
+        ),
       });
       this.setupDiceMessageStreamSubscription();
       this.setupProfileMessageStreamSubscription();
@@ -118,9 +127,11 @@ export class InitiativeListComponent implements HasTitle {
     if (index === -1) {
       this.initiatives.push({
         peerId: peerId,
-        displayName: this.appServiceStore.displayName.getValue(),
+        displayName: this.appServiceStore.displayName,
         initiativeValue: 0,
-        playerCharacterName: 'test',
+        playerCharacterName: this.appServiceStore.selectedCharacter.pipe(
+          map((x) => x!.CharacterName)
+        ),
       });
       return this.initiatives[this.initiatives.length - 1];
     } else {
@@ -163,14 +174,15 @@ export class InitiativeListComponent implements HasTitle {
       (profileMessage: Envelope<ProfileUpdateMessage>) => {
         const initItem = this.initiatives.find((x) => x.peerId === profileMessage.peerId);
         if (initItem && initItem.peerId == profileMessage.peerId) {
-          initItem.displayName = profileMessage.message.displayName;
-          initItem.playerCharacterName = profileMessage.message
-            .playerCharacterName as string;
+          initItem.displayName = of(profileMessage.message.displayName);
+          initItem.playerCharacterName = of(
+            profileMessage.message.playerCharacterName as string
+          );
         } else {
           const player: InitiativeDetail = {
-            displayName: profileMessage.message.displayName,
+            displayName: of(profileMessage.message.displayName),
             peerId: profileMessage.peerId,
-            playerCharacterName: profileMessage.message.playerCharacterName as string,
+            playerCharacterName: of(profileMessage.message.playerCharacterName as string),
             initiativeValue: 0,
           };
           this.initiatives = [...this.initiatives, player];

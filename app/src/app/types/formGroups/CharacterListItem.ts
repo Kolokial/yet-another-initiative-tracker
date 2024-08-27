@@ -2,24 +2,24 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { CharacterFormGroup } from './Character.FormGroup';
 import { PlayerCharacter } from '@shared-types/api/PlayerCharacter';
 
-export class CharacterListeItem {
+export class CharacterListItem {
   public formGroup: FormGroup<CharacterFormGroup>;
   public isUpdating: boolean = false;
 
-  public get characterName(): FormControl<string> {
-    return this.formGroup.controls.CharacterName as FormControl<string>;
+  public get characterName(): string {
+    return this.formGroup.controls.CharacterName.value as string;
   }
 
-  public get dexterityModifier(): FormControl<number> {
-    return this.formGroup.controls.DexterityModifier as FormControl<number>;
+  public get dexterityModifier(): number {
+    return this.formGroup.controls.DexterityModifier.value as number;
   }
 
-  public get hasAlertFeat(): FormControl<boolean> {
-    return this.formGroup.controls.HasAlertFeat as FormControl<boolean>;
+  public get hasAlertFeat(): boolean {
+    return this.formGroup.controls.HasAlertFeat.value as boolean;
   }
 
-  public get hasLuckStone(): FormControl<boolean> {
-    return this.formGroup.controls.HasLuckStone as FormControl<boolean>;
+  public get hasLuckStone(): boolean {
+    return this.formGroup.controls.HasLuckStone.value as boolean;
   }
 
   constructor(

@@ -6,16 +6,20 @@ import {
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
+import { animate, state, style, transition, trigger } from '@angular/animations';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatInputModule } from '@angular/material/input';
 import { CharacterFormGroup } from '../../types/formGroups/Character.FormGroup';
-import { debounceTime } from 'rxjs';
+import { debounceTime, Subject } from 'rxjs';
 import { CharacterManagerApiService } from './character-manager.service';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { CharacterListeItem as CharacterListItem } from 'src/app/types/formGroups/CharacterListItem';
+import { CharacterListItem } from 'src/app/types/formGroups/CharacterListItem';
 import { MatButtonModule } from '@angular/material/button';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatTableModule } from '@angular/material/table';
+import { AppServiceStore } from 'src/app/app.service.store';
 
 @Component({
   selector: 'character-manager',
@@ -27,12 +31,24 @@ import { MatButtonModule } from '@angular/material/button';
     ReactiveFormsModule,
     MatSlideToggleModule,
     MatExpansionModule,
+    MatRadioModule,
     MatIcon,
     MatButtonModule,
     MatProgressSpinnerModule,
+    MatTableModule,
   ],
   templateUrl: './character-manager.component.html',
   styleUrl: './character-manager.component.scss',
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed,void', style({ height: '0px', minHeight: '0' })),
+      state('expanded', style({ height: '*' })),
+      transition(
+        'expanded <=> collapsed',
+        animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')
+      ),
+    ]),
+  ],
 })
 export class CharacterManagerComponent {
   /* TODO: 
@@ -42,47 +58,46 @@ export class CharacterManagerComponent {
     Set initiative bonuses
   */
   public characterForm: CharacterListItem[] = [];
+  public characterFormSource = new Subject<CharacterListItem>();
+  columnsToDisplay = [
+    'select',
+    'characterName',
+    'dexterityModifier',
+    'hasAlertFeat',
+    'hasLuckStone',
+  ];
+  columnsToDisplayWithExpand = [...this.columnsToDisplay, 'expand'];
+  expandedElement!: CharacterListItem | null;
 
-  constructor(private characterService: CharacterManagerApiService) {}
+  constructor(
+    private characterService: CharacterManagerApiService,
+    private appServiceStore: AppServiceStore
+  ) {}
 
   ngOnInit() {
     this.setupCharacterList();
-    // this.characterForm.statusChanges
-    //   .pipe(debounceTime(1000))
-    //   .subscribe((value: FormControlStatus) => {
-    //     console.log(value, this.characterForm.value);
-    //     this.characterForm.controls[0].controls;
-    //     this.characterService
-    //       .createCharacter(
-    //         this.characterForm.controls[0].controls.CharacterName.value as string,
-    //         this.characterForm.controls[0].controls.HasAlertFeat.value as boolean,
-    //         this.characterForm.controls[0].controls.HasLuckStone.value as boolean,
-    //         this.characterForm.controls[0].controls.DexterityModifier.value as number
-    //       )
-    //       .subscribe();
-    //   });
   }
 
   addCharacterForm() {
-    this.characterForm.unshift(
-      new CharacterListItem({
-        PlayerCharacterId: 0,
-        CharacterName: '',
-        DexterityModifier: 0,
-        AlertFeat: false,
-        LuckStone: false,
-      })
-    );
+    const newCharacter = new CharacterListItem({
+      PlayerCharacterId: 0,
+      CharacterName: '',
+      DexterityModifier: 0,
+      AlertFeat: false,
+      LuckStone: false,
+    });
+    this.characterForm = [newCharacter, ...this.characterForm];
+    this.expandedElement = newCharacter;
   }
 
   createCharacter(character: CharacterListItem) {
     character.isUpdating = true;
     this.characterService
       .createCharacter(
-        character.characterName.value,
-        character.hasAlertFeat.value,
-        character.hasLuckStone.value,
-        character.dexterityModifier.value
+        character.characterName,
+        character.hasAlertFeat,
+        character.hasLuckStone,
+        character.dexterityModifier
       )
       .subscribe((createCharacterResponse) => {
         character.characterId = createCharacterResponse.PlayerCharacterId;
@@ -92,23 +107,43 @@ export class CharacterManagerComponent {
   }
 
   deleteCharacter(character: CharacterListItem) {
-    this.characterService
-      .deleteCharacter(character.characterId as number)
-      .subscribe(() => {
-        const index = this.characterForm.findIndex((char) => char === character);
-        if (index > -1) {
-          this.characterForm.splice(index, 1);
-        }
-      });
+    if (character.characterId) {
+      this.characterService
+        .deleteCharacter(character.characterId as number)
+        .subscribe(() => {
+          const index = this.characterForm.findIndex((char) => char === character);
+          if (index > -1) {
+            this.characterForm.splice(index, 1);
+          }
+        });
+    } else {
+      this.characterForm = [...this.characterForm.filter((x) => x !== character)];
+    }
   }
+
+  toggleCharacterSelect(row: any) {
+    if (!row.characterId) {
+      return;
+    }
+    this.appServiceStore.selectedCharacter.next({
+      PlayerCharacterId: row.characterId as number,
+      AlertFeat: row.hasAlertFeat,
+      CharacterName: row.characterName,
+      DexterityModifier: row.dexterityModifier,
+      LuckStone: row.hasLuckStone,
+    });
+  }
+
+  isSelected(row: any) {}
 
   private setupCharacterList(): void {
     this.characterService.readCharacters().subscribe((readCharacterResponse) => {
-      readCharacterResponse.forEach((x) => {
+      readCharacterResponse.reverse().forEach((x) => {
         const characterGroup = new CharacterListItem(x, x.PlayerCharacterId);
         this.setCharacterGroupStatusChange(characterGroup, x.PlayerCharacterId);
         this.characterForm.push(characterGroup);
       });
+      this.characterForm = [...this.characterForm];
     });
   }
 

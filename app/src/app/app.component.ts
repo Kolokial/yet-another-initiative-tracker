@@ -6,13 +6,14 @@ import { SocketIoConfig } from 'ngx-socket-io';
 import { RoomComponent } from './components/room/room.component';
 import { InitiativeListComponent } from './components/initiative-list/initiative-list.component';
 import { InitiativeTrackerComponent } from './components/initiative-tracker/initiative-tracker.component';
-import { map, mergeMap, of, take } from 'rxjs';
+import { map, mergeMap, of, switchMap, take } from 'rxjs';
 import { HasTitle } from './types/title';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { UserApiService } from './shared-services/user-api.service';
 import { AuthService } from '@auth0/auth0-angular';
 import { User } from '@shared-types/User';
 import { AppServiceStore } from './app.service.store';
+import { CharacterManagerApiService } from './components/character-manager/character-manager.service';
 
 //const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
 const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
@@ -47,6 +48,7 @@ export class AppComponent {
 
   constructor(
     private userApi: UserApiService,
+    private characterService: CharacterManagerApiService,
     private signalService: SignalingService,
     private messagingService: MessagingService,
     private auth0: AuthService,
@@ -73,6 +75,7 @@ export class AppComponent {
 
   ngOnInit() {
     this.getUserDisplayNameOnStartup();
+    this.getSelectedCharacterOnStartup();
   }
 
   onActivate(
@@ -105,6 +108,23 @@ export class AppComponent {
       .subscribe((displayName) => {
         if (displayName) {
           this.appServiceStore.displayName.next(displayName);
+        }
+      });
+  }
+
+  private getSelectedCharacterOnStartup() {
+    this.auth0.isAuthenticated$
+      .pipe(
+        switchMap((isAuthed) => {
+          if (isAuthed) {
+            return this.characterService.readCharacters();
+          }
+          return of(null);
+        })
+      )
+      .subscribe((x) => {
+        if (x) {
+          this.appServiceStore.selectedCharacter.next(x[0]);
         }
       });
   }

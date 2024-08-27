@@ -21,13 +21,7 @@ export interface ReadPlayerCharacterRequest {
   PlayerCharacterId: number;
 }
 
-export interface ReadPlayerCharacterResponse {
-  PlayerCharacterId: number;
-  CharacterName: string;
-  AlertFeat: boolean;
-  LuckStone: boolean;
-  DexterityMod: number;
-}
+export interface ReadPlayerCharacterResponse extends PlayerCharacter {}
 
 export interface ReadPlayerCharactersRequest {}
 
