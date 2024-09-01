@@ -14,3 +14,5 @@ export type DiceRollMessage = {
   diceRoll: number;
   isTurnFinished: boolean;
 };
+
+export type PeerId = string;
