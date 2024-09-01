@@ -1,11 +1,7 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
-import { SignalingService } from './shared-services/signaling.service';
 import { QrScannerService } from './components/qr-scanner/qr-scanner.service';
 import { MessagingService } from './shared-services/messaging.service';
 import { SocketIoConfig } from 'ngx-socket-io';
-import { RoomComponent } from './components/room/room.component';
-import { InitiativeListComponent } from './components/initiative-list/initiative-list.component';
-import { InitiativeTrackerComponent } from './components/initiative-tracker/initiative-tracker.component';
 import { map, mergeMap, of, switchMap, take } from 'rxjs';
 import { HasTitle } from './types/title';
 import { MediaMatcher } from '@angular/cdk/layout';
@@ -32,10 +28,6 @@ export class AppComponent {
   mobileQuery: MediaQueryList;
   private _mobileQueryListener: () => void;
 
-  get players(): string[] {
-    return [...this.signalService.players, this.myPeerId];
-  }
-
   public get roomUrl(): string {
     return `room/${this.messagingService.roomId}`;
   }
@@ -49,7 +41,7 @@ export class AppComponent {
   constructor(
     private userApi: UserApiService,
     private characterService: CharacterManagerApiService,
-    private signalService: SignalingService,
+
     private messagingService: MessagingService,
     private auth0: AuthService,
     private appServiceStore: AppServiceStore,
@@ -78,16 +70,16 @@ export class AppComponent {
     this.getSelectedCharacterOnStartup();
   }
 
-  onActivate(
-    component: RoomComponent | InitiativeListComponent | InitiativeTrackerComponent
-  ): void {
-    this.currentComponent = component;
-    if (component instanceof RoomComponent) {
-      component.onLeaveRoom
-        .pipe(take(1))
-        .subscribe(() => this.signalService.disconnect());
-    }
-  }
+  // onActivate(
+  //   component: RoomComponent | InitiativeListComponent | InitiativeTrackerComponent
+  // ): void {
+  //   this.currentComponent = component;
+  //   if (component instanceof RoomComponent) {
+  //     component.onLeaveRoom
+  //       .pipe(take(1))
+  //       .subscribe(() => this.signalService.disconnect());
+  //   }
+  // }
 
   private getUserDisplayNameOnStartup() {
     this.auth0.isAuthenticated$
