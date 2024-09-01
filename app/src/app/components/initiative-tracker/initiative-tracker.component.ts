@@ -127,7 +127,7 @@ export class InitiativeTrackerComponent implements HasTitle {
     if (this.alertFeat) {
       initiativeValue += 5;
     }
-    this.lastSentRoll = initiativeValue;
+    this.appServiceStore.lastSentRoll = initiativeValue;
     this.messagingService.sendDiceRollMessage(initiativeValue);
   }
 
