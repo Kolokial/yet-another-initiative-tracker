@@ -1,8 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Observable, ReplaySubject, take } from 'rxjs';
-import { DataChannelEvents, SignalingService } from './signaling.service';
+import { Observable, Subject, take } from 'rxjs';
 import { AppServiceStore } from '../app.service.store';
 import { Envelope, DiceRollMessage, ProfileUpdateMessage } from '../types/messages';
+import { RoomService } from '../components/room/room.service';
+import {
+  DataChannelEventsTraffic,
+  DataChannelInboundEvents,
+  DataChannelOutboundEvents,
+} from '../types/dataChannels';
+import { PlayerCharacter } from '@shared-types/api/PlayerCharacter';
 
 @Injectable({
   providedIn: 'root',
@@ -14,44 +20,35 @@ export class MessagingService {
   }
 
   public get myPeerId(): Observable<string> {
-    return this.signalingService.myPeerId;
+    return this.roomService.myPeerId;
   }
 
-  private _messageStream = new ReplaySubject<Envelope<DiceRollMessage>>();
-  public get messageStream(): Observable<Envelope<DiceRollMessage>> {
-    return this._messageStream.asObservable();
-  }
-
-  private _profileMessageStream = new ReplaySubject<Envelope<ProfileUpdateMessage>>();
-  public get profileMessageStream(): Observable<Envelope<ProfileUpdateMessage>> {
-    return this._profileMessageStream.asObservable();
-  }
-
-  get displayName(): string {
+  private get displayName(): string {
     return this.appServiceStore.displayName.getValue();
   }
 
-  get dataChannelClosing$(): Observable<string> {
-    return this.signalingService.dataChannelClosing$;
+  private get playerCharacter(): PlayerCharacter | null {
+    return this.appServiceStore.selectedCharacter.getValue();
   }
 
   constructor(
     private appServiceStore: AppServiceStore,
-    private signalingService: SignalingService
+    private roomService: RoomService
   ) {
-    this.signalingService.onDataChannelAdded$.subscribe((dataChannelEventsCollection) => {
+    this.roomService.onDataChannelAdded$.subscribe((dataChannelEventsCollection) => {
       dataChannelEventsCollection.DiceChannel;
 
       if (dataChannelEventsCollection) {
         this.setupDiceChannelEventsSubscriptions(dataChannelEventsCollection.DiceChannel);
         this.setupProfileChannelEventsSubscriptions(
+          dataChannelEventsCollection.PeerId,
           dataChannelEventsCollection.ProfileChannel
         );
       }
     });
   }
 
-  public sendDiceRollMessage(message: number) {
+  public sendDiceRollMessage(message: number): void {
     this.myPeerId.pipe(take(1)).subscribe({
       next: (peerId: string) => {
         const envelope: Envelope<DiceRollMessage> = {
@@ -62,10 +59,9 @@ export class MessagingService {
           },
           timestamp: Date.now(),
         };
-        for (const peerId of Object.keys(this.signalingService.peerConnections)) {
-          const diceRollChannel = this.signalingService.dataChannels[peerId].DiceChannel;
-
-          this.sendMessage(envelope, diceRollChannel as RTCDataChannel);
+        for (const peerId of Object.keys(this.roomService.peerConnections)) {
+          const diceChannel = this.roomService.dataChannelCollections[peerId].DiceChannel;
+          diceChannel.OutboundEvents.sendMessage(envelope);
         }
       },
     });
@@ -73,69 +69,54 @@ export class MessagingService {
 
   public sendTurnFinishedMessage(): void {
     this.myPeerId.pipe(take(1)).subscribe((peerId: string) => {
-      for (const peerId of Object.keys(this.signalingService.peerConnections)) {
-        const profileChannel = this.signalingService.dataChannels[peerId].ProfileChannel;
-        this.sendMessage<DiceRollMessage>(
-          {
-            peerId: peerId,
-            timestamp: Date.now(),
-            message: {
-              isTurnFinished: true,
-              diceRoll: -1,
-            },
-          },
-          profileChannel as RTCDataChannel
-        );
+      const envelope = {
+        peerId: peerId,
+        timestamp: Date.now(),
+        message: {
+          isTurnFinished: true,
+          diceRoll: -1,
+        },
+      };
+      for (const peerId of Object.keys(this.roomService.peerConnections)) {
+        const diceChannel = this.roomService.dataChannelCollections[peerId].DiceChannel;
+        diceChannel.OutboundEvents.sendMessage(envelope);
       }
     });
   }
 
-  private sendMessage<T>(envelope: Envelope<T>, dataChannel: RTCDataChannel): void {
-    if (dataChannel && dataChannel.readyState === 'open') {
-      dataChannel.send(JSON.stringify(envelope));
-    }
-  }
-
   private setupDiceChannelEventsSubscriptions(
-    diceChannelEvents: DataChannelEvents<DiceRollMessage>
+    diceChannelEvents: DataChannelEventsTraffic<DiceRollMessage>
   ) {
-    const peerId = diceChannelEvents.peerId;
-    const diceChannel = this.signalingService.dataChannels[peerId].DiceChannel;
-    diceChannelEvents.onOpen.subscribe({
+    diceChannelEvents.InboundEvents.onOpen.subscribe({
       next: (event: Event) => {
         console.log('Dice channel open', event);
-      },
-    });
-
-    diceChannelEvents.onMessage.subscribe({
-      next: (event: MessageEvent) => {
-        if (event.data.sender !== this.myPeerId) {
-          const envelope: Envelope<DiceRollMessage> = JSON.parse(event.data);
-          console.log('Dice channel message:', event.data);
-        }
+        this.sendDiceRollMessage(this.appServiceStore.lastSentRoll);
       },
     });
   }
 
   private setupProfileChannelEventsSubscriptions(
-    profileChannelEvents: DataChannelEvents<ProfileUpdateMessage>
+    peerId: string,
+    profileChannelEvents: DataChannelEventsTraffic<ProfileUpdateMessage>
   ) {
-    const peerId = profileChannelEvents.peerId;
-    const profileChannel = this.signalingService.dataChannels[peerId].ProfileChannel;
-    if (profileChannel) {
-      profileChannelEvents.onOpen.subscribe((event: Event) => {
-        console.log('Profile channel open');
-        this.sendProfileUpdate(profileChannel);
-      });
-    }
-    profileChannelEvents.onMessage.subscribe((event: MessageEvent) => {
-      if (event.data.sender !== this.myPeerId) {
-        this._profileMessageStream.next(JSON.parse(event.data));
-      }
+    profileChannelEvents.InboundEvents.onOpen.subscribe((event: Event) => {
+      console.log('Profile channel open');
+
+      this.sendProfileUpdateToChannel(profileChannelEvents.OutboundEvents);
     });
   }
 
-  private sendProfileUpdate(profileChannel: RTCDataChannel): void {
+  public sendProfileUpdateToAllChannels() {
+    Object.keys(this.roomService.dataChannelCollections).forEach((peerId) => {
+      const profileChannel =
+        this.roomService.dataChannelCollections[peerId].ProfileChannel.OutboundEvents;
+      this.sendProfileUpdateToChannel(profileChannel);
+    });
+  }
+
+  private sendProfileUpdateToChannel<T>(
+    profileChannel: DataChannelOutboundEvents<ProfileUpdateMessage>
+  ): void {
     this.myPeerId.pipe(take(1)).subscribe({
       next: (peerId: string) => {
         const introduction: Envelope<ProfileUpdateMessage> = {
@@ -143,9 +124,10 @@ export class MessagingService {
           timestamp: Date.now(),
           message: {
             displayName: this.displayName,
+            playerCharacterName: this.playerCharacter?.CharacterName,
           },
         };
-        profileChannel.send(JSON.stringify(introduction));
+        profileChannel.sendMessage(introduction);
       },
     });
   }
