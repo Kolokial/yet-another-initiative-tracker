@@ -7,6 +7,7 @@ import { debounceTime } from 'rxjs';
 import { User } from '@shared-types/User';
 import { AppServiceStore } from 'src/app/app.service.store';
 import { RoomService } from '../room/room.service';
+import { MessagingService } from 'src/app/shared-services/messaging.service';
 
 @Component({
   selector: 'account',
@@ -21,7 +22,8 @@ export class AccountComponent {
   constructor(
     private user: UserApiService,
     private appServiceStore: AppServiceStore,
-    private room: RoomService
+    private room: RoomService,
+    private messagingService: MessagingService
   ) {}
 
   ngOnInit() {
@@ -31,7 +33,7 @@ export class AccountComponent {
         this.user.updateUserDisplayName(displayName);
         this.appServiceStore.displayName.next(displayName);
         if (this.room.roomId && this.room.myPeerId) {
-          //this.sendProfileUpdate()
+          this.messagingService.sendProfileUpdateToAllChannels();
         }
       });
     this.readUser();
