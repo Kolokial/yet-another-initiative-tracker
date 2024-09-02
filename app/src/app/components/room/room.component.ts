@@ -10,11 +10,18 @@ import { AuthService } from '@auth0/auth0-angular';
 import { HasTitle } from '../../types/title';
 import { AppServiceStore } from 'src/app/app.service.store';
 import { RoomData } from 'src/app/types/roomInfo';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 @Component({
   selector: 'room',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatInputModule, MatButtonModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSlideToggleModule,
+  ],
   templateUrl: './room.component.html',
   styleUrl: './room.component.scss',
 })
