@@ -28,6 +28,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AppServiceStore } from './app.service.store';
+import { LoginComponent } from './components/login/login.component';
 
 //const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
 const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
@@ -41,6 +42,7 @@ const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
     SocketIoModule.forRoot(config),
     MatTabsModule,
     InitiativeTrackerComponent,
+    LoginComponent,
     MatButtonModule,
     MatDividerModule,
     MatIconModule,

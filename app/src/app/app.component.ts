@@ -43,7 +43,7 @@ export class AppComponent {
     private characterService: CharacterManagerApiService,
 
     private messagingService: MessagingService,
-    private auth0: AuthService,
+    public auth0: AuthService,
     private appServiceStore: AppServiceStore,
     private qrScanner: QrScannerService,
     ref: ChangeDetectorRef,
@@ -66,6 +66,7 @@ export class AppComponent {
   }
 
   ngOnInit() {
+    this.determineAuthenticationStatus();
     this.getUserDisplayNameOnStartup();
     this.getSelectedCharacterOnStartup();
   }
@@ -119,5 +120,21 @@ export class AppComponent {
           this.appServiceStore.selectedCharacter.next(x[0]);
         }
       });
+  }
+
+  private determineAuthenticationStatus(): void {
+    this.auth0.idTokenClaims$.subscribe({
+      next: (idToken) => {
+        console.log(idToken);
+        if (idToken) {
+          const userDisplayName: string = idToken.name
+            ? idToken.name
+            : (idToken.nickname as string);
+          this.userApi.createUser(idToken['sub'], userDisplayName);
+
+          this.userApi.getUser();
+        }
+      },
+    });
   }
 }

@@ -75,7 +75,7 @@
             aria-label="Character Manager"
             fontIcon="groups"
           ></mat-icon>
-          <span>Character Manager</span>
+          <span class="nav-label">Character Manager</span>
         </a>
         <a
           mat-list-item
@@ -88,8 +88,28 @@
             aria-label="Initiative Order"
             fontIcon="table_chart"
           ></mat-icon>
-          <span>Initative Order</span>
+          <span class="nav-label">Initative Order</span>
         </a>
+        @if (auth0.isAuthenticated$ | async) {
+          <a
+            mat-list-item
+            (click)="
+              auth0.logout({ logoutParams: { returnTo: 'http://localhost:4200/' } })
+            "
+          >
+            <mat-icon
+              aria-hidden="false"
+              aria-label="Log Out"
+              fontIcon="logout"
+            ></mat-icon>
+            <span class="nav-label">Log Out</span>
+          </a>
+        } @else {
+          <a mat-list-item (click)="auth0.loginWithRedirect()">
+            <mat-icon aria-hidden="false" aria-label="Login" fontIcon="login"></mat-icon>
+            <span class="nav-label">Login</span>
+          </a>
+        }
       </mat-nav-list>
     </mat-sidenav>
 
