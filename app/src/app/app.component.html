@@ -25,19 +25,7 @@
           ></mat-icon>
           <span class="nav-label">Account</span>
         </a>
-        <a
-          mat-list-item
-          [routerLink]="roomUrl"
-          routerLinkActive="active"
-          (click)="activeLink = roomUrl"
-        >
-          <mat-icon
-            aria-hidden="false"
-            aria-label="Room Manager"
-            fontIcon="room_preferences"
-          ></mat-icon>
-          <span class="nav-label">Room Manager</span>
-        </a>
+
         <a
           mat-list-item
           routerLink="/init/"
@@ -50,19 +38,6 @@
             fontIcon="casino"
           ></mat-icon>
           <span class="nav-label">Initiative Tracker</span>
-        </a>
-        <a
-          mat-list-item
-          routerLink="/order/"
-          routerLinkActive="active"
-          (click)="activeLink = '/order'"
-        >
-          <mat-icon
-            aria-hidden="false"
-            aria-label="Initiative Order"
-            fontIcon="table_chart"
-          ></mat-icon>
-          <span class="nav-label">Initative Order</span>
         </a>
         <a
           mat-list-item
