@@ -10,6 +10,7 @@ import { AuthService } from '@auth0/auth0-angular';
 import { User } from '@shared-types/User';
 import { AppServiceStore } from './app.service.store';
 import { CharacterManagerApiService } from './components/character-manager/character-manager.service';
+import { environment } from 'src/environments/environment';
 
 //const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
 const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
@@ -69,6 +70,10 @@ export class AppComponent {
     this.determineAuthenticationStatus();
     this.getUserDisplayNameOnStartup();
     this.getSelectedCharacterOnStartup();
+  }
+
+  logout() {
+    this.auth0.logout({ logoutParams: { returnTo: ` ${environment.hostname}` } });
   }
 
   // onActivate(

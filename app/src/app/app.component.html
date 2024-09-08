@@ -91,12 +91,7 @@
           <span class="nav-label">Initative Order</span>
         </a>
         @if (auth0.isAuthenticated$ | async) {
-          <a
-            mat-list-item
-            (click)="
-              auth0.logout({ logoutParams: { returnTo: 'http://localhost:4200/' } })
-            "
-          >
+          <a mat-list-item (click)="logout()">
             <mat-icon
               aria-hidden="false"
               aria-label="Log Out"
