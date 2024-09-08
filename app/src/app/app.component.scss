@@ -9,9 +9,11 @@
   justify-content: flex-start;
   align-items: center;
 
-  .nav-label {
-    margin: auto;
-  }
+}
+
+.nav-label {
+  border: 1px solid red;
+  margin-bottom: 10px;
 }
 
 mat-sidenav {
