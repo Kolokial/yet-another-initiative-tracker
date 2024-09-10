@@ -26,7 +26,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { DataSource } from '@angular/cdk/collections';
-import { InitiativeDetail } from 'src/app/types/InitiativeDetail';
+import { HasPeerId, InitiativeDetail } from 'src/app/types/InitiativeDetail';
 import { DataChannelInboundEvents } from 'src/app/types/dataChannels';
 
 @Component({
@@ -48,7 +48,8 @@ import { DataChannelInboundEvents } from 'src/app/types/dataChannels';
 export class InitiativeListComponent implements HasTitle {
   /* Todo: now we need to work out whose turn it is */
   public turnFinishedButtonEnabled$!: Observable<boolean>;
-  public initiatives!: InitiativeListDataSource;
+  public initiatives!: TableListDataSource<InitiativeDetail>;
+  public spectators!: TableListDataSource<HasPeerId>;
   public displayedColumns: string[] = ['displayName', 'initiativeValue'];
 
   public get roomId$(): Observable<string> {
@@ -78,7 +79,7 @@ export class InitiativeListComponent implements HasTitle {
     private ref: ChangeDetectorRef,
     private appServiceStore: AppServiceStore
   ) {
-    this.initiatives = new InitiativeListDataSource(this.ref);
+    this.initiatives = new TableListDataSource(this.ref);
   }
   readonly title: string = 'Initiative List';
 
@@ -110,7 +111,7 @@ export class InitiativeListComponent implements HasTitle {
   }
 
   private setupInitialIniativeList(peerId: string): void {
-    this.initiatives = new InitiativeListDataSource(this.ref);
+    this.initiatives = new TableListDataSource(this.ref);
     this.initiatives.setRows(this.appServiceStore.initativeList);
     const initiatives = this.initiatives.getRows();
     const index = initiatives.findIndex((init) => init.peerId === peerId);
@@ -256,13 +257,13 @@ export class InitiativeListComponent implements HasTitle {
   }
 }
 
-class InitiativeListDataSource extends DataSource<InitiativeDetail> {
+class TableListDataSource<T extends HasPeerId> extends DataSource<T> {
   constructor(private cdr: ChangeDetectorRef) {
     super();
   }
-  private _dataStream = new BehaviorSubject<InitiativeDetail[]>([]);
+  private _dataStream = new BehaviorSubject<T[]>([]);
 
-  override connect(): Observable<readonly InitiativeDetail[]> {
+  override connect(): Observable<readonly T[]> {
     return this._dataStream.asObservable();
   }
 
@@ -270,12 +271,12 @@ class InitiativeListDataSource extends DataSource<InitiativeDetail> {
     this._dataStream.complete();
   }
 
-  public setRows(initiativeDetail: InitiativeDetail[]): void {
+  public setRows(initiativeDetail: T[]): void {
     this._dataStream.next(initiativeDetail);
     this.cdr.markForCheck();
   }
 
-  public addRow(initiativeDetail: InitiativeDetail): void {
+  public addRow(initiativeDetail: T): void {
     const initiaves = this._dataStream.getValue();
     this._dataStream.next([...initiaves, initiativeDetail]);
     this.cdr.markForCheck();
@@ -289,7 +290,7 @@ class InitiativeListDataSource extends DataSource<InitiativeDetail> {
     this.cdr.markForCheck();
   }
 
-  public getRows(): InitiativeDetail[] {
+  public getRows(): T[] {
     return this._dataStream.getValue();
   }
 }

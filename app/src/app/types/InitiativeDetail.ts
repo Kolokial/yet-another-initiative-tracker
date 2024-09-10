@@ -1,8 +1,11 @@
 import { Observable } from 'rxjs';
 
-export type InitiativeDetail = {
+export interface HasPeerId {
   peerId: string;
+}
+
+export interface InitiativeDetail extends HasPeerId {
   displayName: Observable<string>;
   playerCharacterName: Observable<string>;
   initiativeValue: number;
-};
+}
