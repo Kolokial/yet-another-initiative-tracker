@@ -1,19 +1,13 @@
-<p>login works!</p>
 <ng-container *ngIf="auth.isAuthenticated$ | async; else loggedOut">
-  <ul *ngIf="auth.user$ | async as user">
-    <li>{{ user.name }}</li>
-    <li>{{ user.email }}</li>    
-    <li>{{ user.sub }}</li>
-
-    <li>{{parse(user)}}</li>
-  </ul>
-  <button
-    (click)="auth.logout({ logoutParams: { returnTo: 'http://localhost:4200/room' } })"
-  >
-    Log out
-  </button>
+  <a (click)="auth.logout({ logoutParams: { returnTo: 'http://localhost:4200/login' } })">
+    <mat-icon aria-hidden="false" aria-label="Log Out" fontIcon="logout"></mat-icon>
+    <span class="nav-label">Log Out</span>
+  </a>
 </ng-container>
 
 <ng-template #loggedOut>
-  <button (click)="auth.loginWithRedirect()">Log in</button>
+  <a (click)="auth.loginWithRedirect()">
+    <mat-icon aria-hidden="false" aria-label="Login" fontIcon="login"></mat-icon>
+    <span class="nav-label">Login</span>
+  </a>
 </ng-template>
