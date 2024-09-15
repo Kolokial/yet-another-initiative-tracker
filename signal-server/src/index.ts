@@ -5,14 +5,12 @@ import { Server, Socket } from "socket.io";
 import { ClientToServerEvents, ServerToClientEvents } from "./signals";
 import { DatabaseSetup } from "./database/DatabaseSetup.js";
 import { createServer } from "http";
-import { swaggerSpec } from "./swagger.js";
+//import { swaggerSpec } from "./swagger";
 import { setupRoutes } from "./routes.js";
-
-//const socketIo = require("socket.io");
 
 const app: Express = express();
 const database = new DatabaseSetup();
-app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
+//app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 app.use(express.json());
 app.options(
   "*",

@@ -3,7 +3,7 @@ import { User } from "@shared-types/User";
 import { PlayerCharacter } from "@shared-types/Character";
 import { auth } from "express-oauth2-jwt-bearer";
 
-const DATABASE_PATH = `${process.cwd()}/database/myTestDatabase2.db`;
+const DATABASE_PATH = `${process.cwd()}/src/database/myTestDatabase2.db`;
 
 export class DatabaseSetup {
   private databaseConnection: Database;
