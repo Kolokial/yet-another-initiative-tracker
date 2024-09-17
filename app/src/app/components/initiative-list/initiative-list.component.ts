@@ -20,6 +20,7 @@ import { MatInputModule } from '@angular/material/input';
 import { HasPeerId, InitiativeDetail } from 'src/app/types/InitiativeDetail';
 import { TableListDataSource } from '../../types/TableListDataSource';
 import { SpectatorListComponent } from '../spectator-list/spectator-list.component';
+import { DataChannelInboundEvents } from 'src/app/types/DataChannels';
 
 @Component({
   selector: 'initiative-list',
