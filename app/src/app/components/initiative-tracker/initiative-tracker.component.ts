@@ -7,7 +7,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MessagingService } from '../../shared-services/messaging.service';
 import { FormsModule } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import {
   Observable,
@@ -18,7 +17,7 @@ import {
   tap,
 } from 'rxjs';
 import { InitiativeTrackerStoreService } from './initiative-tracker.store.service';
-import { HasTitle } from '../../types/title';
+import { HasTitle } from '../../types/Title';
 import { AppServiceStore } from 'src/app/app.service.store';
 
 @Component({

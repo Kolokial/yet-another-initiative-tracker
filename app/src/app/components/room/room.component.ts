@@ -7,9 +7,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { RoomService } from './room.service';
 import { Observable } from 'rxjs';
 import { AuthService } from '@auth0/auth0-angular';
-import { HasTitle } from '../../types/title';
+import { HasTitle } from '../../types/Title';
 import { AppServiceStore } from 'src/app/app.service.store';
-import { RoomData } from 'src/app/types/roomInfo';
+import { RoomData } from 'src/app/types/RoomInfo';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 @Component({

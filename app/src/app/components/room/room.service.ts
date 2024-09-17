@@ -1,5 +1,5 @@
 /* Housekeeping! */
-import { Injectable, provideExperimentalZonelessChangeDetection } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { PEER_ID_SEPERATOR, ROOM_ID } from '../../constants';
 import {
   BehaviorSubject,
@@ -12,7 +12,9 @@ import {
 import { Socket } from 'ngx-socket-io';
 import { Location } from '@angular/common';
 import { AuthService } from '@auth0/auth0-angular';
-import { RoomData } from 'src/app/types/roomInfo';
+import { RoomData } from 'src/app/types/RoomInfo';
+
+import { Envelope, PeerId } from 'src/app/types/Messages';
 import {
   DataChannelCollection,
   DataChannelEventsTraffic,
@@ -20,13 +22,7 @@ import {
   DataChannelOutboundEvents,
   RTCDataChannelCollection,
   YAITCustomOffer,
-} from 'src/app/types/dataChannels';
-import {
-  DiceRollMessage,
-  Envelope,
-  PeerId,
-  ProfileUpdateMessage,
-} from 'src/app/types/messages';
+} from 'src/app/types/DataChannels';
 
 @Injectable({
   providedIn: 'root',

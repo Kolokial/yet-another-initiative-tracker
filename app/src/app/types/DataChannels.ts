@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { Envelope, ProfileUpdateMessage, DiceRollMessage, PeerId } from './messages';
+import { Envelope, ProfileUpdateMessage, DiceRollMessage, PeerId } from './Messages';
 
 export type DataChannelCollection = {
   PeerId: string;

@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject, take } from 'rxjs';
 import { AppServiceStore } from '../app.service.store';
-import { Envelope, DiceRollMessage, ProfileUpdateMessage } from '../types/messages';
+import { Envelope, DiceRollMessage, ProfileUpdateMessage } from '../types/Messages';
 import { RoomService } from '../components/room/room.service';
 import {
   DataChannelEventsTraffic,
   DataChannelInboundEvents,
   DataChannelOutboundEvents,
-} from '../types/dataChannels';
+} from '../types/DataChannels';
 import { PlayerCharacter } from '@shared-types/api/PlayerCharacter';
 
 @Injectable({

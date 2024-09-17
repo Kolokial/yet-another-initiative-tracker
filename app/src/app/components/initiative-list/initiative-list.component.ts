@@ -2,32 +2,24 @@ import { ChangeDetectorRef, Component } from '@angular/core';
 import { MessagingService } from '../../shared-services/messaging.service';
 import { AsyncPipe, CommonModule, NgFor } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
-import {
-  BehaviorSubject,
-  Observable,
-  Subscription,
-  combineLatestWith,
-  map,
-  of,
-  tap,
-} from 'rxjs';
-import { HasTitle } from '../../types/title';
+import { Observable, Subscription, combineLatestWith, map, of, tap } from 'rxjs';
+import { HasTitle } from '../../types/Title';
 import { AppServiceStore } from 'src/app/app.service.store';
 import {
   Envelope,
   DiceRollMessage,
   ProfileUpdateMessage,
   PeerId,
-} from 'src/app/types/messages';
+} from 'src/app/types/Messages';
 import { RoomComponent } from '../room/room.component';
-import { RoomData } from 'src/app/types/roomInfo';
+import { RoomData } from 'src/app/types/RoomInfo';
 import { RoomService } from '../room/room.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
-import { DataSource } from '@angular/cdk/collections';
 import { HasPeerId, InitiativeDetail } from 'src/app/types/InitiativeDetail';
-import { DataChannelInboundEvents } from 'src/app/types/dataChannels';
+import { TableListDataSource } from '../../types/TableListDataSource';
+import { SpectatorListComponent } from '../spectator-list/spectator-list.component';
 
 @Component({
   selector: 'initiative-list',
@@ -41,6 +33,7 @@ import { DataChannelInboundEvents } from 'src/app/types/dataChannels';
     MatIconModule,
     MatButtonModule,
     MatInputModule,
+    SpectatorListComponent,
   ],
   templateUrl: './initiative-list.component.html',
   styleUrl: './initiative-list.component.scss',
@@ -49,7 +42,6 @@ export class InitiativeListComponent implements HasTitle {
   /* Todo: now we need to work out whose turn it is */
   public turnFinishedButtonEnabled$!: Observable<boolean>;
   public initiatives!: TableListDataSource<InitiativeDetail>;
-  public spectators!: TableListDataSource<HasPeerId>;
   public displayedColumns: string[] = ['displayName', 'initiativeValue'];
 
   public get roomId$(): Observable<string> {
@@ -254,43 +246,5 @@ export class InitiativeListComponent implements HasTitle {
         this.initiatives.deleteRow(peerId);
       },
     });
-  }
-}
-
-class TableListDataSource<T extends HasPeerId> extends DataSource<T> {
-  constructor(private cdr: ChangeDetectorRef) {
-    super();
-  }
-  private _dataStream = new BehaviorSubject<T[]>([]);
-
-  override connect(): Observable<readonly T[]> {
-    return this._dataStream.asObservable();
-  }
-
-  override disconnect(): void {
-    this._dataStream.complete();
-  }
-
-  public setRows(initiativeDetail: T[]): void {
-    this._dataStream.next(initiativeDetail);
-    this.cdr.markForCheck();
-  }
-
-  public addRow(initiativeDetail: T): void {
-    const initiaves = this._dataStream.getValue();
-    this._dataStream.next([...initiaves, initiativeDetail]);
-    this.cdr.markForCheck();
-  }
-
-  public deleteRow(peerId: string): void {
-    const initiatives = this._dataStream.getValue();
-    this._dataStream.next(
-      initiatives.filter((initDetail) => initDetail.peerId !== peerId)
-    );
-    this.cdr.markForCheck();
-  }
-
-  public getRows(): T[] {
-    return this._dataStream.getValue();
   }
 }
