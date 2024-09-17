@@ -217,6 +217,10 @@ export class InitiativeListComponent implements HasTitle {
   ): void {
     this.profileMessagingSubscriptions[peerId] = profileChannel.onMessage.subscribe(
       (profileMessage: Envelope<ProfileUpdateMessage>) => {
+        if (profileMessage.message.isSpectator) {
+          this.handleSpectator();
+        }
+
         const initiatives = this.initiatives.getRows();
         const initItem = initiatives.find((x) => x.peerId === profileMessage.peerId);
         if (initItem && initItem.peerId == profileMessage.peerId) {
@@ -237,6 +241,8 @@ export class InitiativeListComponent implements HasTitle {
       }
     );
   }
+
+  private handleSpectator() {}
 
   private setupDataChannelOnClosingSubscription(
     onClose$: Observable<PeerId>,
