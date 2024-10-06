@@ -10,31 +10,36 @@ namespace YetAnotherInitiativeTrackerAPI.Controllers;
 public class UserController : ControllerBase
 {
     private readonly ILogger<UserController> _logger;
-    public UserController(ILogger<UserController> logger)
+    private readonly UserService _userService;
+    public UserController(ILogger<UserController> logger, UserService userService)
     {
         _logger = logger;
+        _userService = userService;
     }
 
-    [HttpGet(Name = "GetUser")]
-    public void Get(string user)
+    [HttpGet]
+    public async Task<IActionResult> Get()
     {
+        var auth0Id = User.FindFirst("sub")?.Value;
+        Console.Write(auth0Id);
 
-        using (var connection = new SqliteConnection("Data Source=../../signal-server/src/database/myTestDatabase2.db"))
+        if (auth0Id == null)
         {
-            connection.Open();
-
-            var command = connection.CreateCommand();
-
-            command.CommandText = @"SELECT * FROM User";
-
-            using (var reader = command.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    var name = reader.GetString(0);
-                    Console.WriteLine($"{name}");
-                }
-            }
+            return Unauthorized();
         }
+
+        return Ok(await _userService.GetUser(auth0Id));
+    }
+
+    [HttpPost]
+    public IActionResult Post()
+    {
+        return Ok();
+    }
+
+    [HttpPatch]
+    public IActionResult Patch()
+    {
+        return Ok();
     }
 }
