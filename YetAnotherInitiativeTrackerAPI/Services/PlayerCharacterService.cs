@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 public class PlayerCharacterService
@@ -9,16 +11,15 @@ public class PlayerCharacterService
         _dbContext = dbContext;
     }
 
-    public List<PlayerCharacter> GetAllPlayerCharacters(string auth0Id)
+    public List<PlayerCharacter> ReadAllPlayerCharacters(string auth0Id)
     {
         var user = GetUser(auth0Id);
 
-        return _dbContext.PlayerCharacter.ToList().FindAll(c => c.UserId == user.UserId);
+        return _dbContext.PlayerCharacter.Where(c => c.UserId == user.UserId && c.DexterityMod != null).ToList();
     }
 
-    public int AddPlayerCharacter(string auth0Id, string CharacterName, int DexterityMod, bool? LuckStone, bool? AlertFeat, bool? IsDeleted)
+    public int CreatePlayerCharacter(string auth0Id, string CharacterName, int DexterityMod, bool LuckStone, bool AlertFeat, bool IsDeleted, bool IsInPlay)
     {
-
         var user = GetUser(auth0Id);
         var playerCharacter = new PlayerCharacter
         {
@@ -27,7 +28,8 @@ public class PlayerCharacterService
             CharacterName = CharacterName,
             DexterityMod = DexterityMod,
             IsDeleted = IsDeleted,
-            LuckStone = LuckStone
+            LuckStone = LuckStone,
+            IsInPlay = IsInPlay,
         };
 
         _dbContext.PlayerCharacter.Add(playerCharacter);
@@ -35,11 +37,32 @@ public class PlayerCharacterService
         return playerCharacter.PlayerCharacterId;
     }
 
-    public PlayerCharacter GetPlayerCharacter(string auth0Id, int playerCharacterId)
+    public async Task<PlayerCharacter> UpdatePlayerCharacter(string auth0Id, int playerCharacterId, string CharacterName, int DexterityMod, bool LuckStone, bool AlertFeat, bool IsDeleted, bool IsInPlay)
+    {
+
+        var playerCharacter = await ReadPlayerCharacter(auth0Id, playerCharacterId);
+
+        if (playerCharacter == null)
+        {
+            throw new Exception($"Unable to find player character with Id: {playerCharacterId}");
+        }
+
+        playerCharacter.CharacterName = CharacterName;
+        playerCharacter.DexterityMod = DexterityMod;
+        playerCharacter.AlertFeat = AlertFeat;
+        playerCharacter.LuckStone = LuckStone;
+        playerCharacter.IsInPlay = IsInPlay;
+        playerCharacter.IsDeleted = IsDeleted;
+        await _dbContext.SaveChangesAsync();
+        return playerCharacter;
+
+    }
+
+    public Task<PlayerCharacter> ReadPlayerCharacter(string auth0Id, int playerCharacterId)
     {
         var user = GetUser(auth0Id);
 
-        return _dbContext.PlayerCharacter.ToList().Find(playerCharacter => playerCharacter.PlayerCharacterId == playerCharacterId && playerCharacter.UserId == user.UserId);
+        return _dbContext.PlayerCharacter.Where(playerCharacter => playerCharacter.PlayerCharacterId == playerCharacterId && playerCharacter.UserId == user.UserId).FirstOrDefaultAsync();
     }
 
     private User? GetUser(string auth0Id)

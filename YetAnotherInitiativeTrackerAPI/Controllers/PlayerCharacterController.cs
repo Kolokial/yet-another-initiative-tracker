@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
@@ -17,9 +18,29 @@ public class PlayerCharacterController : ControllerBase
         _playerCharacterService = playerCharacterService;
     }
 
+
+    [HttpPost]
+    [Route("user/character")]
+    public CreateCharacterResponse CreateCharacter([FromBody] PlayerCharacter playerCharacter)
+    {
+        var auth0Id = User.FindFirst("sub")?.Value;
+        var id = _playerCharacterService.CreatePlayerCharacter(auth0Id,
+        playerCharacter.CharacterName,
+        playerCharacter.DexterityMod,
+        playerCharacter.LuckStone,
+        playerCharacter.AlertFeat,
+        playerCharacter.IsDeleted,
+        playerCharacter.IsInPlay);
+
+        return new CreateCharacterResponse
+        {
+            PlayerCharacterId = id
+        };
+    }
+
     [HttpGet]
     [Route("user/characters")]
-    public IActionResult GetCharacters()
+    public IActionResult ReadCharacters()
     {
 
         var auth0Id = User.FindFirst("sub")?.Value;
@@ -30,12 +51,12 @@ public class PlayerCharacterController : ControllerBase
             return Unauthorized("Missing sub.");
         }
 
-        return Ok(_playerCharacterService.GetAllPlayerCharacters(auth0Id));
+        return Ok(_playerCharacterService.ReadAllPlayerCharacters(auth0Id));
     }
 
     [HttpGet]
     [Route("user/character/{playerCharacterId}")]
-    public IActionResult GetCharacter(int playerCharacterId)
+    public IActionResult ReadCharacter(int playerCharacterId)
     {
         var auth0Id = User.FindFirst("sub")?.Value;
         Console.Write(auth0Id);
@@ -45,7 +66,7 @@ public class PlayerCharacterController : ControllerBase
             return Unauthorized("Missing sub.");
         }
 
-        var playerCharacter = _playerCharacterService.GetPlayerCharacter(auth0Id, playerCharacterId);
+        var playerCharacter = _playerCharacterService.ReadPlayerCharacter(auth0Id, playerCharacterId);
 
         if (playerCharacter == null)
         {
@@ -55,17 +76,25 @@ public class PlayerCharacterController : ControllerBase
         return Ok(playerCharacter);
     }
 
-    [HttpPost]
-    [Route("user/character")]
-    public int PostCharacter([FromBody] PlayerCharacter playerCharacter)
+    [HttpPatch]
+    [Route("user/character/{playerCharacterId}")]
+    public Task<PlayerCharacter> UpdateCharacter([FromBody] PlayerCharacter playerCharacter, int playerCharacterId)
     {
         var auth0Id = User.FindFirst("sub")?.Value;
-        return _playerCharacterService.AddPlayerCharacter(auth0Id,
-        playerCharacter.CharacterName,
-        playerCharacter.DexterityMod,
-        playerCharacter?.LuckStone,
-        playerCharacter.AlertFeat,
-        playerCharacter.IsDeleted);
+        return _playerCharacterService.UpdatePlayerCharacter(auth0Id,
+            playerCharacter.PlayerCharacterId,
+            playerCharacter.CharacterName,
+            playerCharacter.DexterityMod,
+            playerCharacter.LuckStone,
+            playerCharacter.AlertFeat,
+            playerCharacter.IsDeleted,
+            playerCharacter.IsInPlay);
+    }
+
+    [HttpDelete]
+    [Route("user/character/{playerCharacterId}")]
+    public void DeleteCharacter(int playerCharacterId)
+    {
 
     }
 }

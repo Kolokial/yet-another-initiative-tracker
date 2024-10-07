@@ -5,7 +5,7 @@ using Microsoft.Data.Sqlite;
 namespace YetAnotherInitiativeTrackerAPI.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/user")]
 [Authorize]
 public class UserController : ControllerBase
 {

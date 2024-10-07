@@ -4,11 +4,11 @@ CREATE TABLE IF NOT EXISTS User(
   DisplayName TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS PlayerCharacter(
+CREATE TABLE IF NOT EXISTS PlayerCharacter2(
     PlayerCharacterId INTEGER PRIMARY KEY,
-    UserId TEXT NOT NULL,
+    UserId INT NOT NULL,
     CharacterName TEXT NOT NULL,
-    DexterityMod INTEGER NULL,
+    DexterityMod INTEGER DEFAULT 0,
     LuckStone INTEGER DEFAULT 0, -- Bool, defaults to false
     AlertFeat INTEGER DEFAULT 0, -- Bool, defaults to false
     IsInPlay INTEGER DEFAULT 0, -- Bool, defaults to false
