@@ -1,5 +1,5 @@
 export interface CreateUserRequest {
-  DisplayName: string;
+  displayName: string;
 }
 
 export interface CreateUserResponse {}
@@ -7,11 +7,11 @@ export interface CreateUserResponse {}
 export interface ReadUserRequest {}
 
 export interface ReadUserResponse {
-  DisplayName: string;
+  displayName: string;
 }
 
 export interface UpdateUserRequest {
-  DisplayName: string;
+  displayName: string;
 }
 
 export interface UpdateUserResponse {}

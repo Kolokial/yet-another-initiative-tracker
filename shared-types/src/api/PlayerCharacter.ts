@@ -1,24 +1,24 @@
 export interface PlayerCharacter {
-  PlayerCharacterId: number;
-  CharacterName: string;
-  AlertFeat: boolean;
-  LuckStone: boolean;
-  DexterityModifier: number;
+  playerCharacterId: number;
+  characterName: string;
+  alertFeat: boolean;
+  luckStone: boolean;
+  dexterityMod: number;
 }
 
 export interface CreatePlayerCharacterRequest {
-  CharacterName: string;
-  AlertFeat: boolean;
-  LuckStone: boolean;
-  DexterityMod: number;
+  characterName: string;
+  alertFeat: boolean;
+  luckStone: boolean;
+  dexterityMod: number;
 }
 
 export interface CreatePlayerCharacterResponse {
-  PlayerCharacterId: number;
+  playerCharacterId: number;
 }
 
 export interface ReadPlayerCharacterRequest {
-  PlayerCharacterId: number;
+  playerCharacterId: number;
 }
 
 export interface ReadPlayerCharacterResponse extends PlayerCharacter {}
@@ -28,13 +28,13 @@ export interface ReadPlayerCharactersRequest {}
 export type ReadPlayerCharactersResponse = PlayerCharacter[];
 
 export interface UpdatePlayerCharacterRequest {
-  PlayerCharacterId: number;
-  CharacterName: string;
-  AlertFeat: boolean;
-  LuckStone: boolean;
-  DexterityModifier: number;
+  playerCharacterId: number;
+  characterName: string;
+  alertFeat: boolean;
+  luckStone: boolean;
+  dexterityModifier: number;
 }
 
 export interface DeletePlayerCharacterRequest {
-  PlayerCharacterId: number;
+  playerCharacterId: number;
 }

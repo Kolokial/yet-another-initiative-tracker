@@ -124,7 +124,8 @@ export class MessagingService {
           timestamp: Date.now(),
           message: {
             displayName: this.displayName,
-            playerCharacterName: this.playerCharacter?.CharacterName,
+            playerCharacterName: this.playerCharacter?.characterName,
+            isSpectator: false,
           },
         };
         profileChannel.sendMessage(introduction);

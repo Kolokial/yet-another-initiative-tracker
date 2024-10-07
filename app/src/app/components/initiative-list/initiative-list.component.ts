@@ -43,6 +43,7 @@ export class InitiativeListComponent implements HasTitle {
   /* Todo: now we need to work out whose turn it is */
   public turnFinishedButtonEnabled$!: Observable<boolean>;
   public initiatives!: TableListDataSource<InitiativeDetail>;
+  public spectators!: TableListDataSource<InitiativeDetail>;
   public displayedColumns: string[] = ['displayName', 'initiativeValue'];
 
   public get roomId$(): Observable<string> {
@@ -120,7 +121,7 @@ export class InitiativeListComponent implements HasTitle {
           tap((x) => {
             console.log('oof', x);
           }),
-          map((x) => x!.CharacterName as string)
+          map((x) => x!.characterName as string)
         ),
       });
     } else {
@@ -173,7 +174,7 @@ export class InitiativeListComponent implements HasTitle {
         displayName: this.appServiceStore.displayName,
         initiativeValue: 0,
         playerCharacterName: this.appServiceStore.selectedCharacter.pipe(
-          map((x) => x!.CharacterName)
+          map((x) => x!.characterName)
         ),
       });
       return initiatives[initiatives.length - 1];
@@ -199,7 +200,7 @@ export class InitiativeListComponent implements HasTitle {
           envelope.message.diceRoll === 0
             ? detail.initiativeValue
             : envelope.message.diceRoll;
-        if (envelope.isTurnFinished) {
+        if (envelope.message.isTurnFinished) {
           const currentPlayersTurn = initiatives.splice(0, 1);
           this.initiatives.addRow(currentPlayersTurn[0]);
         } else {

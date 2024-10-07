@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AuthService, User as AuthUser } from '@auth0/auth0-angular';
 import { Observable, mergeMap, tap } from 'rxjs';
-import { User } from '@shared-types/User';
+import { ReadUserResponse } from '@shared-types/api/User';
 import { BaseApi } from './BaseApi';
 
 @Injectable({
@@ -43,7 +43,7 @@ export class UserApiService extends BaseApi {
       });
   }
 
-  public getUser(): Observable<User> {
-    return this.getRequest<User>(`/api/user`);
+  public getUser(): Observable<ReadUserResponse> {
+    return this.getRequest<ReadUserResponse>(`/api/user`);
   }
 }

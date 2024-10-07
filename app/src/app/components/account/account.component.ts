@@ -8,6 +8,7 @@ import { User } from '@shared-types/User';
 import { AppServiceStore } from 'src/app/app.service.store';
 import { RoomService } from '../room/room.service';
 import { MessagingService } from 'src/app/shared-services/messaging.service';
+import { ReadUserResponse } from '@shared-types/api/User';
 
 @Component({
   selector: 'account',
@@ -40,9 +41,9 @@ export class AccountComponent {
   }
 
   private readUser() {
-    this.user.getUser().subscribe((user: User) => {
-      if (user && user.DisplayName) {
-        this.userDisplayName.setValue(user.DisplayName);
+    this.user.getUser().subscribe((user: ReadUserResponse) => {
+      if (user && user.displayName) {
+        this.userDisplayName.setValue(user.displayName);
       }
     });
   }

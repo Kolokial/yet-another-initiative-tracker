@@ -80,11 +80,11 @@ export class CharacterManagerComponent {
 
   addCharacterForm() {
     const newCharacter = new CharacterListItem({
-      PlayerCharacterId: 0,
-      CharacterName: '',
-      DexterityModifier: 0,
-      AlertFeat: false,
-      LuckStone: false,
+      playerCharacterId: 0,
+      characterName: '',
+      dexterityMod: 0,
+      alertFeat: false,
+      luckStone: false,
     });
     this.characterForm = [newCharacter, ...this.characterForm];
     this.expandedElement = newCharacter;
@@ -100,7 +100,7 @@ export class CharacterManagerComponent {
         character.dexterityModifier
       )
       .subscribe((createCharacterResponse) => {
-        character.characterId = createCharacterResponse.PlayerCharacterId;
+        character.characterId = createCharacterResponse.playerCharacterId;
         character.isUpdating = false;
         this.characterForm = [...this.characterForm];
       });
@@ -126,11 +126,11 @@ export class CharacterManagerComponent {
       return;
     }
     this.appServiceStore.selectedCharacter.next({
-      PlayerCharacterId: row.characterId as number,
-      AlertFeat: row.hasAlertFeat,
-      CharacterName: row.characterName,
-      DexterityModifier: row.dexterityModifier,
-      LuckStone: row.hasLuckStone,
+      playerCharacterId: row.characterId as number,
+      alertFeat: row.hasAlertFeat,
+      characterName: row.characterName,
+      dexterityMod: row.dexterityModifier,
+      luckStone: row.hasLuckStone,
     });
   }
 
@@ -139,8 +139,8 @@ export class CharacterManagerComponent {
   private setupCharacterList(): void {
     this.characterService.readCharacters().subscribe((readCharacterResponse) => {
       readCharacterResponse.reverse().forEach((x) => {
-        const characterGroup = new CharacterListItem(x, x.PlayerCharacterId);
-        this.setCharacterGroupStatusChange(characterGroup, x.PlayerCharacterId);
+        const characterGroup = new CharacterListItem(x, x.playerCharacterId);
+        this.setCharacterGroupStatusChange(characterGroup, x.playerCharacterId);
         this.characterForm.push(characterGroup);
       });
       this.characterForm = [...this.characterForm];

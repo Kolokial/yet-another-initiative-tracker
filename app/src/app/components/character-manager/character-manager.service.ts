@@ -29,10 +29,10 @@ export class CharacterManagerApiService extends BaseApi {
     return this.postRequest<CreatePlayerCharacterRequest, CreatePlayerCharacterResponse>(
       `/api/user/character`,
       {
-        CharacterName: name,
-        AlertFeat: HasAlertFeat,
-        LuckStone: HasLuckStone,
-        DexterityMod: dexMod,
+        characterName: name,
+        alertFeat: HasAlertFeat,
+        luckStone: HasLuckStone,
+        dexterityMod: dexMod,
       }
     );
   }
@@ -57,11 +57,11 @@ export class CharacterManagerApiService extends BaseApi {
     return this.patchRequest<UpdatePlayerCharacterRequest, ReadPlayerCharacterResponse>(
       `/api/user/character/${characterId}`,
       {
-        PlayerCharacterId: characterId,
-        CharacterName: name,
-        AlertFeat: hasAlertFeat,
-        LuckStone: hasLuckStone,
-        DexterityModifier: dexMod,
+        playerCharacterId: characterId,
+        characterName: name,
+        alertFeat: hasAlertFeat,
+        luckStone: hasLuckStone,
+        dexterityModifier: dexMod,
       }
     );
   }

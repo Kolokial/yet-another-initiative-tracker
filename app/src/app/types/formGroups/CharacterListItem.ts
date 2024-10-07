@@ -27,11 +27,11 @@ export class CharacterListItem {
     public characterId?: number
   ) {
     this.formGroup = new FormGroup<CharacterFormGroup>({
-      PlayerCharacterId: new FormControl<number>(character.PlayerCharacterId),
-      CharacterName: new FormControl<string>(character.CharacterName),
-      DexterityModifier: new FormControl<number>(character.DexterityModifier),
-      HasAlertFeat: new FormControl<boolean>(character.AlertFeat),
-      HasLuckStone: new FormControl<boolean>(character.LuckStone),
+      PlayerCharacterId: new FormControl<number>(character.playerCharacterId),
+      CharacterName: new FormControl<string>(character.characterName),
+      DexterityModifier: new FormControl<number>(character.dexterityMod),
+      HasAlertFeat: new FormControl<boolean>(character.alertFeat),
+      HasLuckStone: new FormControl<boolean>(character.luckStone),
     });
   }
 }
