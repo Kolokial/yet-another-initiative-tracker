@@ -11,6 +11,7 @@ import { User } from '@shared-types/User';
 import { AppServiceStore } from './app.service.store';
 import { CharacterManagerApiService } from './components/character-manager/character-manager.service';
 import { environment } from 'src/environments/environment';
+import { ReadUserResponse } from '@shared-types/api/User';
 
 //const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
 const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
@@ -97,9 +98,9 @@ export class AppComponent {
           }
           return of('');
         }),
-        map((value: string | User) => {
-          return (value as User)?.DisplayName
-            ? ((value as User).DisplayName as string)
+        map((value: string | ReadUserResponse) => {
+          return (value as ReadUserResponse)?.displayName
+            ? ((value as ReadUserResponse).displayName as string)
             : (value as string);
         })
       )

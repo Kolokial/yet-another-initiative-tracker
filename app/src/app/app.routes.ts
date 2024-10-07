@@ -32,18 +32,6 @@ export const routes: Routes = [
     canActivate: [canActivateUserGuard],
   },
   {
-    title: 'Room Manager',
-    path: 'room/:roomId',
-    component: RoomComponent,
-    canActivate: [canActivateUserGuard],
-  },
-  {
-    title: 'Room Manager',
-    path: 'room',
-    component: RoomComponent,
-    canActivate: [canActivateUserGuard],
-  },
-  {
     title: 'Initiative Order',
     path: 'order',
     component: InitiativeListComponent,

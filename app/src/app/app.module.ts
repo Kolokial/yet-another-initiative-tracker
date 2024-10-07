@@ -22,7 +22,6 @@ import {
 import { RoomComponent } from './components/room/room.component';
 import { routes } from './app.routes';
 import { RoomService } from './components/room/room.service';
-import { AuthButtonComponent } from './components/auth0/auth0.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -50,7 +49,6 @@ const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
     RouterLink,
     RouterLinkActive,
     RoomComponent,
-    AuthButtonComponent,
     MatToolbarModule,
     MatSidenavModule,
     MatListModule,
