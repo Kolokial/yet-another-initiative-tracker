@@ -1,16 +1,10 @@
 import express, { Express } from "express";
 import cors from "cors";
-import swaggerUI from "swagger-ui-express";
 import { Server, Socket } from "socket.io";
 import { ClientToServerEvents, ServerToClientEvents } from "./signals";
-import { DatabaseSetup } from "./database/DatabaseSetup.js";
 import { createServer } from "http";
-//import { swaggerSpec } from "./swagger";
-import { setupRoutes } from "./routes.js";
 
 const app: Express = express();
-const database = new DatabaseSetup();
-//app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 app.use(express.json());
 app.options(
   "*",
@@ -95,11 +89,6 @@ function removePeerFromRooms(peerId: string) {
 }
 
 const SOCKET_IO_PORT = process.env.PORT || 3000;
-const API_PORT = 8080;
 httpServer.listen(SOCKET_IO_PORT, () =>
   console.log(`Socket IO Server running on port ${SOCKET_IO_PORT}`)
 );
-setupRoutes(app, database);
-app.listen(API_PORT, () => {
-  console.log(`API Server is running on port ${API_PORT}`);
-});

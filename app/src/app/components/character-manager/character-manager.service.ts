@@ -66,7 +66,7 @@ export class CharacterManagerApiService extends BaseApi {
     );
   }
 
-  public deleteCharacter(characterId: number): Observable<DeletePlayerCharacterRequest> {
+  public deleteCharacter(characterId: number): Observable<void> {
     return this.deleteRequest(`/api/user/character/${characterId}`);
   }
 }

@@ -93,8 +93,9 @@ public class PlayerCharacterController : ControllerBase
 
     [HttpDelete]
     [Route("user/character/{playerCharacterId}")]
-    public void DeleteCharacter(int playerCharacterId)
+    public async void DeleteCharacter(int playerCharacterId)
     {
-
+        var auth0Id = User.FindFirst("sub")?.Value;
+        await _playerCharacterService.DeletePlayerCharacter(auth0Id, playerCharacterId);
     }
 }

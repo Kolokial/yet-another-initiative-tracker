@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 public class PlayerCharacterService
@@ -63,6 +61,19 @@ public class PlayerCharacterService
         var user = GetUser(auth0Id);
 
         return _dbContext.PlayerCharacter.Where(playerCharacter => playerCharacter.PlayerCharacterId == playerCharacterId && playerCharacter.UserId == user.UserId).FirstOrDefaultAsync();
+    }
+
+    public async Task DeletePlayerCharacter(string auth0Id, int playerCharacterId)
+    {
+        var user = GetUser(auth0Id);
+
+        var character = await _dbContext.PlayerCharacter.FirstOrDefaultAsync(pc => pc.PlayerCharacterId == playerCharacterId && pc.UserId == user.UserId);
+        if (character == null)
+        {
+            throw new Exception("Couldn't find character to delete");
+        }
+        character.IsDeleted = true;
+        await _dbContext.SaveChangesAsync();
     }
 
     private User? GetUser(string auth0Id)

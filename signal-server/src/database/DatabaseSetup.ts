@@ -1,5 +1,5 @@
 import sqlite3, { Database } from "sqlite3";
-import { User } from "@shared-types/User";
+import { User } from "@shared-types/User.js";
 import { PlayerCharacter } from "@shared-types/Character";
 import { auth } from "express-oauth2-jwt-bearer";
 

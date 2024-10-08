@@ -1,5 +1,7 @@
 #!/bin/sh
-npx kill-port 3000 8080 3001 4200 5200
+npx kill-port 3000 8080 3001 4200 5200 7180
+# Kill any running YAIT .net apis.
+kill -9 $(lsof -t -i:7180)
 # Function to handle termination
 terminate() {
   echo "Terminating all processes..."
@@ -31,10 +33,12 @@ NPM2_PID=$!
 echo "Started Signal Server with PID $NPM2_PID"
 
 # Start the SQLite database
-sqlite3 ./database/myTestDatabase.db < ./database/schema.sql &
-SQLITE_PID=$!
-echo "Started SQLite with PID $SQLITE_PID"
+#sqlite3 ./src/database/myTestDatabase2.db < ./src/database/schema.sql &
+cd ../YetAnotherInitiativeTrackerAPI/
+dotnet run --launch-profile https &
+DOTNET_PID=$!
+echo "Started SQLite with PID $DOTNET_PID"
 
 # Wait for all background processes
-wait $NPM1_PID $NPM2_PID $NPM_PID3 $SQLITE_PID
-npx kill-port 3000 8080 3001 4200 5200
+wait $NPM1_PID $NPM2_PID $NPM_PID3 $DOTNET_PID
+npx kill-port 3000 8080 3001 4200 5200 7180
