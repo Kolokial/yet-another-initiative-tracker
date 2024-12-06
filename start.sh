@@ -15,7 +15,7 @@ terminate() {
 trap terminate INT TERM
 
 # Navigate to the first npm project and start it
-cd ../app/
+cd ./app/
 npm run two &
 NPM1_PID=$!
 echo "Started YAIT with PID $NPM1_PID"

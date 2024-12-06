@@ -36,10 +36,11 @@ io.on("connection", (socket) => {
     if (!rooms[roomId]) {
       rooms[roomId] = [];
     }
-    rooms[roomId].push(socket.id);
+    rooms[roomId].push(auth0Id);
     console.log(
       `Client ${socket.id} with Auth0Id: ${auth0Id} joined room ${roomId}`
     );
+    Object.values(rooms[roomId]).forEach((r) => console.log);
     //notifyPeersInRoom(socket, roomId, "newPeerJoined", socket.id);
 
     io.to(socket.id).emit("roomJoined", rooms[roomId]);

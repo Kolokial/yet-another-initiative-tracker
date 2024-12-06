@@ -84,7 +84,7 @@ export class RoomService {
           this.auth0.idTokenClaims$.subscribe((idToken) => {
             if (idToken) {
               subject.next({
-                myPeerId: this.emitJoinRoom(roomId, idToken),
+                myPeerId: this.emitJoinRoom(roomId, idToken['sub']),
                 roomId: roomId,
               });
               clearInterval(intervalId);
