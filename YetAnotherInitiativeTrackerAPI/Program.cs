@@ -7,7 +7,11 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var appsettingsPath = $"{builder.Environment.ContentRootPath}/appsettings.json";
+Console.WriteLine(appsettingsPath);
+builder.Configuration.AddJsonFile(appsettingsPath);
 builder.Services.AddAppServices(builder.Configuration);
+Console.WriteLine(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddSwaggerBearerAuthorization();
 // Set up the connection to the SQLite database using a relative path
@@ -84,6 +88,7 @@ builder.Services.AddScoped<PlayerCharacterService>();
 // });
 
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -99,6 +104,7 @@ app.UseAppMiddleware();
 // }
 
 app.UseRouting();
+
 
 // Enable CORS
 app.UseCors("AllowSpecificOrigin");

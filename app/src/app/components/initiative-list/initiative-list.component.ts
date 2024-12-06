@@ -74,6 +74,7 @@ export class InitiativeListComponent implements HasTitle {
     private appServiceStore: AppServiceStore
   ) {
     this.initiatives = new TableListDataSource(this.ref);
+    this.spectators = new TableListDataSource(this.ref);
   }
   readonly title: string = 'Initiative List';
 
@@ -217,33 +218,36 @@ export class InitiativeListComponent implements HasTitle {
     peerId: string
   ): void {
     this.profileMessagingSubscriptions[peerId] = profileChannel.onMessage.subscribe(
-      (profileMessage: Envelope<ProfileUpdateMessage>) => {
-        if (profileMessage.message.isSpectator) {
-          this.handleSpectator();
-        }
-
-        const initiatives = this.initiatives.getRows();
-        const initItem = initiatives.find((x) => x.peerId === profileMessage.peerId);
-        if (initItem && initItem.peerId == profileMessage.peerId) {
-          initItem.displayName = of(profileMessage.message.displayName);
-          initItem.playerCharacterName = of(
-            profileMessage.message.playerCharacterName as string
-          );
-          this.ref.markForCheck();
+      (envelope: Envelope<ProfileUpdateMessage>) => {
+        if (envelope.message.isSpectator) {
+          this.populateTableListDataSource(this.spectators, envelope);
         } else {
-          const player: InitiativeDetail = {
-            displayName: of(profileMessage.message.displayName),
-            peerId: profileMessage.peerId,
-            playerCharacterName: of(profileMessage.message.playerCharacterName as string),
-            initiativeValue: 0,
-          };
-          this.initiatives.addRow(player);
+          this.populateTableListDataSource(this.initiatives, envelope);
         }
       }
     );
   }
 
-  private handleSpectator() {}
+  private populateTableListDataSource<T>(
+    dataSource: TableListDataSource<InitiativeDetail>,
+    envelope: Envelope<ProfileUpdateMessage>
+  ): void {
+    const dataSourceRows = dataSource.getRows();
+    const initItem = dataSourceRows.find((x) => x.peerId === envelope.peerId);
+    if (initItem && initItem.peerId == envelope.peerId) {
+      initItem.displayName = of(envelope.message.displayName);
+      initItem.playerCharacterName = of(envelope.message.playerCharacterName as string);
+      this.ref.markForCheck();
+    } else {
+      const player: InitiativeDetail = {
+        displayName: of(envelope.message.displayName),
+        peerId: envelope.peerId,
+        playerCharacterName: of(envelope.message.playerCharacterName as string),
+        initiativeValue: 0,
+      };
+      dataSource.addRow(player);
+    }
+  }
 
   private setupDataChannelOnClosingSubscription(
     onClose$: Observable<PeerId>,

@@ -46,6 +46,14 @@ export class RoomComponent implements HasTitle {
   readonly title: string = 'Room Manager';
   public roomCode: string = '';
 
+  public set isSpectator(value: boolean) {
+    this.appServiceStore.isSpectator.next(value);
+  }
+
+  public get isSpectator(): boolean {
+    return this.appServiceStore.isSpectator.getValue();
+  }
+
   get myPeerId(): Observable<string> {
     return this.roomService.myPeerId;
   }
@@ -89,5 +97,9 @@ export class RoomComponent implements HasTitle {
 
   sendMessage(message: number | string) {
     this.messagingService.sendDiceRollMessage(message as number);
+  }
+
+  isSpectatorChange(isChecked: boolean) {
+    this.isSpectator = isChecked;
   }
 }

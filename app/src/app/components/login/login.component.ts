@@ -4,6 +4,8 @@ import { AuthService } from '@auth0/auth0-angular';
 import { UserApiService } from '../../shared-services/user-api.service';
 import { MatIconModule } from '@angular/material/icon';
 
+import { environment } from 'src/environments/environment';
+
 @Component({
   selector: 'login',
   standalone: true,
@@ -17,27 +19,16 @@ export class LoginComponent {
 
   constructor(
     @Inject(DOCUMENT) public document: Document,
-    public auth: AuthService,
-    private user: UserApiService
-  ) {
-    this.auth.idTokenClaims$.subscribe({
-      next: (idToken) => {
-        console.log(idToken);
-        if (idToken) {
-          const userDisplayName: string = idToken.name
-            ? idToken.name
-            : (idToken.nickname as string);
-          this.user.createUser(idToken['sub'], userDisplayName);
+    public auth: AuthService
+  ) {}
 
-          this.user.getUser();
-        }
-      },
-    });
-    //this.auth.user$;
-    //this.user.getUser(9);
+  login() {
+    this.auth.loginWithRedirect();
   }
 
-  parse(object: any) {
-    return JSON.stringify(object);
+  logout() {
+    this.auth.logout({
+      logoutParams: { returnTo: `http://${environment.hostname}/login` },
+    });
   }
 }

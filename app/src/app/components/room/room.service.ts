@@ -11,7 +11,7 @@ import {
 } from 'rxjs';
 import { Socket } from 'ngx-socket-io';
 import { Location } from '@angular/common';
-import { AuthService } from '@auth0/auth0-angular';
+import { AuthService, IdToken } from '@auth0/auth0-angular';
 import { RoomData } from 'src/app/types/RoomInfo';
 
 import { Envelope, PeerId } from 'src/app/types/Messages';
@@ -81,11 +81,15 @@ export class RoomService {
     } else {
       const intervalId = setInterval(() => {
         if (this.socket.ioSocket.connected) {
-          subject.next({
-            myPeerId: this.emitJoinRoom(roomId),
-            roomId: roomId,
+          this.auth0.idTokenClaims$.subscribe((idToken) => {
+            if (idToken) {
+              subject.next({
+                myPeerId: this.emitJoinRoom(roomId, idToken),
+                roomId: roomId,
+              });
+              clearInterval(intervalId);
+            }
           });
-          clearInterval(intervalId);
         } else {
           this.socket.connect();
         }
@@ -95,9 +99,9 @@ export class RoomService {
     return subject.pipe(take(1));
   }
 
-  private emitJoinRoom(roomId: string): string {
+  private emitJoinRoom(roomId: string, auth0Id: IdToken): string {
     this._roomId.next(roomId);
-    const data = this.socket.emit('joinRoom', roomId);
+    const data = this.socket.emit('joinRoom', roomId, auth0Id);
     this._myPeerId.next(data.id);
     return data.id;
   }
@@ -156,17 +160,31 @@ export class RoomService {
   }
 
   private createOffer(peerId: string, myPeerId: string, roomId: string) {
+    console.log('Creating offer between', peerId, myPeerId);
     this.peerConnections[peerId] = this.createPeerConnection(peerId, myPeerId, roomId);
 
     const peerConnection = this.peerConnections[peerId];
+    peerConnection.onconnectionstatechange = () => {
+      console.log(`Connection state: ${peerConnection.connectionState}`);
+    };
+
+    peerConnection.onsignalingstatechange = () => {
+      console.log(`Signaling state: ${peerConnection.signalingState}`);
+    };
+
+    peerConnection.oniceconnectionstatechange = () => {
+      console.log(`ICE connection state: ${peerConnection.iceConnectionState}`);
+    };
     this.setupDataChannelCollection(peerConnection, peerId, myPeerId);
 
     peerConnection
       .createOffer()
       .then((offer) => {
+        console.log('Created offer:', offer);
         return peerConnection.setLocalDescription(offer);
       })
       .then(() => {
+        console.log('Offer set as local description');
         this.socket.emit('offer', {
           roomId: roomId,
           offer: peerConnection.localDescription,
@@ -178,15 +196,20 @@ export class RoomService {
 
   private createPeerConnection(peerId: string, myPeerId: string, roomId: string) {
     console.log('Creating PeerConnection with', peerId);
-    const peerConnection = new RTCPeerConnection();
+    const peerConnection = new RTCPeerConnection({
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+    });
 
     peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
+        console.log('Generated ICE candidate:', event.candidate);
         this.socket.emit('candidate', {
           roomId: roomId,
           candidate: event.candidate,
           target: myPeerId,
         });
+      } else {
+        console.log('All ICE candidates have been sent');
       }
     };
 
@@ -233,6 +256,7 @@ export class RoomService {
   }
 
   private handleOffer(data: any, myPeerId: string, roomId: string) {
+    console.log('handling offer');
     const peerId = data.peerId;
     const offer = data.offer;
     localStorage.setItem(peerId, JSON.stringify(offer));
@@ -266,6 +290,7 @@ export class RoomService {
   }
 
   private handleAnswer(data: any) {
+    console.log('handling answer', data);
     const peerId = data.source;
     const answer = data.answer;
     const peerConnection = this.peerConnections[peerId];
@@ -277,6 +302,7 @@ export class RoomService {
         peerConnection
           .setRemoteDescription(new RTCSessionDescription(answer))
           .then(() => {
+            console.log('adding ice candidate', peerConnection);
             peerConnection.addIceCandidate();
           });
       }
@@ -284,9 +310,13 @@ export class RoomService {
   }
 
   private handleCandidate(data: any) {
+    console.log('handling candidate', data);
     const candidate = new RTCIceCandidate(data.candidate);
     const peerId = data.target;
-    this.peerConnections[peerId].addIceCandidate(candidate);
+    this.peerConnections[peerId]
+      .addIceCandidate(candidate)
+      .then(() => console.log('ICE candidate added successfully'))
+      .catch((error) => console.error('Error adding ICE candidate:', error));
   }
 
   private setupDataChannelCollection(

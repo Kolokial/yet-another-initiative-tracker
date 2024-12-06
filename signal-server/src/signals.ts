@@ -2,6 +2,7 @@ export type Offer = {
   offer: RTCSessionDescriptionInit;
   roomId: string;
   peerId: string;
+  auth0Id: string;
 };
 
 export type Answer = {
@@ -25,9 +26,9 @@ export type ServerToClientEvents = {
 };
 
 export type ClientToServerEvents = {
-  joinRoom: (roomId: string) => void;
+  joinRoom: (roomId: string, auth0Id: string) => void;
   offer: (data: Offer) => void;
   answer: (data: Answer) => void;
   candidate: (data: Candidate) => void;
-  disconnect: () => void;
+  disconnect: (auth0Id: string) => void;
 };

@@ -28,9 +28,11 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AppServiceStore } from './app.service.store';
 import { LoginComponent } from './components/login/login.component';
+import { environment } from 'src/environments/environment';
+import { LoginService } from './components/login/login.service';
 
 //const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
-const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
+const config: SocketIoConfig = { url: environment.signalServer, options: {} };
 
 @NgModule({
   declarations: [AppComponent],
@@ -60,6 +62,7 @@ const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
     QrScannerService,
     provideRouter(routes, withComponentInputBinding()),
     RoomService,
+    LoginService,
     provideAuth0({
       domain: 'dev-sulaeis36e3ik0p1.us.auth0.com',
       clientId: 'LaP8gm04fP6EnxRhmVBc8F86lCUKKAUA',

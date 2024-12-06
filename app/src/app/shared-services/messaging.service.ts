@@ -31,6 +31,10 @@ export class MessagingService {
     return this.appServiceStore.selectedCharacter.getValue();
   }
 
+  private get isSpectator(): boolean {
+    return this.appServiceStore.isSpectator.getValue();
+  }
+
   constructor(
     private appServiceStore: AppServiceStore,
     private roomService: RoomService
@@ -125,7 +129,7 @@ export class MessagingService {
           message: {
             displayName: this.displayName,
             playerCharacterName: this.playerCharacter?.characterName,
-            isSpectator: false,
+            isSpectator: this.isSpectator,
           },
         };
         profileChannel.sendMessage(introduction);

@@ -14,7 +14,11 @@
       >
         Join Room
       </button>
-      <mat-slide-toggle>Just spectating?</mat-slide-toggle>
+      <mat-slide-toggle
+        [checked]="isSpectator"
+        (change)="isSpectatorChange($event.checked)"
+        >Just spectating?</mat-slide-toggle
+      >
       <div class="flex-item">Join your friends room!</div>
     </div>
 

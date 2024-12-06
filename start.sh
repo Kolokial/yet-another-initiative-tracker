@@ -14,12 +14,6 @@ terminate() {
 # Trap the termination signals
 trap terminate INT TERM
 
-# Navigate to the types project and start it
-cd ./shared-types/
-npm run watch &
-$NPM_PID3=$!
-echo "Started the Shared-Types project"
-
 # Navigate to the first npm project and start it
 cd ../app/
 npm run two &
@@ -35,7 +29,7 @@ echo "Started Signal Server with PID $NPM2_PID"
 # Start the SQLite database
 #sqlite3 ./src/database/myTestDatabase2.db < ./src/database/schema.sql &
 cd ../YetAnotherInitiativeTrackerAPI/
-dotnet run --launch-profile https &
+dotnet watch run --launch-profile https &
 DOTNET_PID=$!
 echo "Started SQLite with PID $DOTNET_PID"
 

@@ -10,6 +10,7 @@ app.options(
   "*",
   cors({
     origin: "*",
+    methods: ["GET", "POST"],
   })
 );
 
@@ -26,7 +27,7 @@ const rooms: { [roomId: string]: string[] } = {};
 io.on("connection", (socket) => {
   console.log("New client connected", socket.id);
 
-  socket.on("joinRoom", (roomId) => {
+  socket.on("joinRoom", (roomId, auth0Id) => {
     if (!roomId) {
       return;
     }
@@ -36,7 +37,9 @@ io.on("connection", (socket) => {
       rooms[roomId] = [];
     }
     rooms[roomId].push(socket.id);
-    console.log(`Client ${socket.id} joined room ${roomId}`);
+    console.log(
+      `Client ${socket.id} with Auth0Id: ${auth0Id} joined room ${roomId}`
+    );
     //notifyPeersInRoom(socket, roomId, "newPeerJoined", socket.id);
 
     io.to(socket.id).emit("roomJoined", rooms[roomId]);
@@ -57,8 +60,8 @@ io.on("connection", (socket) => {
     socket.to(data.roomId).emit("candidate", data);
   });
 
-  socket.on("disconnect", () => {
-    console.log("Client disconnected", socket.id);
+  socket.on("disconnect", (auth0Id: string) => {
+    console.log("Client disconnected", socket.id, auth0Id);
     removePeerFromRooms(socket.id);
   });
 });

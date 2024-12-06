@@ -1,20 +1,16 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { QrScannerService } from './components/qr-scanner/qr-scanner.service';
 import { MessagingService } from './shared-services/messaging.service';
-import { SocketIoConfig } from 'ngx-socket-io';
 import { map, mergeMap, of, switchMap } from 'rxjs';
 import { HasTitle } from './types/Title';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { UserApiService } from './shared-services/user-api.service';
 import { AuthService } from '@auth0/auth0-angular';
-import { User } from '@shared-types/User';
 import { AppServiceStore } from './app.service.store';
 import { CharacterManagerApiService } from './components/character-manager/character-manager.service';
 import { environment } from 'src/environments/environment';
-import { ReadUserResponse } from '@shared-types/api/User';
-
-//const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
-const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
+import { ReadUserResponse } from './types/api/User';
+import { LoginService } from './components/login/login.service';
 
 @Component({
   selector: 'app-root',
@@ -43,7 +39,7 @@ export class AppComponent {
   constructor(
     private userApi: UserApiService,
     private characterService: CharacterManagerApiService,
-
+    private loginService: LoginService,
     private messagingService: MessagingService,
     public auth0: AuthService,
     private appServiceStore: AppServiceStore,
@@ -54,13 +50,6 @@ export class AppComponent {
     this.mobileQuery = media.matchMedia('(max-width: 600px)');
     this._mobileQueryListener = () => ref.detectChanges();
     this.mobileQuery.addListener(this._mobileQueryListener);
-    // Camera.getPhoto({
-    //   quality: 90,
-    //   allowEditing: true,
-    //   resultType: CameraResultType.Uri
-    // }).then(x => {
-    //   console.log(x);
-    // });
   }
 
   startScanning() {
@@ -68,7 +57,7 @@ export class AppComponent {
   }
 
   ngOnInit() {
-    this.determineAuthenticationStatus();
+    this.loginService.determineAuthenticationStatus();
     this.getUserDisplayNameOnStartup();
     this.getSelectedCharacterOnStartup();
   }
@@ -76,17 +65,6 @@ export class AppComponent {
   logout() {
     this.auth0.logout({ logoutParams: { returnTo: ` ${environment.hostname}` } });
   }
-
-  // onActivate(
-  //   component: RoomComponent | InitiativeListComponent | InitiativeTrackerComponent
-  // ): void {
-  //   this.currentComponent = component;
-  //   if (component instanceof RoomComponent) {
-  //     component.onLeaveRoom
-  //       .pipe(take(1))
-  //       .subscribe(() => this.signalService.disconnect());
-  //   }
-  // }
 
   private getUserDisplayNameOnStartup() {
     this.auth0.isAuthenticated$
@@ -126,21 +104,5 @@ export class AppComponent {
           this.appServiceStore.selectedCharacter.next(x[0]);
         }
       });
-  }
-
-  private determineAuthenticationStatus(): void {
-    this.auth0.idTokenClaims$.subscribe({
-      next: (idToken) => {
-        console.log(idToken);
-        if (idToken) {
-          const userDisplayName: string = idToken.name
-            ? idToken.name
-            : (idToken.nickname as string);
-          this.userApi.createUser(idToken['sub'], userDisplayName);
-
-          this.userApi.getUser();
-        }
-      },
-    });
   }
 }

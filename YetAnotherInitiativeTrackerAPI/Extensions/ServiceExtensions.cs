@@ -15,6 +15,7 @@ public static class ServiceExtensions
             {
                 policy.WithOrigins("http://localhost:4200")  // Your frontend URL or allowed origins
                     .WithOrigins("http://localhost:7180")
+                    .WithOrigins("https://yait.airdnd.co.uk")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();  // Optional if using authentication cookies, can be removed for APIs using JWT

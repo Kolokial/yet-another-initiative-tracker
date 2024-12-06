@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { PlayerCharacter } from '@shared-types/api/PlayerCharacter';
+import { PlayerCharacter } from './types/api/PlayerCharacter';
 import { BehaviorSubject } from 'rxjs';
 import { InitiativeDetail } from './types/InitiativeDetail';
 
@@ -11,6 +11,7 @@ export class AppServiceStore {
   public selectedCharacter = new BehaviorSubject<PlayerCharacter | null>(null);
   public lastSentRoll: number = 0;
   public initativeList: InitiativeDetail[] = [];
+  public isSpectator: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   constructor() {}
 }

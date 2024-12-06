@@ -1,12 +1,12 @@
 <ng-container *ngIf="auth.isAuthenticated$ | async; else loggedOut">
-  <a (click)="auth.logout({ logoutParams: { returnTo: 'http://localhost:4200/login' } })">
+  <a (click)="logout()">
     <mat-icon aria-hidden="false" aria-label="Log Out" fontIcon="logout"></mat-icon>
     <span class="nav-label">Log Out</span>
   </a>
 </ng-container>
 
 <ng-template #loggedOut>
-  <a (click)="auth.loginWithRedirect()">
+  <a (click)="login()">
     <mat-icon aria-hidden="false" aria-label="Login" fontIcon="login"></mat-icon>
     <span class="nav-label">Login</span>
   </a>
