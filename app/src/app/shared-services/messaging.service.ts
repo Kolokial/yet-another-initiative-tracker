@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { Observable, Subject, take } from 'rxjs';
+import { Injectable, Signal } from '@angular/core';
+import { first, Observable, Subject, take } from 'rxjs';
 import { AppServiceStore } from '../app.service.store';
 import { Envelope, DiceRollMessage, ProfileUpdateMessage } from '../types/Messages';
 import { RoomService } from '../components/room/room.service';
@@ -9,6 +9,8 @@ import {
   DataChannelOutboundEvents,
 } from '../types/DataChannels';
 import { PlayerCharacter } from '@shared-types/api/PlayerCharacter';
+import { SignalRService } from './signal-r.service';
+import { DateAdapter } from '@angular/material/core';
 
 @Injectable({
   providedIn: 'root',
@@ -37,7 +39,8 @@ export class MessagingService {
 
   constructor(
     private appServiceStore: AppServiceStore,
-    private roomService: RoomService
+    private roomService: RoomService,
+    private signalR: SignalRService
   ) {
     this.roomService.onDataChannelAdded$.subscribe((dataChannelEventsCollection) => {
       dataChannelEventsCollection.DiceChannel;
@@ -52,39 +55,21 @@ export class MessagingService {
     });
   }
 
-  public sendDiceRollMessage(message: number): void {
-    this.myPeerId.pipe(take(1)).subscribe({
+  public sendDiceRollMessage(roll: number): void {
+    this.myPeerId.pipe(first()).subscribe({
       next: (peerId: string) => {
-        const envelope: Envelope<DiceRollMessage> = {
-          peerId: peerId,
-          message: {
-            diceRoll: message,
-            isTurnFinished: false,
-          },
-          timestamp: Date.now(),
+        const message: DiceRollMessage = {
+          diceRoll: roll,
+          isTurnFinished: false,
         };
-        for (const peerId of Object.keys(this.roomService.peerConnections)) {
-          const diceChannel = this.roomService.dataChannelCollections[peerId].DiceChannel;
-          diceChannel.OutboundEvents.sendMessage(envelope);
-        }
+        //this.signalR.invoke('DiceRoll', peerId, message);
       },
     });
   }
 
   public sendTurnFinishedMessage(): void {
-    this.myPeerId.pipe(take(1)).subscribe((peerId: string) => {
-      const envelope = {
-        peerId: peerId,
-        timestamp: Date.now(),
-        message: {
-          isTurnFinished: true,
-          diceRoll: -1,
-        },
-      };
-      for (const peerId of Object.keys(this.roomService.peerConnections)) {
-        const diceChannel = this.roomService.dataChannelCollections[peerId].DiceChannel;
-        diceChannel.OutboundEvents.sendMessage(envelope);
-      }
+    this.myPeerId.pipe(first()).subscribe((peerId: string) => {
+      //this.signalR.invoke('TurnFinished', peerId);
     });
   }
 
@@ -103,37 +88,44 @@ export class MessagingService {
     peerId: string,
     profileChannelEvents: DataChannelEventsTraffic<ProfileUpdateMessage>
   ) {
-    profileChannelEvents.InboundEvents.onOpen.subscribe((event: Event) => {
-      console.log('Profile channel open');
-
-      this.sendProfileUpdateToChannel(profileChannelEvents.OutboundEvents);
-    });
+    // profileChannelEvents.InboundEvents.onOpen.subscribe((event: Event) => {
+    //   console.log('Profile channel open');
+    //   this.sendProfileUpdateToChannel(profileChannelEvents.OutboundEvents);
+    // });
   }
 
   public sendProfileUpdateToAllChannels() {
-    Object.keys(this.roomService.dataChannelCollections).forEach((peerId) => {
-      const profileChannel =
-        this.roomService.dataChannelCollections[peerId].ProfileChannel.OutboundEvents;
-      this.sendProfileUpdateToChannel(profileChannel);
+    this.myPeerId.subscribe((myPeerId) => {
+      const message: ProfileUpdateMessage = {
+        displayName: this.appServiceStore.displayName.value,
+        isSpectator: false,
+        playerCharacterName: 'Test',
+      };
+      //this.signalR.invoke('UpdateDisplayName', myPeerId, message);
     });
+    // Object.keys(this.roomService.dataChannelCollections).forEach((peerId) => {
+    //   const profileChannel =
+    //     this.roomService.dataChannelCollections[peerId].ProfileChannel.OutboundEvents;
+    //   this.sendProfileUpdateToChannel(profileChannel);
+    // });
   }
 
-  private sendProfileUpdateToChannel<T>(
-    profileChannel: DataChannelOutboundEvents<ProfileUpdateMessage>
-  ): void {
-    this.myPeerId.pipe(take(1)).subscribe({
-      next: (peerId: string) => {
-        const introduction: Envelope<ProfileUpdateMessage> = {
-          peerId: peerId,
-          timestamp: Date.now(),
-          message: {
-            displayName: this.displayName,
-            playerCharacterName: this.playerCharacter?.characterName,
-            isSpectator: this.isSpectator,
-          },
-        };
-        profileChannel.sendMessage(introduction);
-      },
-    });
-  }
+  // private sendProfileUpdateToChannel<T>(
+  //   profileChannel: DataChannelOutboundEvents<ProfileUpdateMessage>
+  // ): void {
+  //   this.myPeerId.pipe(first()).subscribe({
+  //     next: (peerId: string) => {
+  //       const introduction: Envelope<ProfileUpdateMessage> = {
+  //         peerId: peerId,
+  //         timestamp: Date.now(),
+  //         message: {
+  //           displayName: this.displayName,
+  //           playerCharacterName: this.playerCharacter?.characterName,
+  //           isSpectator: this.isSpectator,
+  //         },
+  //       };
+  //       profileChannel.sendMessage(introduction);
+  //     },
+  //   });
+  // }
 }

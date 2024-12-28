@@ -36,7 +36,10 @@ io.on("connection", (socket) => {
     if (!rooms[roomId]) {
       rooms[roomId] = [];
     }
-    rooms[roomId].push(auth0Id);
+    if (!rooms[roomId].includes(auth0Id)) {
+      rooms[roomId].push(auth0Id);
+    }
+
     console.log(
       `Client ${socket.id} with Auth0Id: ${auth0Id} joined room ${roomId}`
     );
@@ -44,6 +47,14 @@ io.on("connection", (socket) => {
     //notifyPeersInRoom(socket, roomId, "newPeerJoined", socket.id);
 
     io.to(socket.id).emit("roomJoined", rooms[roomId]);
+  });
+
+  socket.on("leaveRoom", (roomId, auth0Id) => {
+    console.log(
+      `Client ${socket.id} with Auth0Id: ${auth0Id} left room ${roomId}`
+    );
+    removePeerFromRooms(auth0Id);
+    socket.leave(roomId);
   });
 
   socket.on("offer", (data) => {
@@ -62,8 +73,8 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", (auth0Id: string) => {
-    console.log("Client disconnected", socket.id, auth0Id);
-    removePeerFromRooms(socket.id);
+    //console.log("Client disconnected", socket.id, auth0Id);
+    //removePeerFromRooms(socket.id);
   });
 });
 
@@ -81,10 +92,10 @@ function notifyPeersInRoom(
   }
 }
 
-function removePeerFromRooms(peerId: string) {
+function removePeerFromRooms(auth0Id: string) {
   for (const roomId in rooms) {
-    if (rooms[roomId].includes(peerId)) {
-      rooms[roomId] = rooms[roomId].filter((id) => id !== peerId);
+    if (rooms[roomId].includes(auth0Id)) {
+      rooms[roomId] = rooms[roomId].filter((id) => id !== auth0Id);
       if (rooms[roomId].length === 0) {
         delete rooms[roomId];
       }

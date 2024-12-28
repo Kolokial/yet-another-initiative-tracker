@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 import { AppComponent } from './app.component';
@@ -30,9 +30,14 @@ import { AppServiceStore } from './app.service.store';
 import { LoginComponent } from './components/login/login.component';
 import { environment } from 'src/environments/environment';
 import { LoginService } from './components/login/login.service';
+import { SignalRService } from './shared-services/signal-r.service';
+import { multicast } from 'rxjs';
 
 //const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
-const config: SocketIoConfig = { url: environment.signalServer, options: {} };
+const config: SocketIoConfig = {
+  url: environment.signalServer,
+  options: { autoConnect: false, closeOnBeforeunload: true },
+};
 
 @NgModule({
   declarations: [AppComponent],
@@ -58,6 +63,7 @@ const config: SocketIoConfig = { url: environment.signalServer, options: {} };
   ],
   providers: [
     AppServiceStore,
+    SignalRService,
     provideAnimationsAsync(),
     QrScannerService,
     provideRouter(routes, withComponentInputBinding()),

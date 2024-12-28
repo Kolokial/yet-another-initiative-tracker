@@ -57,7 +57,7 @@ export class AppComponent {
   }
 
   ngOnInit() {
-    this.loginService.determineAuthenticationStatus();
+    //this.loginService.determineAuthenticationStatus();
     this.getUserDisplayNameOnStartup();
     this.getSelectedCharacterOnStartup();
   }

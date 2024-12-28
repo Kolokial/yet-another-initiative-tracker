@@ -1,6 +1,6 @@
 export type Envelope<T> = {
-  peerId: string;
-  timestamp: number;
+  auth0Id: string;
+  dateStamp: Date;
   message: T;
 };
 
@@ -16,3 +16,19 @@ export type DiceRollMessage = {
 };
 
 export type PeerId = string;
+
+export type Peer = {
+  displayName: string;
+  auth0Id: string;
+  diceRoll: number;
+  characterName?: string;
+};
+
+export type JoinRoomMessage = {
+  roomName: string;
+  peer: Peer;
+};
+
+export type LeaveRoomMessage = {
+  roomName: string;
+};

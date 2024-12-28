@@ -29,3 +29,13 @@ dotnet dev-certs https
 dotnet dev-certs https --check
 dotnet dev-certs https --trust
 ```
+
+## Exporting Cert
+
+### Windows
+
+`dotnet dev-certs https --trust; dotnet dev-certs https -ep "$env:USERPROFILE/.aspnet/https/aspnetapp.pfx" -p "SecurePwdGoesHere"`
+
+### Mac/Linux
+
+`dotnet dev-certs https --trust; dotnet dev-certs https -ep "${HOME}/.aspnet/https/aspnetapp.pfx" -p "SecurePwdGoesHere"`

@@ -11,6 +11,7 @@ import { HasTitle } from '../../types/Title';
 import { AppServiceStore } from 'src/app/app.service.store';
 import { RoomData } from 'src/app/types/RoomInfo';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { Peer } from 'src/app/types/Messages';
 
 @Component({
   selector: 'room',
@@ -40,7 +41,7 @@ export class RoomComponent implements HasTitle {
   // }
 
   @Output() onLeaveRoom: EventEmitter<void> = new EventEmitter<void>();
-  @Output() onJoinRoom: EventEmitter<RoomData> = new EventEmitter<RoomData>();
+  @Output() onJoinRoom: EventEmitter<Peer[]> = new EventEmitter<Peer[]>();
 
   activeLink: any;
   readonly title: string = 'Room Manager';
@@ -76,15 +77,15 @@ export class RoomComponent implements HasTitle {
 
   createRoom() {
     if (this.displayName.length) {
-      this.roomService.createRoom().subscribe((roomData: RoomData) => {
-        this.onJoinRoom.emit(roomData);
+      this.roomService.createRoom().subscribe((peerList: Peer[]) => {
+        this.onJoinRoom.emit(peerList);
       });
     }
   }
 
   joinRoom(roomId: string) {
     if (this.displayName.length) {
-      this.roomService.joinRoom(roomId).subscribe((roomData: RoomData) => {
+      this.roomService.joinRoom(roomId).subscribe((roomData: Peer[]) => {
         this.onJoinRoom.emit(roomData);
       });
     }

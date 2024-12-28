@@ -3,7 +3,7 @@ import { UserApiService } from '../../shared-services/user-api.service';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
-import { debounceTime } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { User } from '@shared-types/User';
 import { AppServiceStore } from 'src/app/app.service.store';
 import { RoomService } from '../room/room.service';
@@ -28,8 +28,9 @@ export class AccountComponent {
   ) {}
 
   ngOnInit() {
+    this.readUser();
     this.userDisplayName.valueChanges
-      .pipe(debounceTime(1000))
+      .pipe(debounceTime(1000), distinctUntilChanged())
       .subscribe((displayName) => {
         this.user.updateUserDisplayName(displayName);
         this.appServiceStore.displayName.next(displayName);
@@ -37,13 +38,12 @@ export class AccountComponent {
           this.messagingService.sendProfileUpdateToAllChannels();
         }
       });
-    this.readUser();
   }
 
   private readUser() {
     this.user.getUser().subscribe((user: ReadUserResponse) => {
       if (user && user.displayName) {
-        this.userDisplayName.setValue(user.displayName);
+        this.userDisplayName.setValue(user.displayName, { emitEvent: false });
       }
     });
   }

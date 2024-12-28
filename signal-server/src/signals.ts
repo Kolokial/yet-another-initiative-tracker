@@ -27,6 +27,7 @@ export type ServerToClientEvents = {
 
 export type ClientToServerEvents = {
   joinRoom: (roomId: string, auth0Id: string) => void;
+  leaveRoom: (roomId: string, auth0Id: string) => void;
   offer: (data: Offer) => void;
   answer: (data: Answer) => void;
   candidate: (data: Candidate) => void;

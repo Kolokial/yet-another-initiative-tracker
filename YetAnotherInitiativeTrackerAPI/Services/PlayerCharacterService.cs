@@ -81,7 +81,7 @@ public class PlayerCharacterService
         var user = _dbContext.User.Where(user => user.Auth0Id == auth0Id).FirstOrDefault();
         if (user == null)
         {
-            throw new Exception();
+            return null;
         }
         return user;
     }

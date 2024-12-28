@@ -10,6 +10,7 @@ import {
   DiceRollMessage,
   ProfileUpdateMessage,
   PeerId,
+  Peer,
 } from 'src/app/types/Messages';
 import { RoomComponent } from '../room/room.component';
 import { RoomData } from 'src/app/types/RoomInfo';
@@ -97,7 +98,18 @@ export class InitiativeListComponent implements HasTitle {
     this.unsubscribe();
   }
 
-  onJoinRoom(roomData: RoomData) {}
+  onJoinRoom(peerList: Peer[]) {
+    this.initiatives.setRows(
+      peerList.map((x) => {
+        return {
+          displayName: of(x.displayName),
+          initiativeValue: x.diceRoll,
+          playerCharacterName: of(x.characterName),
+          peerId: x.auth0Id,
+        } as InitiativeDetail;
+      })
+    );
+  }
 
   leaveRoom() {
     this.roomService.leaveRoom();
@@ -195,7 +207,7 @@ export class InitiativeListComponent implements HasTitle {
     this.diceMessagingSubscriptions[peerId] = diceChannel.onMessage.subscribe({
       next: (envelope: Envelope<DiceRollMessage>) => {
         const initiatives = this.initiatives.getRows();
-        const detail = this.findInitiativeByPeerId(envelope.peerId, initiatives);
+        const detail = this.findInitiativeByPeerId(envelope.auth0Id, initiatives);
 
         detail.initiativeValue =
           envelope.message.diceRoll === 0
@@ -233,15 +245,15 @@ export class InitiativeListComponent implements HasTitle {
     envelope: Envelope<ProfileUpdateMessage>
   ): void {
     const dataSourceRows = dataSource.getRows();
-    const initItem = dataSourceRows.find((x) => x.peerId === envelope.peerId);
-    if (initItem && initItem.peerId == envelope.peerId) {
+    const initItem = dataSourceRows.find((x) => x.peerId === envelope.auth0Id);
+    if (initItem && initItem.peerId == envelope.auth0Id) {
       initItem.displayName = of(envelope.message.displayName);
       initItem.playerCharacterName = of(envelope.message.playerCharacterName as string);
       this.ref.markForCheck();
     } else {
       const player: InitiativeDetail = {
         displayName: of(envelope.message.displayName),
-        peerId: envelope.peerId,
+        peerId: envelope.auth0Id,
         playerCharacterName: of(envelope.message.playerCharacterName as string),
         initiativeValue: 0,
       };

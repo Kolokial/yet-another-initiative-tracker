@@ -25,7 +25,7 @@ public class UserController : ControllerBase
 
         if (auth0Id == null)
         {
-            return Unauthorized();
+            return NotFound();
         }
 
         return Ok(await _userService.GetUser(auth0Id));

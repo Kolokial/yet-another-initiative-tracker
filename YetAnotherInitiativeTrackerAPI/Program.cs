@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using SignalRChat.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,8 @@ builder.Services.AddAppServices(builder.Configuration);
 Console.WriteLine(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddSwaggerBearerAuthorization();
+builder.Services.AddSingleton<RoomService>();
+builder.Services.AddSignalR();
 // Set up the connection to the SQLite database using a relative path
 var connectionString = "Data Source=./Data/myTestDatabase2.db";
 builder.Services.AddDbContext<YAITDBContext>(options =>
@@ -114,4 +117,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.UsePathBase("/api");
+app.MapHub<ChatHub>("/chathub");
 app.Run();
