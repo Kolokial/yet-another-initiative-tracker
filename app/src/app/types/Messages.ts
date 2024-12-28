@@ -19,10 +19,18 @@ export type PeerId = string;
 
 export type Peer = {
   displayName: string;
-  auth0Id: string;
   diceRoll: number;
   characterName?: string;
 };
+
+export type PeerList = [
+  {
+    displayName: string;
+    auth0Id: string;
+    diceRoll: number;
+    characterName?: string;
+  },
+];
 
 export type JoinRoomMessage = {
   roomName: string;
@@ -31,4 +39,13 @@ export type JoinRoomMessage = {
 
 export type LeaveRoomMessage = {
   roomName: string;
+};
+
+export type UpdateDisplayNameRequest = {
+  displayName: string;
+};
+
+export type UpdateDisplayNameBroadcast = {
+  auth0Id: string;
+  displayName: string;
 };

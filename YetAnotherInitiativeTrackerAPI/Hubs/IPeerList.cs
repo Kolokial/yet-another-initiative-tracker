@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using Microsoft.AspNetCore.SignalR;
 
 public class Envelope<T>
 {
@@ -15,13 +13,35 @@ public class Peer
     public string characterName { get; set; }
 }
 
-public class JoinRoomMessage
+public class JoinRoomRequest
 {
     public string roomName { get; set; }
-    public Peer peer { get; set; }
+    public string displayName { get; set; }
+    public int? diceRoll { get; set; }
+    public string? characterName { get; set; }
 }
 
-public class LeaveRoomMessage
+public class JoinRoomBroadcast
+{
+    public Peer peer { get; set; }
+}
+public class LeaveRoomRequest
 {
     public string roomName { get; set; }
+}
+
+public class LeaveRoomBroadcast
+{
+    public string auth0Id { get; set; }
+}
+
+public class UpdateDisplayNameRequest
+{
+    public string displayName { get; set; }
+}
+
+public class UpdateDisplayNameBroadcast
+{
+    public string auth0Id { get; set; }
+    public string displayName { get; set; }
 }

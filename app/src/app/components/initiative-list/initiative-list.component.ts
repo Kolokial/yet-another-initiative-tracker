@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, Signal } from '@angular/core';
 import { MessagingService } from '../../shared-services/messaging.service';
 import { AsyncPipe, CommonModule, NgFor } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
@@ -22,6 +22,7 @@ import { HasPeerId, InitiativeDetail } from 'src/app/types/InitiativeDetail';
 import { TableListDataSource } from '../../types/TableListDataSource';
 import { SpectatorListComponent } from '../spectator-list/spectator-list.component';
 import { DataChannelInboundEvents } from 'src/app/types/DataChannels';
+import { SignalRService } from 'src/app/shared-services/signal-r.service';
 
 @Component({
   selector: 'initiative-list',
@@ -64,15 +65,14 @@ export class InitiativeListComponent implements HasTitle {
     );
   }
 
-  private diceMessagingSubscriptions: { [peerId: string]: Subscription } = {};
-  private profileMessagingSubscriptions: { [peerId: string]: Subscription } = {};
-  private dataChannelClosingSubscriptions: { [peerId: string]: Subscription } = {};
+  private onPeerJoinedSubscription: Subscription | undefined;
 
   constructor(
     private messagingService: MessagingService,
     private roomService: RoomService,
     private ref: ChangeDetectorRef,
-    private appServiceStore: AppServiceStore
+    private appServiceStore: AppServiceStore,
+    private signalR: SignalRService
   ) {
     this.initiatives = new TableListDataSource(this.ref);
     this.spectators = new TableListDataSource(this.ref);
@@ -80,11 +80,11 @@ export class InitiativeListComponent implements HasTitle {
   readonly title: string = 'Initiative List';
 
   ngOnInit() {
-    this.messagingService.myPeerId.subscribe((peerId: string) => {
-      if (!peerId) {
+    this.onPeerJoinedSubscription = this.signalR.onPeerJoined$.subscribe((peer: Peer) => {
+      if (!peer) {
         this.initiatives.setRows([]);
       } else {
-        this.setupInitialIniativeList(peerId);
+        this.setupInitialIniativeList(peer);
       }
     });
 
@@ -105,7 +105,6 @@ export class InitiativeListComponent implements HasTitle {
           displayName: of(x.displayName),
           initiativeValue: x.diceRoll,
           playerCharacterName: of(x.characterName),
-          peerId: x.auth0Id,
         } as InitiativeDetail;
       })
     );
@@ -157,23 +156,10 @@ export class InitiativeListComponent implements HasTitle {
     const diceChannel = this.roomService.dataChannelCollections[peerId].DiceChannel;
     this.setupProfileOnMessageSubscription(profileChannel.InboundEvents, peerId);
     this.setupDiceOnMessageSubscription(diceChannel.InboundEvents, peerId);
-    this.setupDataChannelOnClosingSubscription(
-      profileChannel.InboundEvents.onClose,
-      peerId
-    );
-    this.setupDataChannelOnClosingSubscription(diceChannel.InboundEvents.onClose, peerId);
   }
 
   private unsubscribe() {
-    Object.values(this.diceMessagingSubscriptions).forEach((subscription) =>
-      subscription.unsubscribe()
-    );
-    Object.values(this.profileMessagingSubscriptions).forEach((subscription) =>
-      subscription.unsubscribe()
-    );
-    Object.values(this.dataChannelClosingSubscriptions).forEach((subscription) =>
-      subscription.unsubscribe()
-    );
+    this.onPeerJoinedSubscription?.unsubscribe();
   }
 
   private findInitiativeByPeerId(
@@ -203,42 +189,12 @@ export class InitiativeListComponent implements HasTitle {
   private setupDiceOnMessageSubscription(
     diceChannel: DataChannelInboundEvents<DiceRollMessage>,
     peerId: string
-  ): void {
-    this.diceMessagingSubscriptions[peerId] = diceChannel.onMessage.subscribe({
-      next: (envelope: Envelope<DiceRollMessage>) => {
-        const initiatives = this.initiatives.getRows();
-        const detail = this.findInitiativeByPeerId(envelope.auth0Id, initiatives);
-
-        detail.initiativeValue =
-          envelope.message.diceRoll === 0
-            ? detail.initiativeValue
-            : envelope.message.diceRoll;
-        if (envelope.message.isTurnFinished) {
-          const currentPlayersTurn = initiatives.splice(0, 1);
-          this.initiatives.addRow(currentPlayersTurn[0]);
-        } else {
-          this.initiatives.setRows(
-            initiatives.sort((a, b) => b.initiativeValue - a.initiativeValue)
-          );
-        }
-      },
-    });
-  }
+  ): void {}
 
   private setupProfileOnMessageSubscription(
     profileChannel: DataChannelInboundEvents<ProfileUpdateMessage>,
     peerId: string
-  ): void {
-    this.profileMessagingSubscriptions[peerId] = profileChannel.onMessage.subscribe(
-      (envelope: Envelope<ProfileUpdateMessage>) => {
-        if (envelope.message.isSpectator) {
-          this.populateTableListDataSource(this.spectators, envelope);
-        } else {
-          this.populateTableListDataSource(this.initiatives, envelope);
-        }
-      }
-    );
-  }
+  ): void {}
 
   private populateTableListDataSource<T>(
     dataSource: TableListDataSource<InitiativeDetail>,
@@ -259,16 +215,5 @@ export class InitiativeListComponent implements HasTitle {
       };
       dataSource.addRow(player);
     }
-  }
-
-  private setupDataChannelOnClosingSubscription(
-    onClose$: Observable<PeerId>,
-    peerId: string
-  ): void {
-    this.dataChannelClosingSubscriptions[peerId] = onClose$.subscribe({
-      next: (peerId: string) => {
-        this.initiatives.deleteRow(peerId);
-      },
-    });
   }
 }

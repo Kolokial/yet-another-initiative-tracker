@@ -1,32 +1,15 @@
 /* Housekeeping! */
 import { Injectable } from '@angular/core';
 import { PEER_ID_SEPERATOR, ROOM_ID } from '../../constants';
-import {
-  BehaviorSubject,
-  combineLatest,
-  first,
-  flatMap,
-  map,
-  mergeMap,
-  Observable,
-  ReplaySubject,
-  Subject,
-  take,
-  throwError,
-} from 'rxjs';
+import { BehaviorSubject, first, Observable, Subject, throwError } from 'rxjs';
 import { Socket } from 'ngx-socket-io';
 import { Location } from '@angular/common';
 import { AuthService, IdToken } from '@auth0/auth0-angular';
 import { RoomData } from 'src/app/types/RoomInfo';
-
-import { Envelope, Peer, PeerId } from 'src/app/types/Messages';
+import { Peer } from 'src/app/types/Messages';
 import {
   DataChannelCollection,
-  DataChannelEventsTraffic,
-  DataChannelInboundEvents,
-  DataChannelOutboundEvents,
   RTCDataChannelCollection,
-  YAITCustomOffer,
 } from 'src/app/types/DataChannels';
 import { environment } from 'src/environments/environment';
 import { SignalRService } from 'src/app/shared-services/signal-r.service';
