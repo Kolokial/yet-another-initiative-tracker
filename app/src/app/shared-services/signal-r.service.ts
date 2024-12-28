@@ -16,7 +16,7 @@ import { AuthService, IdToken } from '@auth0/auth0-angular';
   providedIn: 'root',
 })
 export class SignalRService {
-  public onPeerJoined$: Subject<void> = new Subject<void>();
+  public onPeerJoined$: Subject<Peer> = new Subject<Peer>();
   public onDisplayNameUpdated$: Subject<void> = new Subject<void>();
 
   private _hubConnection: signalR.HubConnection;
