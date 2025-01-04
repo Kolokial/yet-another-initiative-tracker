@@ -21,7 +21,9 @@
     "lib": ["ES2022", "dom"],
     "baseUrl": "./",    
     "paths": {
-      "@shared-types/*": ["../shared-types/src/*"]
+      "@shared-types/*": ["../shared-types/src/*"],
+      "@message-contracts/*": ["./src/app/types/message-contracts/*"]
+      
     }
   },
   "angularCompilerOptions": {

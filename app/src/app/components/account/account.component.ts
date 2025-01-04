@@ -4,10 +4,8 @@ import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
-import { User } from '@shared-types/User';
 import { AppServiceStore } from 'src/app/app.service.store';
 import { RoomService } from '../room/room.service';
-import { MessagingService } from 'src/app/shared-services/messaging.service';
 import { ReadUserResponse } from '@shared-types/api/User';
 
 @Component({
@@ -23,8 +21,7 @@ export class AccountComponent {
   constructor(
     private user: UserApiService,
     private appServiceStore: AppServiceStore,
-    private room: RoomService,
-    private messagingService: MessagingService
+    private room: RoomService
   ) {}
 
   ngOnInit() {
@@ -35,7 +32,7 @@ export class AccountComponent {
         this.user.updateUserDisplayName(displayName);
         this.appServiceStore.displayName.next(displayName);
         if (this.room.roomId && this.room.myPeerId) {
-          this.messagingService.sendProfileUpdateToAllChannels();
+          //Send updated display name
         }
       });
   }

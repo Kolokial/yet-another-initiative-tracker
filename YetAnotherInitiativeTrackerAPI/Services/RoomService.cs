@@ -1,5 +1,7 @@
 /* Housekeeping! */
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Metadata;
+using YAIT.MessageContracts;
 
 public class RoomService
 {
@@ -26,7 +28,18 @@ public class RoomService
             peers = new List<Peer>();
             roomList.Add(roomName, peers);
         }
-        peers.Add(peer);
+        var previousPeer = peers.FirstOrDefault(p => p.auth0Id == peer.auth0Id);
+        if (previousPeer != null)
+        {
+            previousPeer.characterName = peer.characterName;
+            previousPeer.diceRoll = peer.diceRoll;
+            previousPeer.displayName = peer.displayName;
+        }
+        else
+        {
+            peers.Add(peer);
+        }
+
     }
 
     public void RemovePeerFromRoom(string auth0Id)
@@ -47,22 +60,32 @@ public class RoomService
 
     public string? UpdateDisplayName(string auth0Id, string displayName)
     {
+        var roomKey = findPeerRoomKey(auth0Id);
+        List<Peer> room;
+        if (roomKey != null && roomList.TryGetValue(roomKey, out room))
+        {
+            var peer = room.Find(x => x.auth0Id == auth0Id);
+            peer.displayName = displayName;
+        }
+
+        return roomKey;
+    }
+
+    public string findPeerRoomKey(string auth0Id)
+    {
+        // Console.WriteLine(auth0Id);
+        // Console.WriteLine(JsonSerializer.Serialize(roomList));
         foreach (var room in roomList)
         {
-            Console.WriteLine($"Checking room {room.Key}");
             foreach (var peer in room.Value)
             {
                 if (peer.auth0Id == auth0Id)
                 {
-                    peer.displayName = displayName;
                     return room.Key;
-                }
-                else
-                {
-                    Console.WriteLine("Can't find room with user in");
                 }
             }
         }
+        Console.WriteLine("Can't find room with user in");
         return null;
     }
 }

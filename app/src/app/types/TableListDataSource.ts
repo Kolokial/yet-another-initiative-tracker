@@ -1,9 +1,9 @@
 import { ChangeDetectorRef } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { DataSource } from '@angular/cdk/collections';
-import { HasPeerId } from './InitiativeDetail';
+import { HasAuth0Id } from './InitiativeDetail';
 
-export class TableListDataSource<T extends HasPeerId> extends DataSource<T> {
+export class TableListDataSource<T extends HasAuth0Id> extends DataSource<T> {
   constructor(private cdr: ChangeDetectorRef) {
     super();
   }
@@ -31,8 +31,13 @@ export class TableListDataSource<T extends HasPeerId> extends DataSource<T> {
   public deleteRow(peerId: string): void {
     const initiatives = this._dataStream.getValue();
     this._dataStream.next(
-      initiatives.filter((initDetail) => initDetail.peerId !== peerId)
+      initiatives.filter((initDetail) => initDetail.auth0Id !== peerId)
     );
+    this.cdr.markForCheck();
+  }
+
+  public clearRows(): void {
+    this._dataStream.next([]);
     this.cdr.markForCheck();
   }
 

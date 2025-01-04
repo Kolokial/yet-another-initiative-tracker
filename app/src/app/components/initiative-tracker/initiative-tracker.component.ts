@@ -5,7 +5,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MessagingService } from '../../shared-services/messaging.service';
+
 import { FormsModule } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import {
@@ -87,7 +87,6 @@ export class InitiativeTrackerComponent implements HasTitle {
   private impendingRoll: number = 0;
 
   constructor(
-    private messagingService: MessagingService,
     private dataStore: InitiativeTrackerStoreService,
     private appServiceStore: AppServiceStore
   ) {}
@@ -127,7 +126,6 @@ export class InitiativeTrackerComponent implements HasTitle {
       initiativeValue += 5;
     }
     this.appServiceStore.lastSentRoll = initiativeValue;
-    this.messagingService.sendDiceRollMessage(initiativeValue);
   }
 
   onInitiativeKeyUp(initiative: number) {

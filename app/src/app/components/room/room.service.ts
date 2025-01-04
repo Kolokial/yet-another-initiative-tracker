@@ -6,26 +6,17 @@ import { Socket } from 'ngx-socket-io';
 import { Location } from '@angular/common';
 import { AuthService, IdToken } from '@auth0/auth0-angular';
 import { RoomData } from 'src/app/types/RoomInfo';
-import { Peer } from 'src/app/types/Messages';
-import {
-  DataChannelCollection,
-  RTCDataChannelCollection,
-} from 'src/app/types/DataChannels';
+
 import { environment } from 'src/environments/environment';
 import { SignalRService } from 'src/app/shared-services/signal-r.service';
+import { AppServiceStore } from 'src/app/app.service.store';
+import { Peer } from 'src/app/types/messageContracts/Peer';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RoomService {
   public peerConnections: { [key: string]: RTCPeerConnection } = {};
-
-  private dataChannels: { [peerId: string]: RTCDataChannelCollection } = {};
-  public dataChannelCollections: { [peerId: string]: DataChannelCollection } = {};
-  private _onDataChannelAdded$ = new Subject<DataChannelCollection>();
-  public get onDataChannelAdded$(): Observable<DataChannelCollection> {
-    return this._onDataChannelAdded$.asObservable();
-  }
 
   private _roomId: BehaviorSubject<string> = new BehaviorSubject<string>('');
   public get roomId(): Observable<string> {
@@ -39,9 +30,9 @@ export class RoomService {
 
   constructor(
     private location: Location,
-    private socket: Socket,
     private auth0: AuthService,
-    private signalR: SignalRService
+    private signalR: SignalRService,
+    private appStore: AppServiceStore
   ) {
     this.attemptToAutoJoinRoom();
   }
@@ -88,5 +79,11 @@ export class RoomService {
     const roomId = Math.random().toString(36).substring(7);
     this.location.replaceState(`room`);
     return this.joinRoom(roomId);
+  }
+
+  private handlePeerJoined(): void {
+    this.signalR.onPeerJoined$.subscribe((x) => {
+      //this.appStore.initativeList.push(x);
+    });
   }
 }

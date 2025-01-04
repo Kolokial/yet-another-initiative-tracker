@@ -33,8 +33,8 @@ export const routes: Routes = [
   },
   {
     title: 'Initiative Order',
-    path: 'order',
-    component: InitiativeListComponent,
+    path: 'room',
+    component: RoomComponent,
     canActivate: [canActivateUserGuard],
   },
   {

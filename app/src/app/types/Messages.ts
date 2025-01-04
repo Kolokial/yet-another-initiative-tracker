@@ -1,51 +1,64 @@
-export type Envelope<T> = {
-  auth0Id: string;
-  dateStamp: Date;
-  message: T;
-};
+// export type Envelope<T> = {
+//   auth0Id: string;
+//   dateStamp: Date;
+//   message: T;
+// };
 
-export type ProfileUpdateMessage = {
-  displayName: string;
-  playerCharacterName?: string;
-  isSpectator: boolean;
-};
+// export type Broadcast = {
+//   auth0Id: string;
+// };
 
-export type DiceRollMessage = {
-  diceRoll: number;
-  isTurnFinished: boolean;
-};
+// export type ProfileUpdateMessage = {
+//   displayName: string;
+//   playerCharacterName?: string;
+//   isSpectator: boolean;
+// };
 
-export type PeerId = string;
+// export type RollDiceRequest = {
+//   diceRoll: number;
+// };
 
-export type Peer = {
-  displayName: string;
-  diceRoll: number;
-  characterName?: string;
-};
+// export type DiceRolledBroadcast = Broadcast & {
+//   diceRoll: number;
+// };
 
-export type PeerList = [
-  {
-    displayName: string;
-    auth0Id: string;
-    diceRoll: number;
-    characterName?: string;
-  },
-];
+// export type PeerId = string;
 
-export type JoinRoomMessage = {
-  roomName: string;
-  peer: Peer;
-};
+// export type Peer = {
+//   auth0Id: string;
+//   displayName: string;
+//   diceRoll: number;
+//   characterName?: string;
+// };
 
-export type LeaveRoomMessage = {
-  roomName: string;
-};
+// export type JoinRoomRequest = {
+//   roomName: string;
+//   displayName: string;
+//   diceRoll?: number;
+//   characterName?: string;
+// };
 
-export type UpdateDisplayNameRequest = {
-  displayName: string;
-};
+// export type JoinRoomResponse = {
+//   peerList: Peer[];
+// };
 
-export type UpdateDisplayNameBroadcast = {
-  auth0Id: string;
-  displayName: string;
-};
+// export type RoomJoinedBroadcast = Broadcast & {
+//   peer: Peer;
+// };
+
+// export type LeaveRoomRequest = {
+//   roomName: string;
+// };
+
+// export type LeaveRoomBroadcast = Broadcast & {};
+
+// export type UpdateDisplayNameRequest = {
+//   displayName: string;
+// };
+
+// export type UpdateDisplayNameBroadcast = Broadcast & {
+//   displayName: string;
+// };
+
+// export type TurnFinishedRequest = {};
+// export type TurnFinishedBroadcast = Broadcast & {};

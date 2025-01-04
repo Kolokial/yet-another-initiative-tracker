@@ -1,7 +1,6 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { QrScannerService } from './components/qr-scanner/qr-scanner.service';
-import { MessagingService } from './shared-services/messaging.service';
-import { map, mergeMap, of, switchMap } from 'rxjs';
+import { map, mergeMap, Observable, of, switchMap } from 'rxjs';
 import { HasTitle } from './types/Title';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { UserApiService } from './shared-services/user-api.service';
@@ -11,6 +10,7 @@ import { CharacterManagerApiService } from './components/character-manager/chara
 import { environment } from 'src/environments/environment';
 import { ReadUserResponse } from './types/api/User';
 import { LoginService } from './components/login/login.service';
+import { RoomService } from './components/room/room.service';
 
 @Component({
   selector: 'app-root',
@@ -26,9 +26,7 @@ export class AppComponent {
   mobileQuery: MediaQueryList;
   private _mobileQueryListener: () => void;
 
-  public get roomUrl(): string {
-    return `room/${this.messagingService.roomId}`;
-  }
+  public roomUrl!: string;
 
   private currentComponent!: HasTitle;
 
@@ -39,11 +37,10 @@ export class AppComponent {
   constructor(
     private userApi: UserApiService,
     private characterService: CharacterManagerApiService,
-    private loginService: LoginService,
-    private messagingService: MessagingService,
     public auth0: AuthService,
     private appServiceStore: AppServiceStore,
     private qrScanner: QrScannerService,
+    private _roomService: RoomService,
     ref: ChangeDetectorRef,
     media: MediaMatcher
   ) {
@@ -60,6 +57,10 @@ export class AppComponent {
     //this.loginService.determineAuthenticationStatus();
     this.getUserDisplayNameOnStartup();
     this.getSelectedCharacterOnStartup();
+
+    this._roomService.roomId.subscribe((roomId) => {
+      this.roomUrl = `room/${roomId}`;
+    });
   }
 
   logout() {

@@ -2,6 +2,12 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.SignalR;
+using SQLitePCL;
+using YAIT.MessageContracts;
+using YAIT.MessageContracts.FinishTurn;
+using YAIT.MessageContracts.JoinRoom;
+using YAIT.MessageContracts.LeaveRoom;
+using YAIT.MessageContracts.UpdateDisplayName;
 
 namespace SignalRChat.Hubs;
 
@@ -19,7 +25,7 @@ public class ChatHub : Hub
         Console.WriteLine(user, message);
     }
 
-    public async Task<List<Peer>> JoinRoom(Envelope<JoinRoomRequest> envelope)
+    public async Task<JoinRoomResponse> JoinRoom(Envelope<JoinRoomRequest> envelope)
     {
 
         var roomName = envelope.message.roomName;
@@ -33,10 +39,17 @@ public class ChatHub : Hub
         Console.WriteLine($"{envelope.auth0Id} joined {envelope.message.roomName} with ConnectionId: {Context.ConnectionId}");
         await Groups.AddToGroupAsync(Context.ConnectionId, envelope.message.roomName);
         _roomService.AddPeerToRoom(envelope.message.roomName, peer);
-        List<Peer> peerList = _roomService.GetRoomPeers(roomName);
+        var broadcastMessage = new RoomJoinedBroadcast()
+        {
+            auth0Id = envelope.auth0Id,
+            peer = peer
+        };
 
-        await Clients.Group(envelope.message.roomName).SendAsync("PeerJoined", peer);
-        return peerList;
+        await Clients.Group(envelope.message.roomName).SendAsync("RoomJoined", broadcastMessage);
+        return new JoinRoomResponse()
+        {
+            peerList = _roomService.GetRoomPeers(roomName)
+        };
     }
 
     public async Task LeaveRoom(Envelope<LeaveRoomRequest> envelope)
@@ -45,10 +58,22 @@ public class ChatHub : Hub
         var auth0Id = envelope.auth0Id;
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
         Console.WriteLine($"{auth0Id} left {roomName} with ConnectionId: {Context.ConnectionId}");
-        await Clients.Group(roomName).SendAsync("PeerLeft", new LeaveRoomBroadcast()
+        _roomService.RemovePeerFromRoom(envelope.auth0Id);
+        await Clients.Group(roomName).SendAsync("PeerLeft", new RoomLeftBroadcast()
         {
             auth0Id = auth0Id
         });
+    }
+
+    public async Task FinishTurn(Envelope<FinishTurnRequest> envelope)
+    {
+        var roomKey = _roomService.findPeerRoomKey(envelope.auth0Id);
+        Console.WriteLine(roomKey);
+        var broadcastMessage = new TurnFinishedBroadcast()
+        {
+            auth0Id = envelope.auth0Id
+        };
+        await Clients.Group(roomKey).SendAsync("TurnFinished", broadcastMessage);
     }
 
     public async Task UpdateDisplayName(Envelope<UpdateDisplayNameRequest> envelope)
