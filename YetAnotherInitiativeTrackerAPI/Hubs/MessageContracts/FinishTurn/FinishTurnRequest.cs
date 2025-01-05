@@ -1,6 +1,6 @@
 namespace YAIT.MessageContracts.FinishTurn;
 
-public interface FinishTurnRequest
+public class FinishTurnRequest
 {
 
 }

@@ -1,6 +1,6 @@
 namespace YAIT.MessageContracts.UpdateDisplayName;
 
-public interface UpdateDisplayNameRequest
+public class UpdateDisplayNameRequest
 {
     public string displayName { get; set; }
 }

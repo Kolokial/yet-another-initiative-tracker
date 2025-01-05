@@ -1,6 +1,6 @@
 namespace YAIT.MessageContracts.JoinRoom;
 
-public interface JoinRoomRequest
+public class JoinRoomRequest
 {
     public string roomName { get; set; }
     public string displayName { get; set; }

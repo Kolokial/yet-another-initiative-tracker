@@ -1,6 +1,6 @@
 namespace YAIT.MessageContracts.LeaveRoom;
 
-public interface LeaveRoomRequest
+public class LeaveRoomRequest
 {
     public string roomName { get; set; }
 }

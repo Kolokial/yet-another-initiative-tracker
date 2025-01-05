@@ -1,6 +1,6 @@
 namespace YAIT.MessageContracts;
 
-public interface Envelope<T>
+public class Envelope<T>
 {
     public string auth0Id { get; set; }
     public T message { get; set; }

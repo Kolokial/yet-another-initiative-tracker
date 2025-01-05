@@ -1,12 +1,11 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.SignalR;
-using SQLitePCL;
 using YAIT.MessageContracts;
 using YAIT.MessageContracts.FinishTurn;
 using YAIT.MessageContracts.JoinRoom;
 using YAIT.MessageContracts.LeaveRoom;
+using YAIT.MessageContracts.RollDice;
 using YAIT.MessageContracts.UpdateDisplayName;
 
 namespace SignalRChat.Hubs;
@@ -59,7 +58,7 @@ public class ChatHub : Hub
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
         Console.WriteLine($"{auth0Id} left {roomName} with ConnectionId: {Context.ConnectionId}");
         _roomService.RemovePeerFromRoom(envelope.auth0Id);
-        await Clients.Group(roomName).SendAsync("PeerLeft", new RoomLeftBroadcast()
+        await Clients.Group(roomName).SendAsync("RoomLeft", new RoomLeftBroadcast()
         {
             auth0Id = auth0Id
         });
@@ -95,5 +94,17 @@ public class ChatHub : Hub
         {
             Console.WriteLine("Can't find room with user in");
         }
+    }
+
+    public async Task RollDice(Envelope<RollDiceRequest> envelope)
+    {
+        var roomKey = _roomService.findPeerRoomKey(envelope.auth0Id);
+        Console.WriteLine(roomKey);
+        var broadcastMessage = new DiceRolledBroadcast()
+        {
+            auth0Id = envelope.auth0Id,
+            diceRoll = envelope.message.diceRoll
+        };
+        await Clients.Group(roomKey).SendAsync("DiceRolled", broadcastMessage);
     }
 }

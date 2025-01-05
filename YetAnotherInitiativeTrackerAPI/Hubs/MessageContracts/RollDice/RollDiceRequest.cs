@@ -1,7 +1,7 @@
 namespace YAIT.MessageContracts.RollDice;
 
 
-public interface RollDiceRequest
+public class RollDiceRequest
 {
     public int diceRoll { get; set; }
 }
