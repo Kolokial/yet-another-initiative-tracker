@@ -7,6 +7,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { AppServiceStore } from 'src/app/app.service.store';
 import { RoomService } from '../room/room.service';
 import { ReadUserResponse } from '@shared-types/api/User';
+import { SignalRService } from 'src/app/shared-services/signal-r.service';
 
 @Component({
   selector: 'account',
@@ -19,9 +20,10 @@ export class AccountComponent {
   /* TODO: Add user displayname to initiative order, under character name.*/
   public userDisplayName: FormControl<string> = new FormControl();
   constructor(
-    private user: UserApiService,
-    private appServiceStore: AppServiceStore,
-    private room: RoomService
+    private _user: UserApiService,
+    private _appServiceStore: AppServiceStore,
+    private _room: RoomService,
+    private _signalR: SignalRService
   ) {}
 
   ngOnInit() {
@@ -29,16 +31,18 @@ export class AccountComponent {
     this.userDisplayName.valueChanges
       .pipe(debounceTime(1000), distinctUntilChanged())
       .subscribe((displayName) => {
-        this.user.updateUserDisplayName(displayName);
-        this.appServiceStore.displayName.next(displayName);
-        if (this.room.roomId && this.room.myPeerId) {
-          //Send updated display name
+        this._user.updateUserDisplayName(displayName);
+        this._appServiceStore.displayName.next(displayName);
+        if (this._room.roomId && this._room.myPeerId) {
+          this._signalR
+            .updateDisplayName(displayName)
+            .subscribe((x) => console.log('DisplayName Updated'));
         }
       });
   }
 
   private readUser() {
-    this.user.getUser().subscribe((user: ReadUserResponse) => {
+    this._user.getUser().subscribe((user: ReadUserResponse) => {
       if (user && user.displayName) {
         this.userDisplayName.setValue(user.displayName, { emitEvent: false });
       }
