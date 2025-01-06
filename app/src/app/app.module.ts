@@ -31,7 +31,7 @@ import { LoginComponent } from './components/login/login.component';
 import { environment } from 'src/environments/environment';
 import { LoginService } from './components/login/login.service';
 import { SignalRService } from './shared-services/signal-r.service';
-import { multicast } from 'rxjs';
+import { initiativeListServiceInit } from './components/initiative-list/initiative-list.factory';
 
 //const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
 const config: SocketIoConfig = {
@@ -64,6 +64,12 @@ const config: SocketIoConfig = {
   providers: [
     AppServiceStore,
     SignalRService,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initiativeListServiceInit,
+      deps: [SignalRService, AppServiceStore],
+      multi: true,
+    },
     provideAnimationsAsync(),
     QrScannerService,
     provideRouter(routes, withComponentInputBinding()),
