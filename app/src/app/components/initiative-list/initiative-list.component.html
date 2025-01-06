@@ -26,7 +26,7 @@
   <ng-container matColumnDef="displayName">
     <th mat-header-cell *matHeaderCellDef>Player</th>
     <td mat-cell *matCellDef="let element">
-      <span class="player-character-name">{{ element.playerCharacterName }}</span>
+      <span class="player-character-name">{{ element.CharacterName }}</span>
       <span class="display-name">{{ element.displayName }}</span>
     </td>
   </ng-container>
@@ -34,7 +34,7 @@
   <ng-container matColumnDef="initiativeValue">
     <th mat-header-cell *matHeaderCellDef>Initiative</th>
     <td mat-cell *matCellDef="let element">
-      {{ element.initiativeValue }}
+      {{ element.diceRoll }}
     </td>
   </ng-container>
 
