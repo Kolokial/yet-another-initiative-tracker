@@ -85,6 +85,8 @@ export class CharacterManagerComponent {
       dexterityMod: 0,
       alertFeat: false,
       luckStone: false,
+      isInPlay: false,
+      isDeleted: false,
     });
     this.characterForm = [newCharacter, ...this.characterForm];
     this.expandedElement = newCharacter;
@@ -114,6 +116,7 @@ export class CharacterManagerComponent {
           const index = this.characterForm.findIndex((char) => char === character);
           if (index > -1) {
             this.characterForm.splice(index, 1);
+            this.characterForm = [...this.characterForm];
           }
         });
     } else {
@@ -121,7 +124,7 @@ export class CharacterManagerComponent {
     }
   }
 
-  toggleCharacterSelect(row: any) {
+  toggleCharacterSelect(row: CharacterListItem) {
     if (!row.characterId) {
       return;
     }
@@ -132,13 +135,20 @@ export class CharacterManagerComponent {
       dexterityMod: row.dexterityModifier,
       luckStone: row.hasLuckStone,
     });
+
+    row.formGroup.
   }
 
-  isSelected(row: any) {}
+  isSelected(row: CharacterListItem) {
+    
+  }
 
   private setupCharacterList(): void {
     this.characterService.readCharacters().subscribe((readCharacterResponse) => {
       readCharacterResponse.reverse().forEach((x) => {
+        if (x.isDeleted) {
+          return;
+        }
         const characterGroup = new CharacterListItem(x, x.playerCharacterId);
         this.setCharacterGroupStatusChange(characterGroup, x.playerCharacterId);
         this.characterForm.push(characterGroup);
@@ -159,10 +169,11 @@ export class CharacterManagerComponent {
           this.characterService
             .updateCharacter(
               playerCharacterId,
-              character.formGroup.controls.CharacterName.value as string,
-              character.formGroup.controls.HasAlertFeat.value as boolean,
-              character.formGroup.controls.HasLuckStone.value as boolean,
-              character.formGroup.controls.DexterityModifier.value as number
+              character.characterName,
+              character.hasAlertFeat,
+              character.hasLuckStone,
+              character.dexterityModifier,
+              character.isInPlay
             )
             .subscribe(() => {
               console.log('next');

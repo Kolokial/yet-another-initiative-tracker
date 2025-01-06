@@ -16,7 +16,7 @@
           [disabled]="!row.characterId"
           (click)="$event.stopPropagation()"
           (change)="$event ? toggleCharacterSelect(row) : null"
-          [checked]="isSelected(row)"
+          [checked]="row.isInPlay === true"
         >
         </mat-radio-button>
       </td>

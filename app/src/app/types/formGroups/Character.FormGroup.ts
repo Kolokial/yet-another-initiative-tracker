@@ -6,4 +6,5 @@ export interface CharacterFormGroup {
   DexterityModifier: FormControl<number | null>;
   HasAlertFeat: FormControl<boolean | null>;
   HasLuckStone: FormControl<boolean | null>;
+  IsInPlay: FormControl<boolean | null>;
 }

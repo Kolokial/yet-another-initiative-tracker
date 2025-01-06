@@ -52,7 +52,8 @@ export class CharacterManagerApiService extends BaseApi {
     name: string,
     hasAlertFeat: boolean,
     hasLuckStone: boolean,
-    dexMod: number
+    dexMod: number,
+    isInPlay: boolean
   ): Observable<ReadPlayerCharacterResponse> {
     return this.patchRequest<UpdatePlayerCharacterRequest, ReadPlayerCharacterResponse>(
       `/api/user/character/${characterId}`,
@@ -62,6 +63,7 @@ export class CharacterManagerApiService extends BaseApi {
         alertFeat: hasAlertFeat,
         luckStone: hasLuckStone,
         dexterityModifier: dexMod,
+        isInPlay: isInPlay,
       }
     );
   }

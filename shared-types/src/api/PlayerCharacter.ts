@@ -4,6 +4,8 @@ export interface PlayerCharacter {
   alertFeat: boolean;
   luckStone: boolean;
   dexterityMod: number;
+  isInPlay: boolean;
+  isDeleted: boolean;
 }
 
 export interface CreatePlayerCharacterRequest {
@@ -33,6 +35,7 @@ export interface UpdatePlayerCharacterRequest {
   alertFeat: boolean;
   luckStone: boolean;
   dexterityModifier: number;
+  isInPlay: boolean;
 }
 
 export interface DeletePlayerCharacterRequest {
