@@ -13,29 +13,30 @@ import { TurnFinishedBroadcast } from '../types/messageContracts/finishTurn/Turn
 import { JoinRoomRequest } from '../types/messageContracts/JoinRoom/JoinRoomRequest';
 import { LeaveRoomRequest } from '../types/messageContracts/leaveRoom/LeaveRoomRequest';
 import { RollDiceRequest } from '../types/messageContracts/rollDice/RollDiceRequest';
-import { UpdateDisplayNameBroadcast } from '../types/messageContracts/updateDisplayName/DisplayNameUpdatedBroadcast';
+import { UpdateDisplayNameBroadcast as DisplayNameUpdatedBroadcast } from '../types/messageContracts/updateDisplayName/DisplayNameUpdatedBroadcast';
 import { UpdateDisplayNameRequest } from '../types/messageContracts/updateDisplayName/UpdateDisplayNameRequest';
 import { RoomLeftBroadcast } from '../types/messageContracts/leaveRoom/RoomLeftBroadcast';
 import { RoomJoinedBroadcast } from '../types/messageContracts/JoinRoom/RoomJoinedBroadcast';
 import { FinishTurnRequest } from '../types/messageContracts/finishTurn/FinishTurnRequest';
 import { DiceRolledBroadcast } from '../types/messageContracts/rollDice/DiceRolledBroadcast';
+import { JoinRoomResponse } from '../types/messageContracts/JoinRoom/JoinRoomResponse';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SignalRService {
-  private _onPeerJoined$ = new Subject<Peer>();
-  public get onPeerJoined$(): Observable<Peer> {
-    return this._onPeerJoined$.asObservable();
+  private _onRoomJoined$ = new Subject<Peer>();
+  public get onRoomJoined$(): Observable<Peer> {
+    return this._onRoomJoined$.asObservable();
   }
 
-  private _onPeerLeft$ = new Subject<string>();
-  public get onPeerLeft$(): Observable<string> {
-    return this._onPeerLeft$.asObservable();
+  private _onRoomLeft$ = new Subject<string>();
+  public get onRoomLeft$(): Observable<string> {
+    return this._onRoomLeft$.asObservable();
   }
 
-  private _onDisplayNameUpdated$ = new Subject<void>();
-  public get onDisplayNameUpdated$(): Observable<void> {
+  private _onDisplayNameUpdated$ = new Subject<DisplayNameUpdatedBroadcast>();
+  public get onDisplayNameUpdated$(): Observable<DisplayNameUpdatedBroadcast> {
     return this._onDisplayNameUpdated$.asObservable();
   }
 
@@ -60,9 +61,6 @@ export class SignalRService {
       .withKeepAliveInterval(5000)
       .build();
 
-    // this._hubConnection.on('ReceiveMessage', (user, message) => {
-    //   console.log(`User: ${user}, Message: ${message}`);
-    // });
     this.startConnection();
   }
 
@@ -87,12 +85,16 @@ export class SignalRService {
 
   private setupEventHubMethods(): void {
     this._hubConnection.on('RoomJoined', (broadcastMsg: RoomJoinedBroadcast) =>
-      this.onPeerJoined(broadcastMsg)
+      this.onRoomJoined(broadcastMsg)
     );
-    this._hubConnection.on('PeerLeft', (broadcastMsg: RoomLeftBroadcast) =>
-      this.onPeerLeft(broadcastMsg)
+    this._hubConnection.on('RoomLeft', (broadcastMsg: RoomLeftBroadcast) =>
+      this.onRoomLeft(broadcastMsg)
     );
-    this._hubConnection.on('DisplayNameUpdated', this._onDisplayNameUpdated$.next);
+    this._hubConnection.on(
+      'DisplayNameUpdated',
+      (broadcastMsg: DisplayNameUpdatedBroadcast) =>
+        this.onDisplayNameUpdated(broadcastMsg)
+    );
     this._hubConnection.on('DiceRolled', (broadcastMsg: DiceRolledBroadcast) =>
       this.onDiceRolled(broadcastMsg)
     );
@@ -101,8 +103,8 @@ export class SignalRService {
     );
   }
 
-  public joinRoom(roomName: string): Observable<Peer[]> {
-    return this.invoke<JoinRoomRequest, Peer[]>('JoinRoom', {
+  public joinRoom(roomName: string): Observable<JoinRoomResponse> {
+    return this.invoke<JoinRoomRequest, JoinRoomResponse>('JoinRoom', {
       roomName: roomName,
       characterName: this.appStore.selectedCharacter.value?.characterName,
       diceRoll: this.appStore.lastSentRoll,
@@ -135,6 +137,7 @@ export class SignalRService {
       first(),
       switchMap((idTokenClaim: IdToken | null | undefined) => {
         if (!idTokenClaim) {
+          console.error('IdTokenClaim has failed. Are you logged in?');
           return of();
         }
         const envelope: Envelope<T> = {
@@ -149,35 +152,35 @@ export class SignalRService {
     );
   }
 
-  private onPeerJoined(broadcastMessage: RoomJoinedBroadcast): void {
+  private onRoomJoined(broadcastMessage: RoomJoinedBroadcast): void {
     this.auth.idTokenClaims$.pipe(first()).subscribe((idTokenClaim) => {
       if (idTokenClaim && idTokenClaim['sub'] !== broadcastMessage.auth0Id) {
-        this._onPeerJoined$.next(broadcastMessage.peer);
+        this._onRoomJoined$.next(broadcastMessage.peer);
         console.log('Peer Joined: ', broadcastMessage);
       }
     });
   }
 
-  private onPeerLeft(broadcastMessage: RoomLeftBroadcast): void {
+  private onRoomLeft(broadcastMessage: RoomLeftBroadcast): void {
     this.doAuthCheck(broadcastMessage, () => {
-      this._onPeerLeft$.next(broadcastMessage.auth0Id);
+      this._onRoomLeft$.next(broadcastMessage.auth0Id);
       console.log('Peer Left: ', broadcastMessage);
     });
   }
 
   private onDiceRolled(broadcastMsg: DiceRolledBroadcast): void {
-    this.doAuthCheck(broadcastMsg, () => {
-      this._onDiceRolled$.next(broadcastMsg);
-    });
+    this._onDiceRolled$.next(broadcastMsg);
   }
 
-  private onDisplayNameUpdated(broadcastMessage: UpdateDisplayNameBroadcast): void {}
+  private onDisplayNameUpdated(broadcastMessage: DisplayNameUpdatedBroadcast): void {
+    this._onDisplayNameUpdated$.next(broadcastMessage);
+  }
 
   private onTurnFinished(broadcastMsg: TurnFinishedBroadcast): void {
     this.doAuthCheck(broadcastMsg, () => {
       this._onTurnFinished$.next(broadcastMsg.auth0Id);
+      console.log(broadcastMsg.auth0Id, 'finished their turn.');
     });
-    console.log(broadcastMsg.auth0Id, 'finished their turn.');
   }
 
   private doAuthCheck(broadcastMessage: Broadcast, callback: () => void): void {
