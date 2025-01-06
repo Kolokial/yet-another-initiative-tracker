@@ -1,6 +1,6 @@
 namespace YAIT.MessageContracts.UpdateDisplayName;
 
-public class UpdateDisplayNameBroadcast : Broadcast
+public class DisplayNameUpdatedBroadcast : Broadcast
 {
     public string displayName { get; set; }
 }

@@ -82,7 +82,7 @@ public class ChatHub : Hub
         var roomKey = _roomService.UpdateDisplayName(auth0Id, displayName);
         if (roomKey != null)
         {
-            var broadcastMessage = new UpdateDisplayNameBroadcast()
+            var broadcastMessage = new DisplayNameUpdatedBroadcast()
             {
                 auth0Id = envelope.auth0Id,
                 displayName = displayName,
