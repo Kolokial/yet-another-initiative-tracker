@@ -19,6 +19,7 @@ import {
 import { InitiativeTrackerStoreService } from './initiative-tracker.store.service';
 import { HasTitle } from '../../types/Title';
 import { AppServiceStore } from 'src/app/app.service.store';
+import { SignalRService } from 'src/app/shared-services/signal-r.service';
 
 @Component({
   selector: 'initiative-tracker',
@@ -42,30 +43,30 @@ export class InitiativeTrackerComponent implements HasTitle {
   title: string = 'Initiative Tracker';
 
   public get displayName(): Observable<string> {
-    return this.appServiceStore.displayName;
+    return this._appServiceStore.displayName;
   }
 
   public get dexterityModifier(): number {
-    return this.dataStore.dexterityScore;
+    return this._dataStore.dexterityScore;
   }
 
   public set dexterityModifier(value: string) {
-    this.dataStore.dexterityScore = parseInt(value);
+    this._dataStore.dexterityScore = parseInt(value);
   }
 
   public get alertFeat(): boolean {
-    return this.dataStore.alertFeat;
+    return this._dataStore.alertFeat;
   }
 
   public set alertFeat(value: boolean) {
-    this.dataStore.alertFeat = value;
+    this._dataStore.alertFeat = value;
   }
 
   public get luckStone(): boolean {
-    return this.dataStore.luckStone;
+    return this._dataStore.luckStone;
   }
   public set luckStone(v: boolean) {
-    this.dataStore.luckStone = v;
+    this._dataStore.luckStone = v;
   }
 
   private _isInitiativeInputDisabled: boolean = false;
@@ -74,10 +75,10 @@ export class InitiativeTrackerComponent implements HasTitle {
   }
 
   public get initiativeValue(): number {
-    return this.dataStore.initiativeRoll;
+    return this._dataStore.initiativeRoll;
   }
   public set initiativeValue(v: number) {
-    this.dataStore.initiativeRoll = v;
+    this._dataStore.initiativeRoll = v;
   }
 
   private keyup$: Subject<number> = new Subject<number>();
@@ -87,8 +88,9 @@ export class InitiativeTrackerComponent implements HasTitle {
   private impendingRoll: number = 0;
 
   constructor(
-    private dataStore: InitiativeTrackerStoreService,
-    private appServiceStore: AppServiceStore
+    private _dataStore: InitiativeTrackerStoreService,
+    private _appServiceStore: AppServiceStore,
+    private _signalR: SignalRService
   ) {}
 
   ngOnInit() {
@@ -125,7 +127,11 @@ export class InitiativeTrackerComponent implements HasTitle {
     if (this.alertFeat) {
       initiativeValue += 5;
     }
-    this.appServiceStore.lastSentRoll = initiativeValue;
+    this._signalR
+      .rollDice(initiativeValue)
+      .subscribe((x) => console.log('Dice roll sent:', initiativeValue));
+
+    this._appServiceStore.lastSentRoll = initiativeValue;
   }
 
   onInitiativeKeyUp(initiative: number) {
