@@ -12,10 +12,10 @@ import { TableListDataSource } from 'src/app/types/TableListDataSource';
   styleUrl: './spectator-list.component.scss',
 })
 export class SpectatorListComponent {
-  public spectatorList: TableListDataSource<HasAuth0Id>;
+  public spectatorList!: TableListDataSource<HasAuth0Id>;
   public displayedColumns: string[] = ['displayName', 'initiativeValue'];
 
   constructor(cdr: ChangeDetectorRef) {
-    this.spectatorList = new TableListDataSource<HasAuth0Id>(cdr);
+    //this.spectatorList = new TableListDataSource<HasAuth0Id>(cdr);
   }
 }

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -11,7 +11,7 @@ import { HasTitle } from '../../types/Title';
 import { AppServiceStore } from 'src/app/app.service.store';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { InitiativeListComponent } from '../initiative-list/initiative-list.component';
-import { Peer } from 'src/app/types/messageContracts/Peer';
+import { JoinRoomResponse } from 'src/app/types/messageContracts/JoinRoom/JoinRoomResponse';
 
 @Component({
   selector: 'room',
@@ -33,52 +33,50 @@ export class RoomComponent implements HasTitle {
   public roomCode: string = '';
 
   public set isSpectator(value: boolean) {
-    this.appServiceStore.isSpectator.next(value);
+    this._appServiceStore.isSpectator.next(value);
   }
 
   public get isSpectator(): boolean {
-    return this.appServiceStore.isSpectator.getValue();
+    return this._appServiceStore.isSpectator.getValue();
   }
 
   get myPeerId(): Observable<string> {
-    return this.roomService.myPeerId;
+    return this._roomService.myPeerId;
   }
 
   get roomId(): Observable<string> {
-    return this.roomService.roomId;
+    return this._roomService.roomId;
   }
 
   private get displayName(): string {
-    return this.appServiceStore.displayName.getValue();
+    return this._appServiceStore.displayName.getValue();
   }
 
-  public peerList: Peer[] = [];
-
   constructor(
-    private appServiceStore: AppServiceStore,
-    private roomService: RoomService,
+    private _appServiceStore: AppServiceStore,
+    private _roomService: RoomService,
 
     public auth: AuthService
   ) {}
 
   createRoom() {
     if (this.displayName.length) {
-      this.roomService.createRoom().subscribe((peerList: Peer[]) => {
-        this.peerList = peerList;
+      this._roomService.createRoom().subscribe((response: JoinRoomResponse) => {
+        this._appServiceStore.peerList.next(response.peerList);
       });
     }
   }
 
   joinRoomWithCode(roomId: string) {
     if (this.displayName.length) {
-      this.roomService.joinRoom(roomId).subscribe((peerList: Peer[]) => {
-        this.peerList = peerList;
+      this._roomService.joinRoom(roomId).subscribe((response: JoinRoomResponse) => {
+        this._appServiceStore.peerList.next(response.peerList);
       });
     }
   }
 
   leaveRoom() {
-    this.roomService.leaveRoom();
+    this._roomService.leaveRoom();
   }
 
   isSpectatorChange(isChecked: boolean) {

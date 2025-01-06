@@ -1,23 +1,16 @@
 /* Housekeeping! */
 import { Injectable } from '@angular/core';
-import { PEER_ID_SEPERATOR, ROOM_ID } from '../../constants';
-import { BehaviorSubject, first, Observable, Subject, throwError } from 'rxjs';
-import { Socket } from 'ngx-socket-io';
+import { ROOM_ID } from '../../constants';
+import { BehaviorSubject, first, Observable, throwError } from 'rxjs';
 import { Location } from '@angular/common';
-import { AuthService, IdToken } from '@auth0/auth0-angular';
-import { RoomData } from 'src/app/types/RoomInfo';
-
-import { environment } from 'src/environments/environment';
+import { AuthService } from '@auth0/auth0-angular';
 import { SignalRService } from 'src/app/shared-services/signal-r.service';
-import { AppServiceStore } from 'src/app/app.service.store';
-import { Peer } from 'src/app/types/messageContracts/Peer';
+import { JoinRoomResponse } from 'src/app/types/messageContracts/JoinRoom/JoinRoomResponse';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RoomService {
-  public peerConnections: { [key: string]: RTCPeerConnection } = {};
-
   private _roomId: BehaviorSubject<string> = new BehaviorSubject<string>('');
   public get roomId(): Observable<string> {
     return this._roomId.asObservable();
@@ -31,8 +24,7 @@ export class RoomService {
   constructor(
     private location: Location,
     private auth0: AuthService,
-    private signalR: SignalRService,
-    private appStore: AppServiceStore
+    private signalR: SignalRService
   ) {
     this.attemptToAutoJoinRoom();
   }
@@ -54,7 +46,7 @@ export class RoomService {
     });
   }
 
-  public joinRoom(roomId: string): Observable<Peer[]> {
+  public joinRoom(roomId: string): Observable<JoinRoomResponse> {
     if (!roomId) {
       return throwError(() => new Error('No Room ID supplied.'));
     } else {
@@ -79,11 +71,5 @@ export class RoomService {
     const roomId = Math.random().toString(36).substring(7);
     this.location.replaceState(`room`);
     return this.joinRoom(roomId);
-  }
-
-  private handlePeerJoined(): void {
-    this.signalR.onPeerJoined$.subscribe((x) => {
-      //this.appStore.initativeList.push(x);
-    });
   }
 }
