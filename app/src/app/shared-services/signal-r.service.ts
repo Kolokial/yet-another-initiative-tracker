@@ -154,7 +154,7 @@ export class SignalRService {
 
   private onRoomJoined(broadcastMessage: RoomJoinedBroadcast): void {
     this.auth.idTokenClaims$.pipe(first()).subscribe((idTokenClaim) => {
-      if (idTokenClaim && idTokenClaim['sub'] !== broadcastMessage.auth0Id) {
+      if (idTokenClaim && idTokenClaim['sub']) {
         this._onRoomJoined$.next(broadcastMessage.peer);
         console.log('Peer Joined: ', broadcastMessage);
       }
@@ -169,7 +169,11 @@ export class SignalRService {
   }
 
   private onDiceRolled(broadcastMsg: DiceRolledBroadcast): void {
-    this._onDiceRolled$.next(broadcastMsg);
+    this.auth.idTokenClaims$.pipe(first()).subscribe((idTokenClaim) => {
+      if (idTokenClaim && idTokenClaim['sub']) {
+        this._onDiceRolled$.next(broadcastMsg);
+      }
+    });
   }
 
   private onDisplayNameUpdated(broadcastMessage: DisplayNameUpdatedBroadcast): void {

@@ -10,7 +10,7 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatInputModule } from '@angular/material/input';
 import { CharacterFormGroup } from '../../types/formGroups/Character.FormGroup';
-import { debounceTime, Subject } from 'rxjs';
+import { debounceTime, Observable, Subject } from 'rxjs';
 import { CharacterManagerApiService } from './character-manager.service';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIcon } from '@angular/material/icon';
@@ -20,6 +20,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatTableModule } from '@angular/material/table';
 import { AppServiceStore } from 'src/app/app.service.store';
+import { ReadPlayerCharacterResponse } from 'src/app/types/api/PlayerCharacter';
 
 @Component({
   selector: 'character-manager',
@@ -124,24 +125,28 @@ export class CharacterManagerComponent {
     }
   }
 
-  toggleCharacterSelect(row: CharacterListItem) {
-    if (!row.characterId) {
+  toggleCharacterSelect(character: CharacterListItem) {
+    if (!character.characterId) {
       return;
     }
     this.appServiceStore.selectedCharacter.next({
-      playerCharacterId: row.characterId as number,
-      alertFeat: row.hasAlertFeat,
-      characterName: row.characterName,
-      dexterityMod: row.dexterityModifier,
-      luckStone: row.hasLuckStone,
+      playerCharacterId: character.characterId as number,
+      alertFeat: character.hasAlertFeat,
+      characterName: character.characterName,
+      dexterityMod: character.dexterityModifier,
+      luckStone: character.hasLuckStone,
     });
 
-    row.formGroup.
+    this.characterForm.forEach((x) => {
+      if (x.isDeleted) {
+        x.isInPlay = false;
+      }
+    });
+    character.isInPlay = true;
+    this.updateCharacter(character, character.characterId);
   }
 
-  isSelected(row: CharacterListItem) {
-    
-  }
+  isSelected(row: CharacterListItem) {}
 
   private setupCharacterList(): void {
     this.characterService.readCharacters().subscribe((readCharacterResponse) => {
@@ -160,30 +165,38 @@ export class CharacterManagerComponent {
   private setCharacterGroupStatusChange(
     character: CharacterListItem,
     playerCharacterId: number
-  ) {
+  ): void {
     character.formGroup.statusChanges
       .pipe(debounceTime(1000))
       .subscribe((value: FormControlStatus) => {
         if (value === 'VALID') {
-          character.isUpdating = true;
-          this.characterService
-            .updateCharacter(
-              playerCharacterId,
-              character.characterName,
-              character.hasAlertFeat,
-              character.hasLuckStone,
-              character.dexterityModifier,
-              character.isInPlay
-            )
-            .subscribe(() => {
-              console.log('next');
-              character.isUpdating = false;
-            });
+          this.updateCharacter(character, playerCharacterId);
         }
       });
   }
 
-  public getCharacterSummary(character: FormGroup<CharacterFormGroup>) {
+  private updateCharacter(
+    character: CharacterListItem,
+    playerCharacterId: number
+  ): Observable<ReadPlayerCharacterResponse> {
+    character.isUpdating = true;
+    const observable = this.characterService.updateCharacter(
+      playerCharacterId,
+      character.characterName,
+      character.hasAlertFeat,
+      character.hasLuckStone,
+      character.dexterityModifier,
+      character.isInPlay
+    );
+
+    observable.subscribe(() => {
+      character.isUpdating = false;
+    });
+
+    return observable;
+  }
+
+  public getCharacterSummary(character: FormGroup<CharacterFormGroup>): string {
     return `Dex: ${character.controls.DexterityModifier.value}` + ``;
   }
 }

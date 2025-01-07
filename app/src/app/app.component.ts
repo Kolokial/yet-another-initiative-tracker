@@ -100,9 +100,10 @@ export class AppComponent {
           return of(null);
         })
       )
-      .subscribe((x) => {
-        if (x) {
-          this.appServiceStore.selectedCharacter.next(x[0]);
+      .subscribe((characterList) => {
+        if (characterList) {
+          const slectedCharacter = characterList.find((x) => x.isInPlay) || null;
+          this.appServiceStore.selectedCharacter.next(slectedCharacter);
         }
       });
   }

@@ -23,11 +23,19 @@ export class CharacterListItem {
   }
 
   public get isInPlay(): boolean {
-    return this.formGroup.controls.IsInPlay.value as boolean;
+    return this._character.isInPlay;
+  }
+
+  public set isInPlay(isInPlay: boolean) {
+    this._character.isInPlay = isInPlay;
   }
 
   public get isDeleted(): boolean {
     return this._character.isDeleted;
+  }
+
+  public set isDeleted(isDeleted: boolean) {
+    this._character.isDeleted = isDeleted;
   }
 
   constructor(
