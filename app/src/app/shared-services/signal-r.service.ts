@@ -5,7 +5,6 @@ import { AppServiceStore } from '../app.service.store';
 import { first, from, Observable, of, Subject, switchMap } from 'rxjs';
 
 import { AuthService, IdToken } from '@auth0/auth0-angular';
-import { InitiativeListComponent } from '../components/initiative-list/initiative-list.component';
 import { Peer } from '../types/messageContracts/Peer';
 import { Broadcast } from '../types/messageContracts/Broadcast';
 import { Envelope } from '../types/messageContracts/Envelope';
@@ -20,6 +19,8 @@ import { RoomJoinedBroadcast } from '../types/messageContracts/JoinRoom/RoomJoin
 import { FinishTurnRequest } from '../types/messageContracts/finishTurn/FinishTurnRequest';
 import { DiceRolledBroadcast } from '../types/messageContracts/rollDice/DiceRolledBroadcast';
 import { JoinRoomResponse } from '../types/messageContracts/JoinRoom/JoinRoomResponse';
+import { CharacterInPlayUpdatedBroadcast } from '../types/messageContracts/updateCharacterInPlay/CharacterInPlayUpdatedBroadcast';
+import { UpdateCharacterInPlayRequest } from '../types/messageContracts/updateCharacterInPlay/UpdateCharacterInPlayRequest';
 
 @Injectable({
   providedIn: 'root',
@@ -38,6 +39,11 @@ export class SignalRService {
   private _onDisplayNameUpdated$ = new Subject<DisplayNameUpdatedBroadcast>();
   public get onDisplayNameUpdated$(): Observable<DisplayNameUpdatedBroadcast> {
     return this._onDisplayNameUpdated$.asObservable();
+  }
+
+  private _onCharacterInPlayUpdated$ = new Subject<CharacterInPlayUpdatedBroadcast>();
+  public get onCharacterInPlayUpdated$(): Observable<CharacterInPlayUpdatedBroadcast> {
+    return this._onCharacterInPlayUpdated$.asObservable();
   }
 
   private _onDiceRolled$ = new Subject<DiceRolledBroadcast>();
@@ -95,6 +101,11 @@ export class SignalRService {
       (broadcastMsg: DisplayNameUpdatedBroadcast) =>
         this.onDisplayNameUpdated(broadcastMsg)
     );
+    this._hubConnection.on(
+      'CharacterInPlayUpdated',
+      (broadcastMsg: CharacterInPlayUpdatedBroadcast) =>
+        this.onCharacterInPlayUpdated(broadcastMsg)
+    );
     this._hubConnection.on('DiceRolled', (broadcastMsg: DiceRolledBroadcast) =>
       this.onDiceRolled(broadcastMsg)
     );
@@ -121,6 +132,12 @@ export class SignalRService {
   public updateDisplayName(displayName: string): Observable<void> {
     return this.invoke<UpdateDisplayNameRequest, void>('UpdateDisplayName', {
       displayName: displayName,
+    });
+  }
+
+  public updateCharacterInPlayName(characterName: string): Observable<void> {
+    return this.invoke<UpdateCharacterInPlayRequest, void>('UpdateCharacterInPlay', {
+      characterName: characterName,
     });
   }
 
@@ -178,6 +195,12 @@ export class SignalRService {
 
   private onDisplayNameUpdated(broadcastMessage: DisplayNameUpdatedBroadcast): void {
     this._onDisplayNameUpdated$.next(broadcastMessage);
+  }
+
+  private onCharacterInPlayUpdated(
+    broadcastMessage: CharacterInPlayUpdatedBroadcast
+  ): void {
+    this._onCharacterInPlayUpdated$.next(broadcastMessage);
   }
 
   private onTurnFinished(broadcastMsg: TurnFinishedBroadcast): void {

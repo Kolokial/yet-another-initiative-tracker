@@ -21,6 +21,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatTableModule } from '@angular/material/table';
 import { AppServiceStore } from 'src/app/app.service.store';
 import { ReadPlayerCharacterResponse } from 'src/app/types/api/PlayerCharacter';
+import { SignalRService } from 'src/app/shared-services/signal-r.service';
 
 @Component({
   selector: 'character-manager',
@@ -72,7 +73,8 @@ export class CharacterManagerComponent {
 
   constructor(
     private characterService: CharacterManagerApiService,
-    private appServiceStore: AppServiceStore
+    private appServiceStore: AppServiceStore,
+    private _signalR: SignalRService
   ) {}
 
   ngOnInit() {
@@ -156,6 +158,7 @@ export class CharacterManagerComponent {
         }
         const characterGroup = new CharacterListItem(x, x.playerCharacterId);
         this.setCharacterGroupStatusChange(characterGroup, x.playerCharacterId);
+        this.setupCharacterNameStatusChange(characterGroup);
         this.characterForm.push(characterGroup);
       });
       this.characterForm = [...this.characterForm];
@@ -168,11 +171,19 @@ export class CharacterManagerComponent {
   ): void {
     character.formGroup.statusChanges
       .pipe(debounceTime(1000))
-      .subscribe((value: FormControlStatus) => {
-        if (value === 'VALID') {
+      .subscribe((status: FormControlStatus) => {
+        if (status === 'VALID') {
           this.updateCharacter(character, playerCharacterId);
         }
       });
+  }
+
+  private setupCharacterNameStatusChange(character: CharacterListItem): void {
+    character.formGroup.controls.CharacterName.statusChanges.subscribe((status) => {
+      if (status === 'VALID') {
+        this._signalR.updateCharacterInPlayName(character.characterName).subscribe();
+      }
+    });
   }
 
   private updateCharacter(

@@ -1,8 +1,10 @@
-import { Injectable } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { AppServiceStore } from 'src/app/app.service.store';
 import { SignalRService } from 'src/app/shared-services/signal-r.service';
 import { Peer } from 'src/app/types/messageContracts/Peer';
+import { DiceRolledBroadcast } from 'src/app/types/messageContracts/rollDice/DiceRolledBroadcast';
+import { CharacterInPlayUpdatedBroadcast } from 'src/app/types/messageContracts/updateCharacterInPlay/CharacterInPlayUpdatedBroadcast';
+import { UpdateDisplayNameBroadcast } from 'src/app/types/messageContracts/updateDisplayName/DisplayNameUpdatedBroadcast';
 
 export class InitiativeListService {
   private _subscriptions: Subscription[] = [];
@@ -17,6 +19,7 @@ export class InitiativeListService {
     this.setupOnRoomLeftSubscription();
     this.setupOnTurnFinishedSubscription();
     this.setupOnDisplayNameUpdatedSubscription();
+    this.setupOnCharacterInPlayUpdatedSubscription();
 
     this._appStore.peerList.subscribe((peers) => {
       this._peers = peers;
@@ -66,30 +69,53 @@ export class InitiativeListService {
   }
 
   private setupOnDiceRolledSubscription(): void {
-    this._subscriptions.push(
-      this._signalR.onDiceRolled$.subscribe((x) => {
-        //this.initiatives.
-        const index = this._peers.findIndex((p) => p.auth0Id === x.auth0Id);
-        if (index === -1) {
-          return;
-        }
-
-        this._peers[index].diceRoll = x.diceRoll;
-
-        this._appStore.peerList.next(this._peers);
-      })
+    this.setupGenericUpdatePeerListItemSubscription(
+      this._signalR.onDiceRolled$,
+      (diceRoll: DiceRolledBroadcast) => diceRoll.auth0Id,
+      (peer: Peer, diceRoll: DiceRolledBroadcast) => {
+        peer.diceRoll = diceRoll.diceRoll;
+        return peer;
+      }
     );
   }
 
   private setupOnDisplayNameUpdatedSubscription(): void {
+    this.setupGenericUpdatePeerListItemSubscription(
+      this._signalR.onDisplayNameUpdated$,
+      (displayName: UpdateDisplayNameBroadcast) => displayName.auth0Id,
+      (peer: Peer, displayName: UpdateDisplayNameBroadcast) => {
+        peer.displayName = displayName.displayName;
+        return peer;
+      }
+    );
+  }
+
+  private setupOnCharacterInPlayUpdatedSubscription(): void {
+    this.setupGenericUpdatePeerListItemSubscription(
+      this._signalR.onCharacterInPlayUpdated$,
+      (char: CharacterInPlayUpdatedBroadcast) => char.auth0Id,
+      (peer: Peer, char: CharacterInPlayUpdatedBroadcast) => {
+        peer.characterName = char.characterName;
+        return peer;
+      }
+    );
+  }
+
+  private setupGenericUpdatePeerListItemSubscription<T>(
+    observable: Observable<T>,
+    getAuthId: (emittedResult: T) => string,
+    updatePeer: (peer: Peer, emittedResult: T) => Peer
+  ): void {
     this._subscriptions.push(
-      this._signalR.onDisplayNameUpdated$.subscribe((x) => {
-        const index = this._peers.findIndex((p) => p.auth0Id === x.auth0Id);
+      observable.subscribe((emittedResult) => {
+        const index = this._peers.findIndex(
+          (p) => p.auth0Id === getAuthId(emittedResult)
+        );
         if (index === -1) {
           return;
         }
 
-        this._peers[index].displayName = x.displayName;
+        this._peers[index] = updatePeer(this._peers[index], emittedResult);
 
         this._appStore.peerList.next(this._peers);
       })

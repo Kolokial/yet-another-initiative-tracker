@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
 using YAIT.MessageContracts;
@@ -6,6 +5,7 @@ using YAIT.MessageContracts.FinishTurn;
 using YAIT.MessageContracts.JoinRoom;
 using YAIT.MessageContracts.LeaveRoom;
 using YAIT.MessageContracts.RollDice;
+using YAIT.MessageContracts.UpdateCharacterInPlay;
 using YAIT.MessageContracts.UpdateDisplayName;
 
 namespace SignalRChat.Hubs;
@@ -90,9 +90,22 @@ public class ChatHub : Hub
             await Clients.Group(roomKey).SendAsync("DisplayNameUpdated", broadcastMessage);
             return;
         }
-        else
+    }
+
+    public async Task UpdateCharacterInPlay(Envelope<UpdateCharacterInPlayRequest> envelope)
+    {
+        var characterName = envelope.message.characterName;
+        var roomKey = _roomService.findPeerRoomKey(envelope.auth0Id);
+
+        if (roomKey != null)
         {
-            Console.WriteLine("Can't find room with user in");
+            var broadcastMessage = new CharacterInPlayUpdatedBroadcast()
+            {
+                auth0Id = envelope.auth0Id,
+                characterName = characterName,
+            };
+            await Clients.Group(roomKey).SendAsync("CharacterInPlayUpdated", broadcastMessage);
+            return;
         }
     }
 
