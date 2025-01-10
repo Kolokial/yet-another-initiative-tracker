@@ -68,7 +68,7 @@ export class RoomComponent implements HasTitle {
   }
 
   joinRoomWithCode(roomId: string) {
-    if (this.displayName.length) {
+    if (this.displayName.length && roomId !== null && roomId.length > 0) {
       this._roomService.joinRoom(roomId).subscribe((response: JoinRoomResponse) => {
         this._appServiceStore.peerList.next(response.peerList);
       });

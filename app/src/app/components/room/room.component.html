@@ -4,7 +4,12 @@
       <div class="flex-container flex-item card">
         <mat-form-field class="flex-item">
           <mat-label>Room Code</mat-label>
-          <input [(ngModel)]="roomCode" matInput placeholder="Ex. l33tdnd" />
+          <input
+            [(ngModel)]="roomCode"
+            matInput
+            placeholder="Ex. l33tdnd"
+            (keyup.enter)="joinRoomWithCode(roomCode)"
+          />
         </mat-form-field>
         <button
           class="flex-item"
