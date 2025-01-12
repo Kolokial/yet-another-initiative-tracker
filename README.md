@@ -39,3 +39,11 @@ dotnet dev-certs https --trust
 ### Mac/Linux
 
 `dotnet dev-certs https --trust; dotnet dev-certs https -ep "${HOME}/.aspnet/https/aspnetapp.pfx" -p "SecurePwdGoesHere"`
+
+## Building the projects
+
+For the API and SignalR:
+`dotnet publish --runtime linux-x64 --configuration Release --self-contained`
+
+For the Angular project:
+`npm run build`
