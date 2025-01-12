@@ -8,12 +8,14 @@
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
+}
 
+a[mat-list-item] .nav-wrapper {
+  display: flex;
 }
 
 .nav-label {
-  border: 1px solid red;
-  margin-bottom: 10px;
+  margin-left: 10px;
 }
 
 mat-sidenav {
