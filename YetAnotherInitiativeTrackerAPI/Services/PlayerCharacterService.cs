@@ -45,12 +45,19 @@ public class PlayerCharacterService
             throw new Exception($"Unable to find player character with Id: {playerCharacterId}");
         }
 
+
+        if (playerCharacter.IsInPlay != IsInPlay)
+        {
+            ResetCharactersInPlay(auth0Id);
+        }
+
         playerCharacter.CharacterName = CharacterName;
         playerCharacter.DexterityMod = DexterityMod;
         playerCharacter.AlertFeat = AlertFeat;
         playerCharacter.LuckStone = LuckStone;
         playerCharacter.IsInPlay = IsInPlay;
         playerCharacter.IsDeleted = IsDeleted;
+
         await _dbContext.SaveChangesAsync();
         return playerCharacter;
 
@@ -84,5 +91,19 @@ public class PlayerCharacterService
             return null;
         }
         return user;
+    }
+
+    private async void ResetCharactersInPlay(string auth0Id)
+    {
+        var user = GetUser(auth0Id);
+
+        var characters = _dbContext.PlayerCharacter.Where(c => c.UserId == user.UserId && c.IsInPlay == true);
+
+        foreach (var character in characters)
+        {
+            character.IsInPlay = false;
+        }
+
+        await _dbContext.SaveChangesAsync();
     }
 }
