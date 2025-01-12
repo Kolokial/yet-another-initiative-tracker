@@ -146,6 +146,7 @@ export class CharacterManagerComponent {
     });
     character.isInPlay = true;
     this.updateCharacter(character, character.characterId);
+    this._signalR.updateCharacterInPlayName(character.characterName).subscribe();
   }
 
   isSelected(row: CharacterListItem) {}
