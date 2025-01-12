@@ -28,18 +28,31 @@ public class UserController : ControllerBase
             return NotFound();
         }
 
-        return Ok(await _userService.GetUser(auth0Id));
+        var user = await _userService.GetUser(auth0Id);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(user);
     }
 
     [HttpPost]
-    public IActionResult Post()
+    public async Task<IActionResult> Post(CreateUserRequest user)
     {
-        return Ok();
+        var auth0Id = user.Auth0Id;
+        var displayName = user.DisplayName;
+        var result = await _userService.AddUser(auth0Id, displayName);
+
+        return result ? Ok() : NotFound();
     }
 
     [HttpPatch]
-    public IActionResult Patch()
+    public async Task<IActionResult> Patch(UpdateUserRequest user)
     {
-        return Ok();
+        var auth0Id = User.FindFirst("sub")?.Value;
+        var result = await _userService.UpdateUser(auth0Id, user.DisplayName);
+
+        return result ? Ok() : NotFound();
     }
 }

@@ -33,7 +33,7 @@ export class UserApiService extends BaseApi {
     this.auth.user$
       .pipe(
         mergeMap((user: AuthUser | null | undefined) => {
-          return this.postRequest(`/api/user`, { DisplayName: displayName });
+          return this.patchRequest(`/api/user`, { DisplayName: displayName });
         })
       )
       .subscribe({

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
+import { first } from 'rxjs';
 import { AppServiceStore } from 'src/app/app.service.store';
 import { UserApiService } from 'src/app/shared-services/user-api.service';
 import { ReadUserResponse } from 'src/app/types/api/User';
@@ -17,18 +18,17 @@ export class LoginService {
   }
 
   private init() {
-    this.auth0.idTokenClaims$.subscribe({
+    this.auth0.idTokenClaims$.pipe(first()).subscribe({
       next: (idToken) => {
         console.log(idToken);
         if (idToken) {
-          this.userApi.getUser().subscribe((ReadUserResponse: ReadUserResponse) => {
-            if (!ReadUserResponse) {
-              const displayName = idToken.name
-                ? idToken.name
-                : (idToken.nickname as string);
-              this.userApi.createUser(idToken['sub'], displayName);
-              this.appServiceStore.displayName.next(displayName);
-            }
+          const displayName = idToken.name ? idToken.name : (idToken.nickname as string);
+          this.userApi.getUser().subscribe({
+            error: (error) => {
+              if (error.status === 404) {
+                this.userApi.createUser(idToken['sub'], displayName);
+              }
+            },
           });
         } else {
           console.warn('No auth0Id from Auth0.');

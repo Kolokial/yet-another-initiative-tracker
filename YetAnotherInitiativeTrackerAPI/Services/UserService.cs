@@ -14,20 +14,39 @@ public class UserService
         return _dbContext.User.ToList();
     }
 
-    public void AddUser(string auth0id, string name)
+    public async Task<bool> AddUser(string auth0Id, string name)
     {
+        var checkIfUserExists = await GetUser(auth0Id);
+        if (checkIfUserExists != null)
+        {
+            return false;
+        }
+
         var user = new User
         {
-            Auth0Id = auth0id,
+            Auth0Id = auth0Id,
             DisplayName = name
         };
 
-        _dbContext.User.Add(user);
-        _dbContext.SaveChanges();  // Commit the transaction
+        await _dbContext.User.AddAsync(user);
+        await _dbContext.SaveChangesAsync();  // Commit the transaction
+        return true;
+    }
+
+    public async Task<bool> UpdateUser(string auth0Id, string displayName)
+    {
+        var user = await GetUser(auth0Id);
+        if (user != null)
+        {
+            user.DisplayName = displayName;
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+        return false;
     }
 
     public async Task<User> GetUser(string auth0Id)
     {
-        return await _dbContext.User.FirstOrDefaultAsync(user => user.Auth0Id == auth0Id);
+        return await _dbContext.User.SingleOrDefaultAsync(user => user.Auth0Id == auth0Id);
     }
 }

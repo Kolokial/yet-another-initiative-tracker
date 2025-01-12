@@ -1,16 +1,16 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { QrScannerService } from './components/qr-scanner/qr-scanner.service';
-import { map, mergeMap, Observable, of, switchMap } from 'rxjs';
+import { map, mergeMap, of, switchMap } from 'rxjs';
 import { HasTitle } from './types/Title';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { UserApiService } from './shared-services/user-api.service';
-import { AuthService } from '@auth0/auth0-angular';
+import { AuthService, User } from '@auth0/auth0-angular';
 import { AppServiceStore } from './app.service.store';
 import { CharacterManagerApiService } from './components/character-manager/character-manager.service';
 import { environment } from 'src/environments/environment';
 import { ReadUserResponse } from './types/api/User';
-import { LoginService } from './components/login/login.service';
 import { RoomService } from './components/room/room.service';
+import { LoginService } from './components/login/login.service';
 
 @Component({
   selector: 'app-root',
@@ -35,6 +35,7 @@ export class AppComponent {
   }
 
   constructor(
+    private _loginSevice: LoginService,
     private userApi: UserApiService,
     private characterService: CharacterManagerApiService,
     public auth0: AuthService,
@@ -56,11 +57,12 @@ export class AppComponent {
   ngOnInit() {
     //this.loginService.determineAuthenticationStatus();
     this.getUserDisplayNameOnStartup();
-    this.getSelectedCharacterOnStartup();
 
     this._roomService.roomId.subscribe((roomId) => {
       this.roomUrl = `room/${roomId}`;
     });
+
+    this.auth0.user$.subscribe((x) => console.log(x));
   }
 
   logout() {
@@ -83,10 +85,16 @@ export class AppComponent {
             : (value as string);
         })
       )
-      .subscribe((displayName) => {
-        if (displayName) {
-          this.appServiceStore.displayName.next(displayName);
-        }
+      .subscribe({
+        next: (displayName) => {
+          if (displayName) {
+            this.appServiceStore.displayName.next(displayName);
+          }
+          this.getSelectedCharacterOnStartup();
+        },
+        error: (x) => {
+          console.log(x);
+        },
       });
   }
 
