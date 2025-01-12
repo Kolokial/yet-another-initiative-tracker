@@ -64,7 +64,7 @@ export class AppComponent {
   }
 
   logout() {
-    this.auth0.logout({ logoutParams: { returnTo: ` ${environment.hostname}` } });
+    this.auth0.logout({ logoutParams: { returnTo: `${environment.hostname}/login` } });
   }
 
   private getUserDisplayNameOnStartup() {

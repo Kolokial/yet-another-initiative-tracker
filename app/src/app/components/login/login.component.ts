@@ -1,7 +1,6 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { Component, Inject, Input } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
-import { UserApiService } from '../../shared-services/user-api.service';
 import { MatIconModule } from '@angular/material/icon';
 
 import { environment } from 'src/environments/environment';
@@ -28,7 +27,7 @@ export class LoginComponent {
 
   logout() {
     this.auth.logout({
-      logoutParams: { returnTo: `http://${environment.hostname}/login` },
+      logoutParams: { returnTo: `${environment.hostname}/login` },
     });
   }
 }
