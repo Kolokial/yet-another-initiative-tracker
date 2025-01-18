@@ -9,6 +9,11 @@ jobs:
       - name: 🚚 Get Latest Code
         uses: actions/checkout@v3
 
+      - name: Install rsync
+        run: |
+          sudo apt-get update
+          sudo apt-get install rsync
+
       - name: Install Deps
         run: |
           npm install
