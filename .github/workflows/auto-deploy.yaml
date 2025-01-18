@@ -11,10 +11,10 @@ jobs:
 
       - name: Install Deps
         run: |
-          cd ${{ github.workspace }}/app/
           npm install
           npm run build
           ls -l ${{ github.workspace }}/app/dist/
+        working-directory: ${{ github.workspace }}/app/
 
       # - name: 📂 Sync Files
       #   uses: SamKirkland/web-deploy@v1
