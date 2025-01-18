@@ -1,0 +1,25 @@
+name: Deploy UI
+run-name: Deploying UI to Prod
+on: [push]
+jobs:
+  web-deploy:
+    runs-on: ubuntu-latest
+    container: node:21
+    steps:
+      - name: 🚚 Get Latest Code
+        uses: actions/checkout@v3
+
+      - name: Install Deps
+        run: |
+          cd ${{ github.workspace }}/app/
+          npm install
+          npm run build
+          ls -l ${{ github.workspace }}/app/dist/
+
+      # - name: 📂 Sync Files
+      #   uses: SamKirkland/web-deploy@v1
+      #   with:
+      #     target-server: ${{secrets.TARGET_SERVER}}
+      #     remote-user: ${{secrets.REMOTE_USER}}
+      #     private-ssh-key: ${{ secrets.SSH_KEY }}
+      #     destination-path: ${{secrets.DESTINATION_PATH}}
