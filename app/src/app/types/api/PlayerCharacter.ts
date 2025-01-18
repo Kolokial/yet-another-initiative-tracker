@@ -1,4 +1,4 @@
-export interface PlayerCharacter {
+interface PlayerCharacter {
   playerCharacterId: number;
   characterName: string;
   alertFeat: boolean;

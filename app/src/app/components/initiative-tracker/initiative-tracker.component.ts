@@ -47,7 +47,7 @@ export class InitiativeTrackerComponent implements HasTitle {
   }
 
   public get dexterityModifier(): number {
-    return this._dataStore.dexterityScore;
+    return this._appServiceStore.selectedCharacter.value?.dexterityMod || 0;
   }
 
   public set dexterityModifier(value: string) {
@@ -120,6 +120,7 @@ export class InitiativeTrackerComponent implements HasTitle {
 
   sendInitiative(initiativeString: number) {
     let initiativeValue = parseInt(`${initiativeString}`);
+    this._appServiceStore.lastDiceRoll = initiativeValue;
     if (this.dexterityModifier) {
       initiativeValue += this.dexterityModifier;
     }
@@ -127,6 +128,7 @@ export class InitiativeTrackerComponent implements HasTitle {
     if (this.alertFeat) {
       initiativeValue += 5;
     }
+
     this._signalR
       .rollDice(initiativeValue)
       .subscribe((x) => console.log('Dice roll sent:', initiativeValue));

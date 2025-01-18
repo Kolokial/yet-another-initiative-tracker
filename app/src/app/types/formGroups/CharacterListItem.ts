@@ -10,6 +10,14 @@ export class CharacterListItem {
     return this.formGroup.controls.CharacterName.value as string;
   }
 
+  public get playerCharacterId(): number {
+    return this.formGroup.controls.PlayerCharacterId.value as number;
+  }
+
+  public set playerCharacterId(id: number) {
+    this.formGroup.controls.PlayerCharacterId.setValue(id, { emitEvent: false });
+  }
+
   public get dexterityModifier(): number {
     return this.formGroup.controls.DexterityModifier.value as number;
   }
@@ -40,7 +48,7 @@ export class CharacterListItem {
 
   constructor(
     private _character: PlayerCharacter,
-    public characterId?: number
+    private _characterId?: number
   ) {
     this.formGroup = new FormGroup<CharacterFormGroup>({
       PlayerCharacterId: new FormControl<number>(_character.playerCharacterId),
@@ -50,5 +58,17 @@ export class CharacterListItem {
       HasLuckStone: new FormControl<boolean>(_character.luckStone),
       IsInPlay: new FormControl<boolean>(_character.isInPlay),
     });
+  }
+
+  public getPlayerCharacter(): PlayerCharacter {
+    return {
+      alertFeat: this.hasAlertFeat,
+      characterName: this.characterName,
+      dexterityMod: this.dexterityModifier,
+      isDeleted: this.isDeleted,
+      isInPlay: this.isInPlay,
+      luckStone: this.hasLuckStone,
+      playerCharacterId: this.playerCharacterId,
+    };
   }
 }
