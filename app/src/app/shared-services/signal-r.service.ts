@@ -21,6 +21,8 @@ import { DiceRolledBroadcast } from '../types/messageContracts/rollDice/DiceRoll
 import { JoinRoomResponse } from '../types/messageContracts/JoinRoom/JoinRoomResponse';
 import { CharacterInPlayUpdatedBroadcast } from '../types/messageContracts/updateCharacterInPlay/CharacterInPlayUpdatedBroadcast';
 import { UpdateCharacterInPlayRequest } from '../types/messageContracts/updateCharacterInPlay/UpdateCharacterInPlayRequest';
+import { UpdateInitiativeRequest } from '../types/messageContracts/updateInitiative/UpdateInitiativeRequest';
+import { InitiativeUpdatedBroadcast } from '../types/messageContracts/updateInitiative/InitiativeUpdatedBroadcast';
 
 @Injectable({
   providedIn: 'root',
@@ -56,6 +58,11 @@ export class SignalRService {
     return this._onTurnFinished$.asObservable();
   }
 
+  private _onInitiativeUpdated$ = new Subject<number>();
+  public get onInitiativeUpdated$(): Observable<number> {
+    return this._onInitiativeUpdated$.asObservable();
+  }
+
   private _hubConnection: signalR.HubConnection;
   constructor(
     private appStore: AppServiceStore,
@@ -77,7 +84,6 @@ export class SignalRService {
         console.assert(
           this._hubConnection.state === signalR.HubConnectionState.Connected
         );
-        console.log('SignalR Connected.', fulfilled);
         this.setupEventHubMethods();
       })
       .catch((reason) => {
@@ -112,11 +118,16 @@ export class SignalRService {
     this._hubConnection.on('TurnFinished', (broadcastMsg: TurnFinishedBroadcast) =>
       this.onTurnFinished(broadcastMsg)
     );
+    this._hubConnection.on(
+      'InitiativeUpdated',
+      (broadcastMsg: InitiativeUpdatedBroadcast) => this.onInitiativeUpdated(broadcastMsg)
+    );
   }
 
   public joinRoom(roomName: string): Observable<JoinRoomResponse> {
     return this.invoke<JoinRoomRequest, JoinRoomResponse>('JoinRoom', {
       roomName: roomName,
+      /* probably should have these passed in */
       characterName: this.appStore.selectedCharacter.value?.characterName,
       diceRoll: this.appStore.lastSentRoll,
       displayName: this.appStore.displayName.value,
@@ -138,6 +149,12 @@ export class SignalRService {
   public updateCharacterInPlayName(characterName: string): Observable<void> {
     return this.invoke<UpdateCharacterInPlayRequest, void>('UpdateCharacterInPlay', {
       characterName: characterName,
+    });
+  }
+
+  public updateInitiative(initiative: number): Observable<void> {
+    return this.invoke<UpdateInitiativeRequest, void>('UpdateInitiative', {
+      initiative: initiative,
     });
   }
 
@@ -208,6 +225,10 @@ export class SignalRService {
       this._onTurnFinished$.next(broadcastMsg.auth0Id);
       console.log(broadcastMsg.auth0Id, 'finished their turn.');
     });
+  }
+
+  private onInitiativeUpdated(broadcastMessage: InitiativeUpdatedBroadcast): void {
+    this._onInitiativeUpdated$.next(broadcastMessage.initiative);
   }
 
   private doAuthCheck(broadcastMessage: Broadcast, callback: () => void): void {

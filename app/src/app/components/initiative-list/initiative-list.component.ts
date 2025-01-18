@@ -57,8 +57,6 @@ export class InitiativeListComponent implements HasTitle {
     this.initiatives.setDataStream(this._appServiceStore.peerList);
   }
 
-  ngOnDestroy() {}
-
   leaveRoom() {
     this._roomService.leaveRoom();
   }

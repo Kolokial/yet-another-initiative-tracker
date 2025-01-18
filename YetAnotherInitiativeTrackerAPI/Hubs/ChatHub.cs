@@ -67,7 +67,7 @@ public class ChatHub : Hub
     public async Task FinishTurn(Envelope<FinishTurnRequest> envelope)
     {
         var roomKey = _roomService.findPeerRoomKey(envelope.auth0Id);
-        Console.WriteLine(roomKey);
+
         var broadcastMessage = new TurnFinishedBroadcast()
         {
             auth0Id = envelope.auth0Id
@@ -109,10 +109,26 @@ public class ChatHub : Hub
         }
     }
 
+    public async Task UpdateInitiative(Envelope<UpdateInitiativeRequest> envelope)
+    {
+        var roomKey = _roomService.findPeerRoomKey(envelope.auth0Id);
+
+        if (roomKey != null)
+        {
+            var broadcastMessage = new InitiativeUpdatedBroadcast()
+            {
+                auth0Id = envelope.auth0Id,
+                initiative = envelope.message.Initiative
+
+            };
+            await Clients.Group(roomKey).SendAsync("InitiativeUpdated", broadcastMessage);
+        }
+    }
+
     public async Task RollDice(Envelope<RollDiceRequest> envelope)
     {
         var roomKey = _roomService.findPeerRoomKey(envelope.auth0Id);
-        Console.WriteLine(roomKey);
+
         var broadcastMessage = new DiceRolledBroadcast()
         {
             auth0Id = envelope.auth0Id,

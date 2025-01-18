@@ -34,7 +34,7 @@ export interface UpdatePlayerCharacterRequest {
   characterName: string;
   alertFeat: boolean;
   luckStone: boolean;
-  dexterityModifier: number;
+  dexterityMod: number;
   isInPlay: boolean;
 }
 

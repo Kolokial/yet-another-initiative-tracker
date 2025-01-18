@@ -62,7 +62,7 @@ export class CharacterManagerApiService extends BaseApi {
         characterName: name,
         alertFeat: hasAlertFeat,
         luckStone: hasLuckStone,
-        dexterityModifier: dexMod,
+        dexterityMod: dexMod,
         isInPlay: isInPlay,
       }
     );

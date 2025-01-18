@@ -105,16 +105,16 @@ export class CharacterManagerComponent {
         character.dexterityModifier
       )
       .subscribe((createCharacterResponse) => {
-        character.characterId = createCharacterResponse.playerCharacterId;
+        character.playerCharacterId = createCharacterResponse.playerCharacterId;
         character.isUpdating = false;
         this.characterForm = [...this.characterForm];
       });
   }
 
   deleteCharacter(character: CharacterListItem) {
-    if (character.characterId) {
+    if (character.playerCharacterId) {
       this.characterService
-        .deleteCharacter(character.characterId as number)
+        .deleteCharacter(character.playerCharacterId as number)
         .subscribe(() => {
           const index = this.characterForm.findIndex((char) => char === character);
           if (index > -1) {
@@ -128,11 +128,12 @@ export class CharacterManagerComponent {
   }
 
   toggleCharacterSelect(character: CharacterListItem) {
-    if (!character.characterId) {
+    if (!character.playerCharacterId) {
       return;
     }
+
     this.appServiceStore.selectedCharacter.next({
-      playerCharacterId: character.characterId as number,
+      playerCharacterId: character.playerCharacterId as number,
       alertFeat: character.hasAlertFeat,
       characterName: character.characterName,
       dexterityMod: character.dexterityModifier,
@@ -145,8 +146,11 @@ export class CharacterManagerComponent {
       }
     });
     character.isInPlay = true;
-    this.updateCharacter(character, character.characterId);
+    this.updateCharacter(character, character.playerCharacterId);
     this._signalR.updateCharacterInPlayName(character.characterName).subscribe();
+    this._signalR.rollDice(
+      this.appServiceStore.lastDiceRoll + character.dexterityModifier
+    );
   }
 
   isSelected(row: CharacterListItem) {}
@@ -175,6 +179,7 @@ export class CharacterManagerComponent {
       .subscribe((status: FormControlStatus) => {
         if (status === 'VALID') {
           this.updateCharacter(character, playerCharacterId);
+          this.appServiceStore.selectedCharacter.next(character.getPlayerCharacter());
         }
       });
   }
