@@ -13,8 +13,9 @@ jobs:
         run: |
           npm install
           npm run build
-          ls -l ${{ github.workspace }}/app/dist/
         working-directory: ${{ github.workspace }}/app/
+      - run: |
+          ls ${{ github.workspace }}/app/dist/
 
       # - name: 📂 Sync Files
       #   uses: SamKirkland/web-deploy@v1
