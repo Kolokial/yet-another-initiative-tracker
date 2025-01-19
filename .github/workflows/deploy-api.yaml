@@ -16,6 +16,7 @@ jobs:
         run: |
           apt-get update
           apt-get -y install rsync
+          apt-get -y install openssh-client
         working-directory: ${{ github.workspace }}/app/
 
       - name: 🏗 Build
