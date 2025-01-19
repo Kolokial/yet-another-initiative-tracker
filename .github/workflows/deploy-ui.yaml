@@ -25,8 +25,10 @@ jobs:
       - run: |
           ls
         working-directory: ${{ github.workspace }}/app/dist/app/browser
+        name: List files
 
       - run: >
+          mkdir ~/.ssh    
           touch ~/.ssh/yait_ssh_key
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/yait_ssh_key
           rsync 
@@ -41,6 +43,7 @@ jobs:
           --progress 
           --delete-after ./* ${{secrets.REMOTE_USER}}@${{secrets.TARGET_SERVER}}:${{ secrets.DESTINATION_PATH}}
         working-directory: ${{ github.workspace }}/app/dist/app/browser
+        name: Uploading to Server
 
       # - name: 📂 Sync Files
       #   uses: SamKirkland/web-deploy@v1
