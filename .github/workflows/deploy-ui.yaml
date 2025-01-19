@@ -31,7 +31,7 @@ jobs:
           mkdir ~/.ssh    
           touch ~/.ssh/yait_ssh_key
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/yait_ssh_key
-          md5 ~/.ssh/yait_ssh_key
+          md5sum ~/.ssh/yait_ssh_key
 
       - name: ⬆ Uploading to Server
         run: >
