@@ -1,8 +1,8 @@
 name: Deploy API
-run-name: Deploying API to Prod
+run-name: Deploying API
 on:
   push:
-    #paths: YetAnotherInitiativeTrackerAPI/**
+    paths: YetAnotherInitiativeTrackerAPI/**
   workflow_dispatch:
 jobs:
   Deploy-API:
@@ -12,12 +12,12 @@ jobs:
       - name: 🚚 Get Latest Code
         uses: actions/checkout@v3
 
-      - name: 🧱 Install Deps
+      - name: 📦 Install rsync & SSH
         run: |
           apt-get update
           apt-get -y install rsync
           apt-get -y install openssh-client
-        working-directory: ${{ github.workspace }}/app/
+        working-directory: ${{ github.workspace }}
 
       - name: 🏗 Build
         run: |
@@ -35,7 +35,7 @@ jobs:
           md5sum /.ssh/yait_ssh_key
         working-directory: ${{ github.workspace }}
 
-      - name: ⬆ Uploading to Server
+      - name: ⬆ Sync to server
         run: >
           rsync 
           -e "
