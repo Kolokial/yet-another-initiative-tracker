@@ -2,28 +2,23 @@ name: Deploy UI
 run-name: Deploying UI to Prod
 on:
   push:
-    #paths: app/**
+    paths: app/**
   workflow_dispatch:
 jobs:
-  web-deploy:
+  Deploy-UI:
     runs-on: ubuntu-latest
     container: node:21
     steps:
       - name: 🚚 Get Latest Code
         uses: actions/checkout@v3
 
-      - name: 🧱 Install Deps
+      - name: 🧱 Install Deps & Build
         run: |
           apt-get update
           apt-get -y install rsync
           npm install
           npm run build
         working-directory: ${{ github.workspace }}/app/
-
-      - name: ✅ List files
-        run: |
-          ls
-        working-directory: ${{ github.workspace }}/app/dist/app/browser
 
       - name: 🔐 Prepping Keys
         run: |
@@ -48,14 +43,5 @@ jobs:
           --compress 
           --human-readable 
           --progress 
-          --delete-after ./* ${{secrets.REMOTE_USER}}@${{secrets.TARGET_SERVER}}:${{ secrets.DESTINATION_PATH}}
+          --delete-after ./* ${{secrets.REMOTE_USER}}@${{secrets.TARGET_SERVER}}:${{ secrets.UI_DESTINATION_PATH}}
         working-directory: ${{ github.workspace }}/app/dist/app/browser
-
-      # - name: 📂 Sync Files
-      #   uses: SamKirkland/web-deploy@v1
-      #   with:
-      #     target-server: ${{secrets.TARGET_SERVER}}
-      #     remote-user: ${{secrets.REMOTE_USER}}
-      #     private-ssh-key: ${{ secrets.SSH_KEY }}
-      #     destination-path: ${{ secrets.DESTINATION_PATH}}
-      #     source-path: ${{ github.workspace }}/app/dist/app/browser/
