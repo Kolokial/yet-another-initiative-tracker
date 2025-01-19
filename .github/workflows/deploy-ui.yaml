@@ -32,6 +32,7 @@ jobs:
           touch ~/.ssh/yait_ssh_key
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/yait_ssh_key
           md5sum ~/.ssh/yait_ssh_key
+        working-directory: ${{ github.workspace }}
 
       - name: ⬆ Uploading to Server
         run: >
