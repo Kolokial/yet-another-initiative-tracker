@@ -43,7 +43,6 @@ jobs:
           -i /.ssh/yait_ssh_key 
           -o StrictHostKeyChecking=no" 
           --archive 
-          --verbose 
           --compress 
           --human-readable 
           --progress 
