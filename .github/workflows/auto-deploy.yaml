@@ -2,7 +2,7 @@ name: Deploy UI
 run-name: Deploying UI to Prod
 on:
   push:
-    paths: app/**
+    #paths: app/**
   workflow_dispatch:
 jobs:
   web-deploy:
