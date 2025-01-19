@@ -29,5 +29,5 @@ jobs:
           target-server: ${{secrets.TARGET_SERVER}}
           remote-user: ${{secrets.REMOTE_USER}}
           private-ssh-key: ${{ secrets.SSH_KEY }}
-          destination-path: ${{secrets.DESTINATION_PATH}}
+          destination-path: ${{ secrets.DESTINATION_PATH}}
           source-path: ${{ github.workspace }}/app/dist/app/browser/
