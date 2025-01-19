@@ -1,6 +1,6 @@
 name: Deploy UI
 run-name: Deploying UI to Prod
-on: [push]
+on: [push, workflow_dispatch]
 jobs:
   web-deploy:
     runs-on: ubuntu-latest
