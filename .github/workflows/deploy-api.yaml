@@ -46,7 +46,9 @@ jobs:
           --compress 
           --human-readable 
           --progress 
-          --delete-after ./* ${{secrets.REMOTE_USER}}@${{secrets.TARGET_SERVER}}:${{ secrets.API_DESTINATION_PATH}}
+          --exclude=Data/ 
+          --delete-after ./* 
+          ${{secrets.REMOTE_USER}}@${{secrets.TARGET_SERVER}}:${{ secrets.API_DESTINATION_PATH}}
         working-directory: ${{ github.workspace }}/YetAnotherInitiativeTrackerAPI/bin/Release/net8.0/linux-x64/publish
 
       - name: 🔄 Restart Service
