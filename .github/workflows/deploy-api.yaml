@@ -1,16 +1,22 @@
-name: Deploy UI
-run-name: Deploying UI to Prod
+name: Deploy API
+run-name: Deploying API to Prod
 on:
   push:
     #paths: YetAnotherInitiativeTrackerAPI/**
   workflow_dispatch:
 jobs:
-  Deploy-UI:
+  Deploy-API:
     runs-on: ubuntu-latest
     container: mcr.microsoft.com/dotnet/sdk:8.0
     steps:
       - name: 🚚 Get Latest Code
         uses: actions/checkout@v3
+
+      - name: 🧱 Install Deps
+        run: |
+          apt-get update
+          apt-get -y install rsync
+        working-directory: ${{ github.workspace }}/app/
 
       - name: 🏗 Build
         run: |
