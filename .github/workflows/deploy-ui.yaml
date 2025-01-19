@@ -12,25 +12,30 @@ jobs:
       - name: 🚚 Get Latest Code
         uses: actions/checkout@v3
 
-      - name: Install rsync
+      - name: 🔃 Install rsync
         run: |
           apt-get update
           apt-get -y install rsync
 
-      - name: Install Deps
+      - name: 🧱 Install Deps
         run: |
           npm install
           npm run build
         working-directory: ${{ github.workspace }}/app/
-      - run: |
+
+      - name: ✅ List files
+        run: |
           ls
         working-directory: ${{ github.workspace }}/app/dist/app/browser
-        name: List files
 
-      - run: >
+      - name: 🔐 Prepping Keys
+        run: |
           mkdir ~/.ssh    
           touch ~/.ssh/yait_ssh_key
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/yait_ssh_key
+
+      - name: ⬆ Uploading to Server
+        run: >
           rsync 
           -e "
           ssh -p 22 
@@ -43,7 +48,6 @@ jobs:
           --progress 
           --delete-after ./* ${{secrets.REMOTE_USER}}@${{secrets.TARGET_SERVER}}:${{ secrets.DESTINATION_PATH}}
         working-directory: ${{ github.workspace }}/app/dist/app/browser
-        name: Uploading to Server
 
       # - name: 📂 Sync Files
       #   uses: SamKirkland/web-deploy@v1
