@@ -12,7 +12,7 @@ jobs:
       - name: Install rsync
         run: |
           apt-get update
-          apt-get install rsync
+          apt-get -y install rsync
 
       - name: Install Deps
         run: |
