@@ -50,11 +50,11 @@ jobs:
           --delete-after ./* ${{secrets.REMOTE_USER}}@${{secrets.TARGET_SERVER}}:${{ secrets.API_DESTINATION_PATH}}
         working-directory: ${{ github.workspace }}/YetAnotherInitiativeTrackerAPI/bin/Release/net8.0/linux-x64/publish
 
-      # - name: 📂 Sync Files
-      #   uses: SamKirkland/web-deploy@v1
-      #   with:
-      #     target-server: ${{secrets.TARGET_SERVER}}
-      #     remote-user: ${{secrets.REMOTE_USER}}
-      #     private-ssh-key: ${{ secrets.SSH_KEY }}
-      #     destination-path: ${{ secrets.DESTINATION_PATH}}
-      #     source-path: ${{ github.workspace }}/app/dist/app/browser/
+      - name: 🔄 Restart Service
+        run: >
+          ssh -p 22 
+          -i /.ssh/yait_ssh_key 
+          -o StrictHostKeyChecking=no
+          ${{secrets.REMOTE_USER}}@${{secrets.TARGET_SERVER}} 
+          "restart-yait-api"
+        working-directory: ${{ github.workspace }}/YetAnotherInitiativeTrackerAPI/bin/Release/net8.0/linux-x64/publish
