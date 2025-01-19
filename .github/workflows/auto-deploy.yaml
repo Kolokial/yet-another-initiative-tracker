@@ -11,8 +11,8 @@ jobs:
 
       - name: Install rsync
         run: |
-          sudo apt-get update
-          sudo apt-get install rsync
+          apt-get update
+          apt-get install rsync
 
       - name: Install Deps
         run: |
