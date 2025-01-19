@@ -28,10 +28,10 @@ jobs:
       - name: 🔐 Prepping Keys
         run: |
           pwd
-          mkdir ~/.ssh    
-          touch ~/.ssh/yait_ssh_key
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/yait_ssh_key
-          md5sum ~/.ssh/yait_ssh_key
+          mkdir /.ssh    
+          touch /.ssh/yait_ssh_key
+          echo "${{ secrets.SSH_KEY }}" > /.ssh/yait_ssh_key
+          md5sum /.ssh/yait_ssh_key
         working-directory: ${{ github.workspace }}
 
       - name: ⬆ Uploading to Server
@@ -39,7 +39,7 @@ jobs:
           rsync 
           -e "
           ssh -p 22 
-          -i ~/.ssh/yait_ssh_key 
+          -i /.ssh/yait_ssh_key 
           -o StrictHostKeyChecking=no" 
           --archive 
           --verbose 
