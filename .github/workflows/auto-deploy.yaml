@@ -1,6 +1,9 @@
 name: Deploy UI
 run-name: Deploying UI to Prod
-on: [push, workflow_dispatch]
+on:
+  push:
+    paths: app/**
+  workflow_dispatch:
 jobs:
   web-deploy:
     runs-on: ubuntu-latest
@@ -23,11 +26,27 @@ jobs:
           ls
         working-directory: ${{ github.workspace }}/app/dist/app/browser
 
-      - name: 📂 Sync Files
-        uses: SamKirkland/web-deploy@v1
-        with:
-          target-server: ${{secrets.TARGET_SERVER}}
-          remote-user: ${{secrets.REMOTE_USER}}
-          private-ssh-key: ${{ secrets.SSH_KEY }}
-          destination-path: ${{ secrets.DESTINATION_PATH}}
-          source-path: ${{ github.workspace }}/app/dist/app/browser/
+      - run: >
+          touch ~/.ssh/yait_ssh_key
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/yait_ssh_key
+          rsync 
+          -e "
+          ssh -p 22 
+          -i ~/.ssh/yait_ssh_key 
+          -o StrictHostKeyChecking=no" 
+          --archive 
+          --verbose 
+          --compress 
+          --human-readable 
+          --progress 
+          --delete-after ./* ${{secrets.REMOTE_USER}}@${{secrets.TARGET_SERVER}}:${{ secrets.DESTINATION_PATH}}
+        working-directory: ${{ github.workspace }}/app/dist/app/browser
+
+      # - name: 📂 Sync Files
+      #   uses: SamKirkland/web-deploy@v1
+      #   with:
+      #     target-server: ${{secrets.TARGET_SERVER}}
+      #     remote-user: ${{secrets.REMOTE_USER}}
+      #     private-ssh-key: ${{ secrets.SSH_KEY }}
+      #     destination-path: ${{ secrets.DESTINATION_PATH}}
+      #     source-path: ${{ github.workspace }}/app/dist/app/browser/
