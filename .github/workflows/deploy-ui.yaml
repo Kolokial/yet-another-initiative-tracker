@@ -12,13 +12,10 @@ jobs:
       - name: 🚚 Get Latest Code
         uses: actions/checkout@v3
 
-      - name: 🔃 Install rsync
+      - name: 🧱 Install Deps
         run: |
           apt-get update
           apt-get -y install rsync
-
-      - name: 🧱 Install Deps
-        run: |
           npm install
           npm run build
         working-directory: ${{ github.workspace }}/app/
@@ -30,9 +27,11 @@ jobs:
 
       - name: 🔐 Prepping Keys
         run: |
+          pwd
           mkdir ~/.ssh    
           touch ~/.ssh/yait_ssh_key
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/yait_ssh_key
+          md5 ~/.ssh/yait_ssh_key
 
       - name: ⬆ Uploading to Server
         run: >
