@@ -1,13 +1,12 @@
 /* Housekeeping! */
 import { Injectable } from '@angular/core';
 import { ROOM_ID } from '../../constants';
-import { BehaviorSubject, first, Observable, Subject, tap, throwError } from 'rxjs';
-import { Location } from '@angular/common';
+import { BehaviorSubject, first, Observable, throwError } from 'rxjs';
 import { AuthService } from '@auth0/auth0-angular';
 import { SignalRService } from 'src/app/shared-services/signal-r.service';
 import { JoinRoomResponse } from 'src/app/types/messageContracts/JoinRoom/JoinRoomResponse';
-import { ResponseBase } from 'src/app/types/messageContracts/ResponseBase';
 import { UserType } from 'src/app/types/formGroups/JoinRoom.FormGroup';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable({
   providedIn: 'root',
@@ -22,9 +21,13 @@ export class RoomService {
 
   constructor(
     private auth0: AuthService,
-    private signalR: SignalRService
+    private signalR: SignalRService,
+    private _snackBar: MatSnackBar
   ) {
     this.attemptToAutoJoinRoom();
+
+    this.setupOnPeerJoinedSnackBar();
+    this.setupOnPeerLeftSnackBar();
   }
 
   private attemptToAutoJoinRoom() {
@@ -62,5 +65,37 @@ export class RoomService {
 
         localStorage.removeItem(ROOM_ID);
       });
+  }
+
+  private setupOnPeerJoinedSnackBar() {
+    this.signalR.onRoomJoined$.subscribe((peer) => {
+      this.auth0.idTokenClaims$.pipe(first()).subscribe((idToken) => {
+        if (!idToken) {
+          return;
+        }
+
+        if (idToken['sub'] !== peer.auth0Id) {
+          this._snackBar.open(`${peer.displayName} has joined!`, 'X', {
+            duration: 3000,
+          });
+        }
+      });
+    });
+  }
+
+  public setupOnPeerLeftSnackBar() {
+    this.signalR.onRoomLeft$.subscribe((peer) => {
+      this.auth0.idTokenClaims$.pipe(first()).subscribe((idToken) => {
+        if (!idToken) {
+          return;
+        }
+
+        if (idToken['sub'] !== peer.auth0Id) {
+          this._snackBar.open(`${peer.displayName} has left!`, 'X', {
+            duration: 3000,
+          });
+        }
+      });
+    });
   }
 }

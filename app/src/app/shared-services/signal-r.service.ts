@@ -35,8 +35,8 @@ export class SignalRService {
     return this._onRoomJoined$.asObservable();
   }
 
-  private _onRoomLeft$ = new Subject<string>();
-  public get onRoomLeft$(): Observable<string> {
+  private _onRoomLeft$ = new Subject<Peer>();
+  public get onRoomLeft$(): Observable<Peer> {
     return this._onRoomLeft$.asObservable();
   }
 
@@ -200,7 +200,7 @@ export class SignalRService {
 
   private onRoomLeft(broadcastMessage: RoomLeftBroadcast): void {
     this.doAuthCheck(broadcastMessage, () => {
-      this._onRoomLeft$.next(broadcastMessage.auth0Id);
+      this._onRoomLeft$.next(broadcastMessage.peer);
       console.log('Peer Left: ', broadcastMessage);
     });
   }

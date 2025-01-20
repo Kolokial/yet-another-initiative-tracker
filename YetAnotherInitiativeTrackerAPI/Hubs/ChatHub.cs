@@ -69,12 +69,14 @@ public class ChatHub : Hub
     {
         var roomName = envelope.message.roomName;
         var auth0Id = envelope.auth0Id;
+        var peer = _roomService.GetRoomPeers(roomName).FirstOrDefault(x => x.auth0Id == envelope.auth0Id);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
         Console.WriteLine($"{auth0Id} left {roomName} with ConnectionId: {Context.ConnectionId}");
         _roomService.RemovePeerFromRoom(envelope.auth0Id);
         await Clients.Group(roomName).SendAsync("RoomLeft", new RoomLeftBroadcast()
         {
-            auth0Id = auth0Id
+            auth0Id = auth0Id,
+            peer = peer
         });
     }
 
