@@ -7,7 +7,8 @@
     "two": "concurrently --kill-others \"ng serve --host 0.0.0.0 --port 5200\" \"ng serve --host 0.0.0.0 --port 4200\"",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "analyze": "webpack --profile --json"
   },
   "private": true,
   "dependencies": {
@@ -29,7 +30,6 @@
     "@capacitor/ios": "^6.0.0",
     "@ionic/pwa-elements": "^3.3.0",
     "@microsoft/signalr": "^8.0.7",
-    "ngx-socket-io": "^4.7.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.3"
@@ -48,6 +48,8 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "prettier": "3.3.1",
-    "typescript": "~5.4.2"
+    "typescript": "~5.4.2",
+    "webpack-bundle-analyzer": "^4.10.2",
+    "webpack-cli": "^6.0.1"
   }
 }
