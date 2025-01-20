@@ -44,7 +44,7 @@ public class PlayerCharacterController : ControllerBase
     {
 
         var auth0Id = User.FindFirst("sub")?.Value;
-        Console.Write(auth0Id);
+        //Console.Write(auth0Id);
 
         if (auth0Id == null)
         {
@@ -59,7 +59,7 @@ public class PlayerCharacterController : ControllerBase
     public IActionResult ReadCharacter(int playerCharacterId)
     {
         var auth0Id = User.FindFirst("sub")?.Value;
-        Console.Write(auth0Id);
+        //Console.Write(auth0Id);
 
         if (auth0Id == null)
         {

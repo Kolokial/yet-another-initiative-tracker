@@ -28,7 +28,7 @@ public static class ServiceExtensions
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         var domain = $"https://{configuration["Auth0:Domain"]}/";
-        Console.WriteLine(domain);
+        //Console.WriteLine(domain);
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
