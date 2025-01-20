@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { environment } from 'src/environments/environment';
 import { AppServiceStore } from '../app.service.store';
-import { first, from, Observable, of, Subject, switchMap } from 'rxjs';
+import { defer, first, from, Observable, of, Subject, switchMap } from 'rxjs';
 
 import { AuthService, IdToken } from '@auth0/auth0-angular';
 import { Peer } from '../types/messageContracts/Peer';
@@ -23,6 +23,8 @@ import { CharacterInPlayUpdatedBroadcast } from '../types/messageContracts/updat
 import { UpdateCharacterInPlayRequest } from '../types/messageContracts/updateCharacterInPlay/UpdateCharacterInPlayRequest';
 import { UpdateInitiativeRequest } from '../types/messageContracts/updateInitiative/UpdateInitiativeRequest';
 import { InitiativeUpdatedBroadcast } from '../types/messageContracts/updateInitiative/InitiativeUpdatedBroadcast';
+import { ResponseBase } from '../types/messageContracts/ResponseBase';
+import { UserType } from '../types/formGroups/JoinRoom.FormGroup';
 
 @Injectable({
   providedIn: 'root',
@@ -124,13 +126,14 @@ export class SignalRService {
     );
   }
 
-  public joinRoom(roomName: string): Observable<JoinRoomResponse> {
+  public joinRoom(roomName: string, userType: UserType): Observable<JoinRoomResponse> {
     return this.invoke<JoinRoomRequest, JoinRoomResponse>('JoinRoom', {
       roomName: roomName,
       /* probably should have these passed in */
       characterName: this.appStore.selectedCharacter.value?.characterName,
       diceRoll: this.appStore.lastSentRoll,
       displayName: this.appStore.displayName.value,
+      isDungeonMaster: userType === 'dungeon-master',
     });
   }
 
@@ -179,9 +182,9 @@ export class SignalRService {
           message: message,
           dateStamp: new Date(),
         };
-        const promise = this._hubConnection.invoke(method, envelope);
+        const promise = this._hubConnection.invoke<O>(method, envelope);
         promise.catch(console.error);
-        return from(promise);
+        return defer(() => from(promise));
       })
     );
   }

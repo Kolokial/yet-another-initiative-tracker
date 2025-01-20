@@ -55,12 +55,7 @@ export class AppComponent {
   }
 
   ngOnInit() {
-    //this.loginService.determineAuthenticationStatus();
     this.getUserDisplayNameOnStartup();
-
-    this._roomService.roomId.subscribe((roomId) => {
-      this.roomUrl = `room/${roomId}`;
-    });
 
     this.auth0.user$.subscribe((x) => console.log(x));
   }
