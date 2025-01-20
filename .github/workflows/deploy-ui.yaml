@@ -3,6 +3,7 @@ run-name: Deploying UI
 on:
   push:
     paths: app/**
+    branches: main
   workflow_dispatch:
 jobs:
   Deploy-UI:
