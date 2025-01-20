@@ -13,10 +13,11 @@ import { RoomService } from './components/room/room.service';
 import { LoginService } from './components/login/login.service';
 
 @Component({
-  selector: 'app-root',
-  providers: [QrScannerService],
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
+    selector: 'app-root',
+    providers: [QrScannerService],
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss'],
+    standalone: false
 })
 export class AppComponent {
   message!: string;

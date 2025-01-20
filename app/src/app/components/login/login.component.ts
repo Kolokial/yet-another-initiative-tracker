@@ -6,11 +6,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { environment } from 'src/environments/environment';
 
 @Component({
-  selector: 'login',
-  standalone: true,
-  imports: [CommonModule, MatIconModule],
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.scss',
+    selector: 'login',
+    imports: [CommonModule, MatIconModule],
+    templateUrl: './login.component.html',
+    styleUrl: './login.component.scss'
 })
 export class LoginComponent {
   @Input()

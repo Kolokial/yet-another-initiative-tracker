@@ -16,19 +16,18 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { UserType } from 'src/app/types/formGroups/JoinRoom.FormGroup';
 
 @Component({
-  selector: 'room',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSlideToggleModule,
-    InitiativeListComponent,
-    MatButtonToggleModule,
-  ],
-  templateUrl: './room.component.html',
-  styleUrl: './room.component.scss',
+    selector: 'room',
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatInputModule,
+        MatButtonModule,
+        MatSlideToggleModule,
+        InitiativeListComponent,
+        MatButtonToggleModule,
+    ],
+    templateUrl: './room.component.html',
+    styleUrl: './room.component.scss'
 })
 export class RoomComponent implements HasTitle {
   activeLink: any;

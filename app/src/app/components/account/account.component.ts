@@ -10,11 +10,10 @@ import { ReadUserResponse } from '@shared-types/api/User';
 import { SignalRService } from 'src/app/shared-services/signal-r.service';
 
 @Component({
-  selector: 'account',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatInputModule],
-  templateUrl: './account.component.html',
-  styleUrl: './account.component.scss',
+    selector: 'account',
+    imports: [CommonModule, ReactiveFormsModule, MatInputModule],
+    templateUrl: './account.component.html',
+    styleUrl: './account.component.scss'
 })
 export class AccountComponent {
   /* TODO: Add user displayname to initiative order, under character name.*/
