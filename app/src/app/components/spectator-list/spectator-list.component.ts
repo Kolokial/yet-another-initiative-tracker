@@ -6,10 +6,10 @@ import { TableListDataSource } from 'src/app/types/TableListDataSource';
 
 @Component({
   selector: 'spectator-list',
-  standalone: true,
   imports: [AsyncPipe, MatTableModule],
   templateUrl: './spectator-list.component.html',
   styleUrl: './spectator-list.component.scss',
+  standalone: true,
 })
 export class SpectatorListComponent {
   public spectatorList!: TableListDataSource<HasAuth0Id>;

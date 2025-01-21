@@ -3,6 +3,7 @@ run-name: Deploying API
 on:
   push:
     paths: YetAnotherInitiativeTrackerAPI/**
+    branches: main
   workflow_dispatch:
 jobs:
   Deploy-API:

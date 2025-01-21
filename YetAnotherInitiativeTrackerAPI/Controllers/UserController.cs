@@ -21,7 +21,7 @@ public class UserController : ControllerBase
     public async Task<IActionResult> Get()
     {
         var auth0Id = User.FindFirst("sub")?.Value;
-        Console.Write(auth0Id);
+        //Console.Write(auth0Id);
 
         if (auth0Id == null)
         {

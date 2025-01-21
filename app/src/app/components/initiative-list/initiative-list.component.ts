@@ -17,18 +17,16 @@ import { Peer } from 'src/app/types/messageContracts/Peer';
 
 @Component({
   selector: 'initiative-list',
-  standalone: true,
   imports: [
     CommonModule,
-    NgFor,
     MatTableModule,
     AsyncPipe,
-    RoomComponent,
     MatIconModule,
     MatButtonModule,
     MatInputModule,
     SpectatorListComponent,
   ],
+  standalone: true,
   templateUrl: './initiative-list.component.html',
   styleUrl: './initiative-list.component.scss',
 })

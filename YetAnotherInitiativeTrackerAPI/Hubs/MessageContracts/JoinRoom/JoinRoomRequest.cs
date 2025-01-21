@@ -6,4 +6,5 @@ public class JoinRoomRequest
     public string displayName { get; set; }
     public int? diceRoll { get; set; }
     public string? characterName { get; set; }
+    public bool isDungeonMaster { get; set; }
 }

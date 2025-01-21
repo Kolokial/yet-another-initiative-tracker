@@ -1,4 +1,4 @@
-import { APP_INITIALIZER, NgModule } from '@angular/core';
+import { NgModule, inject, provideAppInitializer } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 import { AppComponent } from './app.component';
@@ -63,18 +63,18 @@ const config: SocketIoConfig = {
   ],
   providers: [
     AppServiceStore,
-    SignalRService,
-    {
-      provide: APP_INITIALIZER,
-      useFactory: initiativeListServiceInit,
-      deps: [SignalRService, AppServiceStore],
-      multi: true,
-    },
+
+    provideAppInitializer(() => {
+      const initializerFn = initiativeListServiceInit(
+        inject(SignalRService),
+        inject(AppServiceStore)
+      );
+      return initializerFn();
+    }),
     provideAnimationsAsync(),
     QrScannerService,
     provideRouter(routes, withComponentInputBinding()),
-    RoomService,
-    LoginService,
+
     provideAuth0({
       domain: 'dev-sulaeis36e3ik0p1.us.auth0.com',
       clientId: 'LaP8gm04fP6EnxRhmVBc8F86lCUKKAUA',

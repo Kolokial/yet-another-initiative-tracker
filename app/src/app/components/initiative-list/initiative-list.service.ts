@@ -44,8 +44,8 @@ export class InitiativeListService {
 
   private setupOnRoomLeftSubscription(): void {
     this._subscriptions.push(
-      this._signalR.onRoomLeft$.subscribe((auth0Id: string) => {
-        const index = this._peers.findIndex((x) => x.auth0Id === auth0Id);
+      this._signalR.onRoomLeft$.subscribe((peer: Peer) => {
+        const index = this._peers.findIndex((x) => x.auth0Id === peer.auth0Id);
         if (index === -1) {
           return;
         }

@@ -1,6 +1,4 @@
 /* Housekeeping! */
-using System.Text.Json;
-using Microsoft.EntityFrameworkCore.Metadata;
 using YAIT.MessageContracts;
 
 public class RoomService
@@ -34,6 +32,7 @@ public class RoomService
             previousPeer.characterName = peer.characterName;
             previousPeer.diceRoll = peer.diceRoll;
             previousPeer.displayName = peer.displayName;
+            previousPeer.isDungeonMaster = peer.isDungeonMaster;
         }
         else
         {
@@ -87,5 +86,16 @@ public class RoomService
         }
         Console.WriteLine("Can't find room with user in");
         return null;
+    }
+
+    public bool hasDungeonMasterJoinedRoom(string roomName)
+    {
+        var peers = GetRoomPeers(roomName);
+        if (peers.Count == 0)
+        {
+            return false;
+        }
+        var peer = peers.FirstOrDefault<Peer>(p => p.isDungeonMaster);
+        return peer != null;
     }
 }

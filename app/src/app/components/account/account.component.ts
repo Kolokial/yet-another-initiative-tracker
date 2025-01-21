@@ -10,11 +10,10 @@ import { ReadUserResponse } from '@shared-types/api/User';
 import { SignalRService } from 'src/app/shared-services/signal-r.service';
 
 @Component({
-  selector: 'account',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatInputModule],
-  templateUrl: './account.component.html',
-  styleUrl: './account.component.scss',
+    selector: 'account',
+    imports: [CommonModule, ReactiveFormsModule, MatInputModule],
+    templateUrl: './account.component.html',
+    styleUrl: './account.component.scss'
 })
 export class AccountComponent {
   /* TODO: Add user displayname to initiative order, under character name.*/
@@ -33,11 +32,10 @@ export class AccountComponent {
       .subscribe((displayName) => {
         this._user.updateUserDisplayName(displayName);
         this._appServiceStore.displayName.next(displayName);
-        if (this._room.roomId && this._room.myPeerId) {
-          this._signalR
-            .updateDisplayName(displayName)
-            .subscribe((x) => console.log('DisplayName Updated'));
-        }
+
+        this._signalR
+          .updateDisplayName(displayName)
+          .subscribe((x) => console.log('DisplayName Updated'));
       });
   }
 

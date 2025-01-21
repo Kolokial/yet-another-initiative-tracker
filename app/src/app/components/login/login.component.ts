@@ -7,10 +7,10 @@ import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'login',
-  standalone: true,
   imports: [CommonModule, MatIconModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
+  standalone: true,
 })
 export class LoginComponent {
   @Input()

@@ -13,10 +13,11 @@ import { RoomService } from './components/room/room.service';
 import { LoginService } from './components/login/login.service';
 
 @Component({
-  selector: 'app-root',
-  providers: [QrScannerService],
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
+    selector: 'app-root',
+    providers: [QrScannerService],
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss'],
+    standalone: false
 })
 export class AppComponent {
   message!: string;
@@ -55,12 +56,7 @@ export class AppComponent {
   }
 
   ngOnInit() {
-    //this.loginService.determineAuthenticationStatus();
     this.getUserDisplayNameOnStartup();
-
-    this._roomService.roomId.subscribe((roomId) => {
-      this.roomUrl = `room/${roomId}`;
-    });
 
     this.auth0.user$.subscribe((x) => console.log(x));
   }

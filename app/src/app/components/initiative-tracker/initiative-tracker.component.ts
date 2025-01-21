@@ -23,7 +23,6 @@ import { SignalRService } from 'src/app/shared-services/signal-r.service';
 
 @Component({
   selector: 'initiative-tracker',
-  standalone: true,
   imports: [
     CommonModule,
     MatButtonModule,
@@ -36,6 +35,7 @@ import { SignalRService } from 'src/app/shared-services/signal-r.service';
   ],
   templateUrl: './initiative-tracker.component.html',
   styleUrl: './initiative-tracker.component.scss',
+  standalone: true,
 })
 export class InitiativeTrackerComponent implements HasTitle {
   @Input() public players: string[] = [];

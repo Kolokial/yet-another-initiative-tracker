@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
 using YAIT.MessageContracts;
 using YAIT.MessageContracts.FinishTurn;
@@ -28,14 +27,27 @@ public class ChatHub : Hub
     {
 
         var roomName = envelope.message.roomName;
+
+        if (envelope.message.isDungeonMaster && _roomService.hasDungeonMasterJoinedRoom(roomName))
+        {
+            return new JoinRoomResponse()
+            {
+                dateStamp = new DateTime(),
+                peerList = new List<Peer>(),
+                errorMessage = $"The Dungeon Master has already joined room: {roomName}",
+                isRoomJoined = false
+            };
+        }
+
         var peer = new Peer()
         {
             auth0Id = envelope.auth0Id,
             characterName = envelope.message.characterName,
             diceRoll = envelope.message.diceRoll == null ? 0 : (int)envelope.message.diceRoll,
-            displayName = envelope.message.displayName
+            displayName = envelope.message.displayName,
+            isDungeonMaster = envelope.message.isDungeonMaster
         };
-        Console.WriteLine($"{envelope.auth0Id} joined {envelope.message.roomName} with ConnectionId: {Context.ConnectionId}");
+        //Console.WriteLine($"{envelope.auth0Id} joined {envelope.message.roomName} with ConnectionId: {Context.ConnectionId}");
         await Groups.AddToGroupAsync(Context.ConnectionId, envelope.message.roomName);
         _roomService.AddPeerToRoom(envelope.message.roomName, peer);
         var broadcastMessage = new RoomJoinedBroadcast()
@@ -47,7 +59,9 @@ public class ChatHub : Hub
         await Clients.Group(envelope.message.roomName).SendAsync("RoomJoined", broadcastMessage);
         return new JoinRoomResponse()
         {
-            peerList = _roomService.GetRoomPeers(roomName)
+            dateStamp = new DateTime(),
+            peerList = _roomService.GetRoomPeers(roomName),
+            isRoomJoined = true
         };
     }
 
@@ -55,12 +69,14 @@ public class ChatHub : Hub
     {
         var roomName = envelope.message.roomName;
         var auth0Id = envelope.auth0Id;
+        var peer = _roomService.GetRoomPeers(roomName).FirstOrDefault(x => x.auth0Id == envelope.auth0Id);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
         Console.WriteLine($"{auth0Id} left {roomName} with ConnectionId: {Context.ConnectionId}");
         _roomService.RemovePeerFromRoom(envelope.auth0Id);
         await Clients.Group(roomName).SendAsync("RoomLeft", new RoomLeftBroadcast()
         {
-            auth0Id = auth0Id
+            auth0Id = auth0Id,
+            peer = peer
         });
     }
 
