@@ -29,6 +29,10 @@ export class InitiativeListService {
   private setupOnRoomJoinedSubscription(): void {
     this._subscriptions.push(
       this._signalR.onRoomJoined$.subscribe((peer: Peer) => {
+        if (peer.isDungeonMaster) {
+          return;
+        }
+
         if (this._peers.findIndex((x) => x.auth0Id === peer.auth0Id) === -1) {
           this._peers.push(peer);
         }

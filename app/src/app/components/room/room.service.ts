@@ -74,8 +74,9 @@ export class RoomService {
           return;
         }
 
+        const emoji = peer.isDungeonMaster ? '🎲' : '⚔';
         if (idToken['sub'] !== peer.auth0Id) {
-          this._snackBar.open(`${peer.displayName} has joined!`, 'X', {
+          this._snackBar.open(`${emoji} ${peer.displayName} has joined!`, '❌', {
             duration: 3000,
           });
         }

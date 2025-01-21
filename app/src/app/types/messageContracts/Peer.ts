@@ -3,4 +3,6 @@ export interface Peer {
   displayName: string;
   diceRoll: number;
   characterName?: string;
+  isDungeonMaster?: boolean;
+  isNonPlayableCharacter?: boolean;
 }
