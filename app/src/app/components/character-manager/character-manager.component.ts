@@ -24,29 +24,33 @@ import { ReadPlayerCharacterResponse } from 'src/app/types/api/PlayerCharacter';
 import { SignalRService } from 'src/app/shared-services/signal-r.service';
 
 @Component({
-    selector: 'character-manager',
-    imports: [
-        CommonModule,
-        FormsModule,
-        MatInputModule,
-        ReactiveFormsModule,
-        MatSlideToggleModule,
-        MatExpansionModule,
-        MatRadioModule,
-        MatIcon,
-        MatButtonModule,
-        MatProgressSpinnerModule,
-        MatTableModule,
-    ],
-    templateUrl: './character-manager.component.html',
-    styleUrl: './character-manager.component.scss',
-    animations: [
-        trigger('detailExpand', [
-            state('collapsed,void', style({ height: '0px', minHeight: '0' })),
-            state('expanded', style({ height: '*' })),
-            transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-        ]),
-    ]
+  selector: 'character-manager',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatInputModule,
+    ReactiveFormsModule,
+    MatSlideToggleModule,
+    MatExpansionModule,
+    MatRadioModule,
+    MatIcon,
+    MatButtonModule,
+    MatProgressSpinnerModule,
+    MatTableModule,
+  ],
+  templateUrl: './character-manager.component.html',
+  styleUrl: './character-manager.component.scss',
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed,void', style({ height: '0px', minHeight: '0' })),
+      state('expanded', style({ height: '*' })),
+      transition(
+        'expanded <=> collapsed',
+        animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')
+      ),
+    ]),
+  ],
 })
 export class CharacterManagerComponent {
   /* TODO: 

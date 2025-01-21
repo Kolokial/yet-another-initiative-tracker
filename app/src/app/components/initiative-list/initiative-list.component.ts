@@ -16,20 +16,19 @@ import { SignalRService } from 'src/app/shared-services/signal-r.service';
 import { Peer } from 'src/app/types/messageContracts/Peer';
 
 @Component({
-    selector: 'initiative-list',
-    imports: [
-        CommonModule,
-        NgFor,
-        MatTableModule,
-        AsyncPipe,
-        RoomComponent,
-        MatIconModule,
-        MatButtonModule,
-        MatInputModule,
-        SpectatorListComponent,
-    ],
-    templateUrl: './initiative-list.component.html',
-    styleUrl: './initiative-list.component.scss'
+  selector: 'initiative-list',
+  imports: [
+    CommonModule,
+    MatTableModule,
+    AsyncPipe,
+    MatIconModule,
+    MatButtonModule,
+    MatInputModule,
+    SpectatorListComponent,
+  ],
+  standalone: true,
+  templateUrl: './initiative-list.component.html',
+  styleUrl: './initiative-list.component.scss',
 })
 export class InitiativeListComponent implements HasTitle {
   /* Todo: now we need to work out whose turn it is */

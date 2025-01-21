@@ -22,19 +22,20 @@ import { AppServiceStore } from 'src/app/app.service.store';
 import { SignalRService } from 'src/app/shared-services/signal-r.service';
 
 @Component({
-    selector: 'initiative-tracker',
-    imports: [
-        CommonModule,
-        MatButtonModule,
-        MatDividerModule,
-        MatIconModule,
-        MatInputModule,
-        MatFormFieldModule,
-        FormsModule,
-        MatCheckboxModule,
-    ],
-    templateUrl: './initiative-tracker.component.html',
-    styleUrl: './initiative-tracker.component.scss'
+  selector: 'initiative-tracker',
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatDividerModule,
+    MatIconModule,
+    MatInputModule,
+    MatFormFieldModule,
+    FormsModule,
+    MatCheckboxModule,
+  ],
+  templateUrl: './initiative-tracker.component.html',
+  styleUrl: './initiative-tracker.component.scss',
+  standalone: true,
 })
 export class InitiativeTrackerComponent implements HasTitle {
   @Input() public players: string[] = [];

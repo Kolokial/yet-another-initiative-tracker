@@ -63,16 +63,18 @@ const config: SocketIoConfig = {
   ],
   providers: [
     AppServiceStore,
-    SignalRService,
+
     provideAppInitializer(() => {
-        const initializerFn = (initiativeListServiceInit)(inject(SignalRService), inject(AppServiceStore));
-        return initializerFn();
-      }),
+      const initializerFn = initiativeListServiceInit(
+        inject(SignalRService),
+        inject(AppServiceStore)
+      );
+      return initializerFn();
+    }),
     provideAnimationsAsync(),
     QrScannerService,
     provideRouter(routes, withComponentInputBinding()),
-    RoomService,
-    LoginService,
+
     provideAuth0({
       domain: 'dev-sulaeis36e3ik0p1.us.auth0.com',
       clientId: 'LaP8gm04fP6EnxRhmVBc8F86lCUKKAUA',
