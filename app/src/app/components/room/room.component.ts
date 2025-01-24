@@ -14,6 +14,8 @@ import { JoinRoomResponse } from 'src/app/types/messageContracts/JoinRoom/JoinRo
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { UserType } from 'src/app/types/formGroups/JoinRoom.FormGroup';
+import { DmToolsComponent } from '../dm-tools/dm-tools.component';
+import { MatTabsModule } from '@angular/material/tabs';
 
 @Component({
   selector: 'room',
@@ -26,6 +28,8 @@ import { UserType } from 'src/app/types/formGroups/JoinRoom.FormGroup';
     MatSlideToggleModule,
     InitiativeListComponent,
     MatButtonToggleModule,
+    MatTabsModule,
+    DmToolsComponent,
   ],
   templateUrl: './room.component.html',
   styleUrl: './room.component.scss',

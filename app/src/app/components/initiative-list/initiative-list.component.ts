@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, Input, ViewChild } from '@angular/core';
 import { AsyncPipe, CommonModule, NgFor } from '@angular/common';
 import { MatTable, MatTableModule } from '@angular/material/table';
-import { Observable, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import { HasTitle } from '../../types/Title';
 import { AppServiceStore } from 'src/app/app.service.store';
 import { RoomComponent } from '../room/room.component';

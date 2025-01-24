@@ -43,6 +43,16 @@
     </div>
   </div>
 } @else {
-  <p>RoomId: {{ roomId | async }}</p>
-  <initiative-list></initiative-list>
+  @if (userType === 'dungeon-master') {
+    <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center">
+      <mat-tab label="RoomId: {{ roomId | async }}">
+        <initiative-list></initiative-list>
+      </mat-tab>
+      <mat-tab label="DM Tools"> <dm-tools></dm-tools></mat-tab>
+      <!-- <mat-tab label="Third">Content 3</mat-tab> -->
+    </mat-tab-group>
+  } @else {
+    <p>RoomId: {{ roomId | async }}</p>
+    <initiative-list></initiative-list>
+  }
 }

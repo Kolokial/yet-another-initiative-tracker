@@ -1,0 +1,21 @@
+<p>dm-tools works!</p>
+
+<table mat-table [dataSource]="npcs" class="mat-elevation-z8" matSort>
+  <ng-container matColumnDef="displayName">
+    <th mat-header-cell *matHeaderCellDef>Player</th>
+    <td mat-cell *matCellDef="let element">
+      <div class="player-character-name">{{ element.characterName }}</div>
+      <span class="display-name">{{ element.displayName }}</span>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="initiativeValue">
+    <th mat-header-cell *matHeaderCellDef>Initiative</th>
+    <td mat-cell *matCellDef="let element">
+      {{ element.diceRoll }}
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+</table>
