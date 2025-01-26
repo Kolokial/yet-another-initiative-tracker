@@ -29,8 +29,7 @@ public class RoomService
         var previousPeer = peers.FirstOrDefault(p => p.auth0Id == peer.auth0Id);
         if (previousPeer != null)
         {
-            previousPeer.characterName = peer.characterName;
-            previousPeer.diceRoll = peer.diceRoll;
+            previousPeer.characters = peer.characters;
             previousPeer.displayName = peer.displayName;
             previousPeer.isDungeonMaster = peer.isDungeonMaster;
         }
@@ -59,7 +58,7 @@ public class RoomService
 
     public string? UpdateDisplayName(string auth0Id, string displayName)
     {
-        var roomKey = findPeerRoomKey(auth0Id);
+        var roomKey = FindPeerRoomKey(auth0Id);
         List<Peer> room;
         if (roomKey != null && roomList.TryGetValue(roomKey, out room))
         {
@@ -70,7 +69,7 @@ public class RoomService
         return roomKey;
     }
 
-    public string findPeerRoomKey(string auth0Id)
+    public string FindPeerRoomKey(string auth0Id)
     {
         // Console.WriteLine(auth0Id);
         // Console.WriteLine(JsonSerializer.Serialize(roomList));
@@ -97,5 +96,39 @@ public class RoomService
         }
         var peer = peers.FirstOrDefault<Peer>(p => p.isDungeonMaster);
         return peer != null;
+    }
+
+    public void AddCharacterToPeer(string auth0Id, Character character)
+    {
+        foreach (var room in roomList)
+        {
+            foreach (var peer in room.Value)
+            {
+                if (peer.auth0Id == auth0Id)
+                {
+                    peer.characters.Append(character);
+                }
+            }
+        }
+
+    }
+
+    public void RemoveCharacterFromPeer(string auth0Id, int characterId)
+    {
+        foreach (var room in roomList)
+        {
+            foreach (var peer in room.Value)
+            {
+                if (peer.auth0Id == auth0Id)
+                {
+                    var character = peer.characters.SingleOrDefault(x => x.Id == characterId);
+                    if (character != null)
+                    {
+                        peer.characters.Remove(character);
+                    }
+                }
+            }
+        }
+
     }
 }

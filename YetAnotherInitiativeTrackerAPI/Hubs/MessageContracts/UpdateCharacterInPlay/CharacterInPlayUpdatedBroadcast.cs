@@ -1,6 +1,6 @@
-using YAIT.MessageContracts;
+namespace YAIT.MessageContracts.UpdateCharacterInPlay;
 
 public class CharacterInPlayUpdatedBroadcast : Broadcast
 {
-    public string characterName { get; set; }
+    public Character character { get; set; }
 }

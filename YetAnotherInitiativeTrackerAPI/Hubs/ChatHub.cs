@@ -1,8 +1,12 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.OpenApi.Extensions;
 using YAIT.MessageContracts;
+using YAIT.MessageContracts.AddCharacter;
 using YAIT.MessageContracts.FinishTurn;
 using YAIT.MessageContracts.JoinRoom;
 using YAIT.MessageContracts.LeaveRoom;
+using YAIT.MessageContracts.RemoveCharacter;
 using YAIT.MessageContracts.RollDice;
 using YAIT.MessageContracts.UpdateCharacterInPlay;
 using YAIT.MessageContracts.UpdateDisplayName;
@@ -42,8 +46,7 @@ public class ChatHub : Hub
         var peer = new Peer()
         {
             auth0Id = envelope.auth0Id,
-            characterName = envelope.message.characterName,
-            diceRoll = envelope.message.diceRoll == null ? 0 : (int)envelope.message.diceRoll,
+            characters = envelope.message.characters == null ? new List<Character>() : envelope.message.characters,
             displayName = envelope.message.displayName,
             isDungeonMaster = envelope.message.isDungeonMaster
         };
@@ -82,7 +85,7 @@ public class ChatHub : Hub
 
     public async Task FinishTurn(Envelope<FinishTurnRequest> envelope)
     {
-        var roomKey = _roomService.findPeerRoomKey(envelope.auth0Id);
+        var roomKey = _roomService.FindPeerRoomKey(envelope.auth0Id);
 
         var broadcastMessage = new TurnFinishedBroadcast()
         {
@@ -110,15 +113,15 @@ public class ChatHub : Hub
 
     public async Task UpdateCharacterInPlay(Envelope<UpdateCharacterInPlayRequest> envelope)
     {
-        var characterName = envelope.message.characterName;
-        var roomKey = _roomService.findPeerRoomKey(envelope.auth0Id);
+        var character = envelope.message.character;
+        var roomKey = _roomService.FindPeerRoomKey(envelope.auth0Id);
 
         if (roomKey != null)
         {
             var broadcastMessage = new CharacterInPlayUpdatedBroadcast()
             {
                 auth0Id = envelope.auth0Id,
-                characterName = characterName,
+                character = character,
             };
             await Clients.Group(roomKey).SendAsync("CharacterInPlayUpdated", broadcastMessage);
             return;
@@ -127,7 +130,7 @@ public class ChatHub : Hub
 
     public async Task UpdateInitiative(Envelope<UpdateInitiativeRequest> envelope)
     {
-        var roomKey = _roomService.findPeerRoomKey(envelope.auth0Id);
+        var roomKey = _roomService.FindPeerRoomKey(envelope.auth0Id);
 
         if (roomKey != null)
         {
@@ -143,7 +146,7 @@ public class ChatHub : Hub
 
     public async Task RollDice(Envelope<RollDiceRequest> envelope)
     {
-        var roomKey = _roomService.findPeerRoomKey(envelope.auth0Id);
+        var roomKey = _roomService.FindPeerRoomKey(envelope.auth0Id);
 
         var broadcastMessage = new DiceRolledBroadcast()
         {
@@ -151,5 +154,26 @@ public class ChatHub : Hub
             diceRoll = envelope.message.diceRoll
         };
         await Clients.Group(roomKey).SendAsync("DiceRolled", broadcastMessage);
+    }
+
+    public async Task AddCharacter(Envelope<AddCharacterRequest> envelope)
+    {
+        var roomKey = _roomService.FindPeerRoomKey(envelope.auth0Id);
+        _roomService.AddCharacterToPeer(envelope.auth0Id, envelope.message.character);
+        await Clients.Group(roomKey).SendAsync("CharacterAdded", new CharacterAddedBroadcast()
+        {
+            character = envelope.message.character
+        });
+    }
+
+    public async Task RemoveCharacter(Envelope<RemoveCharacterRequest> envelope)
+    {
+        var roomKey = _roomService.FindPeerRoomKey(envelope.auth0Id);
+        _roomService.RemoveCharacterFromPeer(envelope.auth0Id, envelope.message.characterId);
+        await Clients.Group(roomKey).SendAsync("CharacterRemoved", new CharacterRemovedBroadcast()
+        {
+            auth0Id = envelope.auth0Id,
+            characterId = envelope.message.characterId
+        });
     }
 }
