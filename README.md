@@ -47,3 +47,11 @@ For the API and SignalR:
 
 For the Angular project:
 `npm run build`
+
+## Running the projects locally
+
+API & SignalR
+`dotnet watch run --launch-profile https`
+
+Angular
+`npm start`
