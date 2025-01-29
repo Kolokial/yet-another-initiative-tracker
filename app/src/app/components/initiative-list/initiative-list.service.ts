@@ -3,6 +3,7 @@ import { AppServiceStore } from 'src/app/app.service.store';
 import { SignalRService } from 'src/app/shared-services/signal-r.service';
 import { Character } from 'src/app/types/messageContracts/Character';
 import { Peer } from 'src/app/types/messageContracts/Peer';
+import { CharacteRemovedBroadcast as CharacterRemovedBroadcast } from 'src/app/types/messageContracts/removeCharacter/CharacterRemovedBroadcast';
 import { UpdateDisplayNameBroadcast } from 'src/app/types/messageContracts/updateDisplayName/DisplayNameUpdatedBroadcast';
 
 export class InitiativeListService {
@@ -20,6 +21,8 @@ export class InitiativeListService {
     this.setupOnTurnFinishedSubscription();
     this.setupOnDisplayNameUpdatedSubscription();
     this.setupOnCharacterInPlayUpdatedSubscription();
+    this.setupOnCharacterAddedSubscription();
+    this.setupOnCharacterRemovedSubscription();
 
     this._appStore.peerList.subscribe((peers) => {
       this._peers = peers;
@@ -130,6 +133,36 @@ export class InitiativeListService {
         this._characters[index] = broadcast.character;
         this._appStore.charactersInRoom.next(this._characters);
       })
+    );
+  }
+
+  private setupOnCharacterAddedSubscription(): void {
+    this._subscriptions.push(
+      this._signalR.onCharacterAdded$.subscribe((character: Character) => {
+        const characterIndex = this._characters.findIndex((c) => c.id == character.id);
+
+        if (characterIndex === -1) {
+          this._characters.push(character);
+          this._appStore.charactersInRoom.next(this._characters);
+        }
+      })
+    );
+  }
+
+  private setupOnCharacterRemovedSubscription(): void {
+    this._subscriptions.push(
+      this._signalR.onCharacterRemoved$.subscribe(
+        (character: CharacterRemovedBroadcast) => {
+          const characterIndex = this._characters.findIndex(
+            (c) => c.id == character.characterId
+          );
+
+          if (characterIndex !== -1) {
+            this._characters.splice(characterIndex, 1);
+            this._appStore.charactersInRoom.next(this._characters);
+          }
+        }
+      )
     );
   }
 

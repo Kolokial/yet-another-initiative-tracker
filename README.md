@@ -7,7 +7,9 @@ Yet Another Initiative Tracker
 - Condition Reminders - DS
 - Custom music per player. Crossfade between. - DS
 - Setup DB to hold history.
-- investigate websockets to replace webRTC
+- ~~investigate websockets to replace webRTC~~
+- Need to add a heartbeat for refreshes
+- Ability for DMs to have hidden characters in the turn order
 
 ## Development setup
 

@@ -26,6 +26,8 @@ import { UserType } from '../types/formGroups/JoinRoom.FormGroup';
 import { Character } from '../types/messageContracts/Character';
 import { CharacterAddedBroadcast } from '../types/messageContracts/addCharacter/CharacterAddedBroadcast';
 import { AddCharacterRequest } from '../types/messageContracts/addCharacter/AddCharacterRequest';
+import { RemoveCharacterRequest } from '../types/messageContracts/removeCharacter/RemoveCharacterRequest';
+import { CharacteRemovedBroadcast } from '../types/messageContracts/removeCharacter/CharacterRemovedBroadcast';
 
 @Injectable({
   providedIn: 'root',
@@ -61,14 +63,19 @@ export class SignalRService {
     return this._onTurnFinished$.asObservable();
   }
 
-  private _onInitiativeUpdated$ = new Subject<number>();
-  public get onInitiativeUpdated$(): Observable<number> {
+  private _onInitiativeUpdated$ = new Subject<InitiativeUpdatedBroadcast>();
+  public get onInitiativeUpdated$(): Observable<InitiativeUpdatedBroadcast> {
     return this._onInitiativeUpdated$.asObservable();
   }
 
   private _onCharacterAdded$ = new Subject<Character>();
   public get onCharacterAdded$(): Observable<Character> {
     return this._onCharacterAdded$.asObservable();
+  }
+
+  private _onCharacterRemoved$ = new Subject<CharacteRemovedBroadcast>();
+  public get onCharacterRemoved$(): Observable<CharacteRemovedBroadcast> {
+    return this._onCharacterRemoved$.asObservable();
   }
 
   private _hubConnection: signalR.HubConnection;
@@ -133,6 +140,9 @@ export class SignalRService {
     this._hubConnection.on('CharacterAdded', (broadcastMsg: CharacterAddedBroadcast) =>
       this.onCharacterAdded(broadcastMsg)
     );
+    this._hubConnection.on('CharacterRemoved', (broadcastMsg: CharacteRemovedBroadcast) =>
+      this.onCharacterRemoved(broadcastMsg)
+    );
   }
 
   public joinRoom(
@@ -185,6 +195,12 @@ export class SignalRService {
   public addCharacter(character: Character): Observable<void> {
     return this.invoke<AddCharacterRequest, void>('AddCharacter', {
       character: character,
+    });
+  }
+
+  public removeCharacter(characterId: number): Observable<void> {
+    return this.invoke<RemoveCharacterRequest, void>('RemoveCharacter', {
+      characterId: characterId,
     });
   }
 
@@ -248,11 +264,15 @@ export class SignalRService {
   }
 
   private onInitiativeUpdated(broadcastMessage: InitiativeUpdatedBroadcast): void {
-    this._onInitiativeUpdated$.next(broadcastMessage.initiative);
+    this._onInitiativeUpdated$.next(broadcastMessage);
   }
 
   private onCharacterAdded(broadcastMessage: CharacterAddedBroadcast): void {
     this._onCharacterAdded$.next(broadcastMessage.character);
+  }
+
+  private onCharacterRemoved(broadcastMessage: CharacteRemovedBroadcast): void {
+    this._onCharacterRemoved$.next(broadcastMessage);
   }
 
   private doAuthCheck(broadcastMessage: Broadcast, callback: () => void): void {

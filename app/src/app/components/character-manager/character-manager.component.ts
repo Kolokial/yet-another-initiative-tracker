@@ -130,6 +130,9 @@ export class CharacterManagerComponent {
       .subscribe((createCharacterResponse) => {
         character.characterId = createCharacterResponse.playerCharacterId;
         character.isUpdating = false;
+
+        this.setCharacterGroupStatusChange(character);
+        this.setupCharacterNameStatusChange(character);
         this.characterForm = [...this.characterForm];
       });
   }
@@ -155,6 +158,8 @@ export class CharacterManagerComponent {
       return;
     }
 
+    const previousCharacterId =
+      this.appServiceStore.selectedCharacter.value[0].playerCharacterId;
     this.appServiceStore.selectedCharacter.next([characterListItem.getPlayerCharacter()]);
 
     this.characterForm.forEach((x) => {
@@ -164,7 +169,10 @@ export class CharacterManagerComponent {
     });
     characterListItem.isInPlay = true;
     this.updateCharacter(characterListItem);
-    this._signalR.addCharacter(characterListItem.getCharacter()).subscribe();
+    this._signalR.removeCharacter(previousCharacterId).subscribe((x) => console.log(x));
+    this._signalR
+      .addCharacter(characterListItem.getCharacter())
+      .subscribe((x) => console.log(x));
     this._signalR.rollDice(
       this.appServiceStore.lastDiceRoll + characterListItem.dexterityModifier
     );
@@ -184,6 +192,10 @@ export class CharacterManagerComponent {
 
     if (checkboxEvent.checked === true) {
       selectedCharacters.push(character.getPlayerCharacter());
+      this._signalR.addCharacter(character.getCharacter()).subscribe();
+      this._signalR.rollDice(
+        this.appServiceStore.lastDiceRoll + character.dexterityModifier
+      );
     } else if (checkboxEvent.checked === false) {
       const index = selectedCharacters.findIndex(
         (x) => x.playerCharacterId === character.characterId
@@ -192,16 +204,11 @@ export class CharacterManagerComponent {
       if (index !== -1) {
         selectedCharacters.splice(index, 1);
       }
+      this._signalR.removeCharacter(character.characterId).subscribe();
     }
 
     this.appServiceStore.selectedCharacter.next(selectedCharacters);
     this.updateCharacter(character);
-    this._signalR
-      .updateCharacterInPlayName(character.characterId, character.characterName)
-      .subscribe();
-    this._signalR.rollDice(
-      this.appServiceStore.lastDiceRoll + character.dexterityModifier
-    );
   }
 
   isSelected(row: CharacterListItem) {}

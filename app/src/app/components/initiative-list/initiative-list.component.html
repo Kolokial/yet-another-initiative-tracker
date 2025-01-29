@@ -39,6 +39,7 @@
           mat-icon-button
           *ngIf="element.auth0Id.startsWith(auth0Id)"
           aria-label="Roll"
+          (click)="openInitiativeTracker()"
         >
           <mat-icon>casino</mat-icon>
         </button>

@@ -106,7 +106,7 @@ public class RoomService
             {
                 if (peer.auth0Id == auth0Id)
                 {
-                    peer.characters.Append(character);
+                    peer.characters.Add(character);
                 }
             }
         }

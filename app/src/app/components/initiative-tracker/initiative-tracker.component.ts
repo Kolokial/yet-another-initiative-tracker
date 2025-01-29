@@ -64,12 +64,7 @@ export class InitiativeTrackerComponent {
     return this._isInitiativeInputDisabled;
   }
 
-  public get initiativeValue(): number {
-    return this._dataStore.initiativeRoll;
-  }
-  public set initiativeValue(v: number) {
-    this._dataStore.initiativeRoll = v;
-  }
+  public initiativeValue: number = 0;
 
   private keyup$: Subject<number> = new Subject<number>();
   private keyupSubscription!: Subscription;
@@ -107,6 +102,10 @@ export class InitiativeTrackerComponent {
     this._isInitiativeInputDisabled = false;
   }
 
+  triggerInitiative() {
+    this.sendInitiative(this.initiativeValue);
+  }
+
   sendInitiative(initiativeString: number) {
     let initiativeValue = parseInt(`${initiativeString}`);
     this.character.lastDiceRoll = initiativeValue;
@@ -125,7 +124,7 @@ export class InitiativeTrackerComponent {
     this.character.lastSentRoll = initiativeValue;
   }
 
-  onInitiativeKeyUp(initiative: number) {
-    this.keyup$.next(initiative);
+  onInitiativeKeyUp() {
+    this.keyup$.next(this.initiativeValue);
   }
 }

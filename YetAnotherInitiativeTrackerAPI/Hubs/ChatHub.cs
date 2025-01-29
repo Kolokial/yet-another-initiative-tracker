@@ -177,6 +177,7 @@ public class ChatHub : Hub
         envelope.message.character.Auth0Id = envelope.auth0Id;
         await Clients.Group(roomKey).SendAsync("CharacterAdded", new CharacterAddedBroadcast()
         {
+            auth0Id = envelope.auth0Id,
             character = envelope.message.character
         });
     }
