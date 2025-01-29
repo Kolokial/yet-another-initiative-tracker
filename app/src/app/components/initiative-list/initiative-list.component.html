@@ -5,28 +5,50 @@
   Todo: Expand row to show how total was calculated.
   flat roll + dex + bonuses + feats, etc
 -->
+@if (!isDungeonMaster) {
+  <div class="action-button-container">
+    <button
+      class="action-butons-flex-item"
+      mat-fab
+      extended
+      (click)="sendTurnFinishedMessage()"
+      [disabled]="turnFinishedButtonEnabled$ | async"
+    >
+      <mat-icon>door_open</mat-icon>
+      End Turn
+    </button>
 
-<div class="action-button-container">
-  <button
-    class="action-butons-flex-item"
-    mat-fab
-    extended
-    (click)="sendTurnFinishedMessage()"
-    [disabled]="turnFinishedButtonEnabled$ | async"
-  >
-    <mat-icon></mat-icon>
-    End Turn
-  </button>
-  <button class="action-butons-flex-item" mat-fab extended (click)="leaveRoom()">
-    <mat-icon>exit_to_app</mat-icon>
-    <span>Leave Room</span>
-  </button>
-</div>
+    <button
+      (click)="openInitiativeTracker()"
+      class="action-butons-flex-item"
+      [disabled]="selectedCharacter === null"
+      mat-fab
+      extended
+    >
+      <mat-icon></mat-icon>
+      Roll
+    </button>
+  </div>
+}
 <table mat-table [dataSource]="initiatives" class="mat-elevation-z8" matSort>
+  @if (isDungeonMaster) {
+    <ng-container matColumnDef="rollDice">
+      <th mat-header-cell *matHeaderCellDef>Roll</th>
+      <td mat-cell *matCellDef="let element">
+        <button
+          mat-icon-button
+          *ngIf="element.auth0Id.startsWith(auth0Id)"
+          aria-label="Roll"
+        >
+          <mat-icon>casino</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+  }
   <ng-container matColumnDef="displayName">
     <th mat-header-cell *matHeaderCellDef>Player</th>
     <td mat-cell *matCellDef="let element">
-      <div class="player-character-name">{{ element.characterName }}</div>
+      <div class="player-character-name">{{ element.name }}</div>
       <span class="display-name">{{ element.displayName }}</span>
     </td>
   </ng-container>
@@ -34,9 +56,24 @@
   <ng-container matColumnDef="initiativeValue">
     <th mat-header-cell *matHeaderCellDef>Initiative</th>
     <td mat-cell *matCellDef="let element">
-      {{ element.diceRoll }}
+      {{ element.initialInitiative }}
     </td>
   </ng-container>
+
+  @if (isDungeonMaster) {
+    <ng-container matColumnDef="endTurn">
+      <th mat-header-cell *matHeaderCellDef>End Turn</th>
+      <td mat-cell *matCellDef="let element">
+        <button
+          *ngIf="element.auth0Id.startsWith(auth0Id)"
+          mat-icon-button
+          aria-label="End Turn"
+        >
+          <mat-icon>check_circle</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+  }
 
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
   <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
@@ -64,4 +101,4 @@
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
   </table> -->
 
-<spectator-list></spectator-list>
+<!-- <spectator-list></spectator-list> -->

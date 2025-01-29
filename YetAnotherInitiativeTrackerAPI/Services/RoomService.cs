@@ -131,4 +131,20 @@ public class RoomService
         }
 
     }
+
+    public Character? FindCharacter(string auth0Id, int characterId)
+    {
+        foreach (var room in roomList)
+        {
+            foreach (var peer in room.Value)
+            {
+                if (peer.auth0Id == auth0Id)
+                {
+                    var character = peer.characters.SingleOrDefault(x => x.Id == characterId);
+                    return character;
+                }
+            }
+        }
+        return null;
+    }
 }

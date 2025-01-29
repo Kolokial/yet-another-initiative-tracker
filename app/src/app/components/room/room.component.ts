@@ -10,12 +10,14 @@ import { HasTitle } from '../../types/Title';
 import { AppServiceStore } from 'src/app/app.service.store';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { InitiativeListComponent } from '../initiative-list/initiative-list.component';
-import { JoinRoomResponse } from 'src/app/types/messageContracts/JoinRoom/JoinRoomResponse';
+import { JoinRoomResponse } from 'src/app/types/messageContracts/joinRoom/JoinRoomResponse';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { UserType } from 'src/app/types/formGroups/JoinRoom.FormGroup';
 import { DmToolsComponent } from '../dm-tools/dm-tools.component';
 import { MatTabsModule } from '@angular/material/tabs';
+import { CharacterManagerComponent } from '../character-manager/character-manager.component';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'room',
@@ -25,11 +27,13 @@ import { MatTabsModule } from '@angular/material/tabs';
     FormsModule,
     MatInputModule,
     MatButtonModule,
+    MatIconModule,
     MatSlideToggleModule,
     InitiativeListComponent,
     MatButtonToggleModule,
     MatTabsModule,
     DmToolsComponent,
+    CharacterManagerComponent,
   ],
   templateUrl: './room.component.html',
   styleUrl: './room.component.scss',
@@ -38,7 +42,14 @@ export class RoomComponent implements HasTitle {
   activeLink: any;
   readonly title: string = 'Room Manager';
   public roomCode: string = '';
-  public userType: UserType = 'player';
+
+  public get userType(): UserType {
+    return this._roomService.userType;
+  }
+
+  public set userType(value: UserType) {
+    this._roomService.userType = value;
+  }
 
   public set isSpectator(value: boolean) {
     this._appServiceStore.isSpectator.next(value);
@@ -72,8 +83,9 @@ export class RoomComponent implements HasTitle {
   createRoom() {
     if (this.displayName.length) {
       const roomId = Math.random().toString(36).substring(7);
+      const characters = this._appServiceStore.convertPlayerCharacterToCharacter();
       this._roomService
-        .joinRoom(roomId, this.userType)
+        .joinRoom(roomId, this.userType, characters)
         .subscribe((response: JoinRoomResponse) => {
           this.handleJoinRoomReponse(response, roomId);
         });
@@ -82,8 +94,9 @@ export class RoomComponent implements HasTitle {
 
   joinRoom(roomId: string, userType: UserType) {
     if (this.displayName.length && roomId !== null && roomId.length > 0) {
+      var characters = this._appServiceStore.convertPlayerCharacterToCharacter();
       this._roomService
-        .joinRoom(roomId, userType)
+        .joinRoom(roomId, userType, characters)
         .subscribe((response: JoinRoomResponse) => {
           this.handleJoinRoomReponse(response, roomId);
         });
@@ -104,6 +117,8 @@ export class RoomComponent implements HasTitle {
     } else {
       this._roomService.roomId.next(roomId);
       this._appServiceStore.peerList.next(joinRoomResponse.peerList);
+      const characters = joinRoomResponse.peerList.flatMap((peer) => peer.characters);
+      this._appServiceStore.charactersInRoom.next(characters);
     }
   }
 }

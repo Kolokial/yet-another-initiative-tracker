@@ -23,6 +23,7 @@ export class LoginService {
         console.log(idToken);
         if (idToken) {
           const displayName = idToken.name ? idToken.name : (idToken.nickname as string);
+          this.appServiceStore.auth0Id = idToken['sub'];
           this.userApi.getUser().subscribe({
             error: (error) => {
               if (error.status === 404) {

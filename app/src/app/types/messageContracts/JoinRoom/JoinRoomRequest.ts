@@ -1,7 +1,8 @@
+import { Character } from '../Character';
+
 export interface JoinRoomRequest {
   roomName: string;
   displayName: string;
-  diceRoll: number;
-  characterName?: string;
+  characters?: Character[];
   isDungeonMaster: boolean;
 }

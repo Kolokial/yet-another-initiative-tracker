@@ -73,14 +73,15 @@ public class ChatHub : Hub
         var roomName = envelope.message.roomName;
         var auth0Id = envelope.auth0Id;
         var peer = _roomService.GetRoomPeers(roomName).FirstOrDefault(x => x.auth0Id == envelope.auth0Id);
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
-        Console.WriteLine($"{auth0Id} left {roomName} with ConnectionId: {Context.ConnectionId}");
-        _roomService.RemovePeerFromRoom(envelope.auth0Id);
         await Clients.Group(roomName).SendAsync("RoomLeft", new RoomLeftBroadcast()
         {
             auth0Id = auth0Id,
             peer = peer
         });
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
+        Console.WriteLine($"{auth0Id} left {roomName} with ConnectionId: {Context.ConnectionId}");
+        _roomService.RemovePeerFromRoom(envelope.auth0Id);
+
     }
 
     public async Task FinishTurn(Envelope<FinishTurnRequest> envelope)
@@ -113,19 +114,30 @@ public class ChatHub : Hub
 
     public async Task UpdateCharacterInPlay(Envelope<UpdateCharacterInPlayRequest> envelope)
     {
-        var character = envelope.message.character;
-        var roomKey = _roomService.FindPeerRoomKey(envelope.auth0Id);
+        var id = envelope.message.characterId;
+        var name = envelope.message.characterName;
+        var character = _roomService.FindCharacter(envelope.auth0Id, id);
 
-        if (roomKey != null)
+        if (character == null)
         {
-            var broadcastMessage = new CharacterInPlayUpdatedBroadcast()
-            {
-                auth0Id = envelope.auth0Id,
-                character = character,
-            };
-            await Clients.Group(roomKey).SendAsync("CharacterInPlayUpdated", broadcastMessage);
             return;
         }
+
+        character.Name = name;
+        var roomKey = _roomService.FindPeerRoomKey(envelope.auth0Id);
+
+        if (roomKey == null)
+        {
+            return;
+        }
+
+        var broadcastMessage = new CharacterInPlayUpdatedBroadcast()
+        {
+            auth0Id = envelope.auth0Id,
+            character = character,
+        };
+        await Clients.Group(roomKey).SendAsync("CharacterInPlayUpdated", broadcastMessage);
+
     }
 
     public async Task UpdateInitiative(Envelope<UpdateInitiativeRequest> envelope)
@@ -151,7 +163,9 @@ public class ChatHub : Hub
         var broadcastMessage = new DiceRolledBroadcast()
         {
             auth0Id = envelope.auth0Id,
-            diceRoll = envelope.message.diceRoll
+            diceRoll = envelope.message.diceRoll,
+            characteId = envelope.message.characteId
+
         };
         await Clients.Group(roomKey).SendAsync("DiceRolled", broadcastMessage);
     }
@@ -160,6 +174,7 @@ public class ChatHub : Hub
     {
         var roomKey = _roomService.FindPeerRoomKey(envelope.auth0Id);
         _roomService.AddCharacterToPeer(envelope.auth0Id, envelope.message.character);
+        envelope.message.character.Auth0Id = envelope.auth0Id;
         await Clients.Group(roomKey).SendAsync("CharacterAdded", new CharacterAddedBroadcast()
         {
             character = envelope.message.character

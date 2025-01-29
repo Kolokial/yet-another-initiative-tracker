@@ -4,15 +4,17 @@ import { ROOM_ID } from '../../constants';
 import { BehaviorSubject, first, Observable, throwError } from 'rxjs';
 import { AuthService } from '@auth0/auth0-angular';
 import { SignalRService } from 'src/app/shared-services/signal-r.service';
-import { JoinRoomResponse } from 'src/app/types/messageContracts/JoinRoom/JoinRoomResponse';
+import { JoinRoomResponse } from 'src/app/types/messageContracts/joinRoom/JoinRoomResponse';
 import { UserType } from 'src/app/types/formGroups/JoinRoom.FormGroup';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Character } from 'src/app/types/messageContracts/Character';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RoomService {
   public roomId: BehaviorSubject<string> = new BehaviorSubject<string>('');
+  public userType: UserType = 'player';
 
   private _myPeerId: BehaviorSubject<string> = new BehaviorSubject<string>('');
   public get myPeerId(): Observable<string> {
@@ -47,11 +49,15 @@ export class RoomService {
     });
   }
 
-  public joinRoom(roomId: string, userType: UserType): Observable<JoinRoomResponse> {
+  public joinRoom(
+    roomId: string,
+    userType: UserType,
+    characters: Character[]
+  ): Observable<JoinRoomResponse> {
     if (!roomId) {
       return throwError(() => new Error('No Room ID supplied.'));
     } else {
-      return this.signalR.joinRoom(roomId, userType);
+      return this.signalR.joinRoom(roomId, userType, characters);
     }
   }
 

@@ -9,5 +9,5 @@ import { InitiativeDetail } from 'src/app/types/InitiativeDetail';
   styleUrl: './dm-tools.component.scss',
 })
 export class DmToolsComponent {
-  public npcs: InitiativeDetail;
+  //public npcs: InitiativeDetail;
 }

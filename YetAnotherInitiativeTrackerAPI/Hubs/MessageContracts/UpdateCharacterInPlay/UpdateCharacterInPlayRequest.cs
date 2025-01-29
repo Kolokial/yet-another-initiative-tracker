@@ -2,5 +2,6 @@ namespace YAIT.MessageContracts.UpdateCharacterInPlay;
 
 public class UpdateCharacterInPlayRequest
 {
-    public Character character { get; set; }
+    public string characterName { get; set; }
+    public int characterId { get; set; }
 }

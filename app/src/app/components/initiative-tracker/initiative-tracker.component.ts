@@ -5,21 +5,12 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-
 import { FormsModule } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import {
-  Observable,
-  Subject,
-  Subscription,
-  debounceTime,
-  distinctUntilChanged,
-  tap,
-} from 'rxjs';
+import { Subject, Subscription, debounceTime, distinctUntilChanged, tap } from 'rxjs';
 import { InitiativeTrackerStoreService } from './initiative-tracker.store.service';
-import { HasTitle } from '../../types/Title';
-import { AppServiceStore } from 'src/app/app.service.store';
 import { SignalRService } from 'src/app/shared-services/signal-r.service';
+import { CharacterListItem } from 'src/app/types/formGroups/CharacterListItem';
 
 @Component({
   selector: 'initiative-tracker',
@@ -37,17 +28,16 @@ import { SignalRService } from 'src/app/shared-services/signal-r.service';
   templateUrl: './initiative-tracker.component.html',
   styleUrl: './initiative-tracker.component.scss',
 })
-export class InitiativeTrackerComponent implements HasTitle {
-  @Input() public players: string[] = [];
-  @Input() public playerName: string = '';
-  title: string = 'Initiative Tracker';
+export class InitiativeTrackerComponent {
+  @Input()
+  private character!: CharacterListItem;
 
-  public get displayName(): Observable<string> {
-    return this._appServiceStore.displayName;
+  public get displayName(): string {
+    return this.character.characterName;
   }
 
   public get dexterityModifier(): number {
-    return this._appServiceStore.selectedCharacter.value?.dexterityMod || 0;
+    return this.character.dexterityModifier || 0;
   }
 
   public set dexterityModifier(value: string) {
@@ -89,7 +79,6 @@ export class InitiativeTrackerComponent implements HasTitle {
 
   constructor(
     private _dataStore: InitiativeTrackerStoreService,
-    private _appServiceStore: AppServiceStore,
     private _signalR: SignalRService
   ) {}
 
@@ -120,7 +109,7 @@ export class InitiativeTrackerComponent implements HasTitle {
 
   sendInitiative(initiativeString: number) {
     let initiativeValue = parseInt(`${initiativeString}`);
-    this._appServiceStore.lastDiceRoll = initiativeValue;
+    this.character.lastDiceRoll = initiativeValue;
     if (this.dexterityModifier) {
       initiativeValue += this.dexterityModifier;
     }
@@ -133,7 +122,7 @@ export class InitiativeTrackerComponent implements HasTitle {
       .rollDice(initiativeValue)
       .subscribe((x) => console.log('Dice roll sent:', initiativeValue));
 
-    this._appServiceStore.lastSentRoll = initiativeValue;
+    this.character.lastSentRoll = initiativeValue;
   }
 
   onInitiativeKeyUp(initiative: number) {

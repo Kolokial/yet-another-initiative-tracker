@@ -1,49 +1,70 @@
-import { ChangeDetectorRef, Component, Input, ViewChild } from '@angular/core';
-import { AsyncPipe, CommonModule, NgFor } from '@angular/common';
+import { ChangeDetectorRef, Component, inject, Input, ViewChild } from '@angular/core';
+import { AsyncPipe, CommonModule } from '@angular/common';
 import { MatTable, MatTableModule } from '@angular/material/table';
 import { Observable } from 'rxjs';
 import { HasTitle } from '../../types/Title';
 import { AppServiceStore } from 'src/app/app.service.store';
-import { RoomComponent } from '../room/room.component';
-import { RoomService } from '../room/room.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { InitiativeDetail } from 'src/app/types/InitiativeDetail';
 import { TableListDataSource } from '../../types/TableListDataSource';
-import { SpectatorListComponent } from '../spectator-list/spectator-list.component';
 import { SignalRService } from 'src/app/shared-services/signal-r.service';
 import { Peer } from 'src/app/types/messageContracts/Peer';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { InitiativeTrackerComponent } from '../initiative-tracker/initiative-tracker.component';
+import { Character } from 'src/app/types/messageContracts/Character';
 
 @Component({
   selector: 'initiative-list',
   standalone: true,
   imports: [
     CommonModule,
-    NgFor,
     MatTableModule,
     AsyncPipe,
-    RoomComponent,
     MatIconModule,
     MatButtonModule,
     MatInputModule,
-    SpectatorListComponent,
+    MatDialogModule,
   ],
   templateUrl: './initiative-list.component.html',
   styleUrl: './initiative-list.component.scss',
 })
 export class InitiativeListComponent implements HasTitle {
+  @Input()
+  public set isDungeonMaster(value: boolean) {
+    this._isDungeonMaster = value;
+    if (value) {
+      this.displayedColumns.unshift('rollDice');
+      this.displayedColumns.push('endTurn');
+    }
+  }
+
+  public get isDungeonMaster(): boolean {
+    return this._isDungeonMaster;
+  }
+  private _isDungeonMaster: boolean = false;
+
+  private readonly dialog = inject(MatDialog);
+
   /* Todo: now we need to work out whose turn it is */
   public turnFinishedButtonEnabled$!: Observable<boolean>;
-  public initiatives!: TableListDataSource<Peer>;
+  public initiatives!: TableListDataSource<Character>;
   //public initiatives: Peer[] = [];
   public spectators!: TableListDataSource<InitiativeDetail>;
   public displayedColumns: string[] = ['displayName', 'initiativeValue'];
 
+  public get selectedCharacter() {
+    return this._appServiceStore.selectedCharacter.value[0];
+  }
+
+  public get auth0Id(): string {
+    return this._appServiceStore.auth0Id;
+  }
+
   @ViewChild(MatTable) table!: MatTable<Peer[]>;
 
   constructor(
-    private _roomService: RoomService,
     private _ref: ChangeDetectorRef,
     private _appServiceStore: AppServiceStore,
     private _signalR: SignalRService
@@ -54,14 +75,18 @@ export class InitiativeListComponent implements HasTitle {
   readonly title: string = 'Initiative List';
 
   ngOnInit() {
-    this.initiatives.setDataStream(this._appServiceStore.peerList);
-  }
-
-  leaveRoom() {
-    this._roomService.leaveRoom();
+    this.initiatives.setDataStream(this._appServiceStore.charactersInRoom);
   }
 
   sendTurnFinishedMessage(): void {
     this._signalR.finishTurn().subscribe((x) => console.log('ending turn'));
+  }
+
+  openInitiativeTracker(): void {
+    const dialogRef = this.dialog.open(InitiativeTrackerComponent);
+
+    dialogRef.afterClosed().subscribe((result) => {
+      console.log(`Dialog result: ${result}`);
+    });
   }
 }
