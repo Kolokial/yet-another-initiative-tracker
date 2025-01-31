@@ -188,8 +188,11 @@ export class SignalRService {
     return this.invoke<FinishTurnRequest, void>('FinishTurn', { test: '' });
   }
 
-  public rollDice(diceRoll: number): Observable<void> {
-    return this.invoke<RollDiceRequest, void>('RollDice', { diceRoll: diceRoll });
+  public rollDice(diceRoll: number, characterId: number): Observable<void> {
+    return this.invoke<RollDiceRequest, void>('RollDice', {
+      diceRoll: diceRoll,
+      characterId: characterId,
+    });
   }
 
   public addCharacter(character: Character): Observable<void> {

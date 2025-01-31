@@ -158,9 +158,8 @@ export class CharacterManagerComponent {
       return;
     }
 
-    const previousCharacterId =
-      this.appServiceStore.selectedCharacter.value[0].playerCharacterId;
-    this.appServiceStore.selectedCharacter.next([characterListItem.getPlayerCharacter()]);
+    const previousCharacterId = this.appServiceStore.selectedCharacter.value[0].id;
+    this.appServiceStore.selectedCharacter.next([characterListItem.getCharacter()]);
 
     this.characterForm.forEach((x) => {
       if (x.isDeleted) {
@@ -174,7 +173,8 @@ export class CharacterManagerComponent {
       .addCharacter(characterListItem.getCharacter())
       .subscribe((x) => console.log(x));
     this._signalR.rollDice(
-      this.appServiceStore.lastDiceRoll + characterListItem.dexterityModifier
+      this.appServiceStore.lastDiceRoll + characterListItem.dexterityModifier,
+      characterListItem.characterId
     );
   }
 
@@ -191,15 +191,14 @@ export class CharacterManagerComponent {
     const selectedCharacters = this.appServiceStore.selectedCharacter.value;
 
     if (checkboxEvent.checked === true) {
-      selectedCharacters.push(character.getPlayerCharacter());
+      selectedCharacters.push(character.getCharacter());
       this._signalR.addCharacter(character.getCharacter()).subscribe();
       this._signalR.rollDice(
-        this.appServiceStore.lastDiceRoll + character.dexterityModifier
+        this.appServiceStore.lastDiceRoll + character.dexterityModifier,
+        character.characterId
       );
     } else if (checkboxEvent.checked === false) {
-      const index = selectedCharacters.findIndex(
-        (x) => x.playerCharacterId === character.characterId
-      );
+      const index = selectedCharacters.findIndex((x) => x.id === character.characterId);
 
       if (index !== -1) {
         selectedCharacters.splice(index, 1);
@@ -234,7 +233,7 @@ export class CharacterManagerComponent {
       .subscribe((status: FormControlStatus) => {
         if (status === 'VALID') {
           this.updateCharacter(character);
-          this.appServiceStore.selectedCharacter.next([character.getPlayerCharacter()]);
+          this.appServiceStore.selectedCharacter.next([character.getCharacter()]);
         }
       });
   }

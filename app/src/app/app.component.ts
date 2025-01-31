@@ -104,12 +104,24 @@ export class AppComponent {
         })
       )
       .subscribe((characterList) => {
-        if (characterList) {
-          const selectedCharacter = characterList.find((x) => x.isInPlay);
-          if (selectedCharacter) {
-            this.appServiceStore.selectedCharacter.next([selectedCharacter]);
-          }
+        if (!characterList) {
+          return;
         }
+        const selectedCharacter = characterList.find((x) => x.isInPlay);
+        if (!selectedCharacter) {
+          return;
+        }
+        this.appServiceStore.selectedCharacter.next([
+          {
+            alertFeat: selectedCharacter.alertFeat,
+            dexterityMod: selectedCharacter.dexterityMod,
+            id: selectedCharacter.playerCharacterId,
+            initiative: 0,
+            luckStone: selectedCharacter.luckStone,
+            name: selectedCharacter.characterName,
+            auth0Id: this.appServiceStore.auth0Id,
+          },
+        ]);
       });
   }
 }

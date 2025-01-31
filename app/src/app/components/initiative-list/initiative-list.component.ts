@@ -82,8 +82,11 @@ export class InitiativeListComponent implements HasTitle {
     this._signalR.finishTurn().subscribe((x) => console.log('ending turn'));
   }
 
-  openInitiativeTracker(): void {
-    const dialogRef = this.dialog.open(InitiativeTrackerComponent);
+  openInitiativeTracker(element: any): void {
+    console.log(element);
+    const dialogRef = this.dialog.open(InitiativeTrackerComponent, {
+      data: this.selectedCharacter,
+    });
 
     dialogRef.afterClosed().subscribe((result) => {
       console.log(`Dialog result: ${result}`);

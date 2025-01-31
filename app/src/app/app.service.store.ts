@@ -10,7 +10,7 @@ import { PlayerCharacter } from '@shared-types/api/PlayerCharacter';
 export class AppServiceStore {
   public auth0Id: string = '';
   public displayName: BehaviorSubject<string> = new BehaviorSubject('');
-  public selectedCharacter = new BehaviorSubject<PlayerCharacter[]>([]);
+  public selectedCharacter = new BehaviorSubject<Character[]>([]);
   public lastSentRoll: number = 0;
   public lastDiceRoll: number = 0;
   public peerList = new BehaviorSubject<Peer[]>([]);
@@ -25,10 +25,10 @@ export class AppServiceStore {
         alertFeat: character.alertFeat,
         auth0Id: this.auth0Id,
         dexterityMod: character.dexterityMod,
-        id: character.playerCharacterId,
+        id: character.id,
         initiative: 0,
         luckStone: character.luckStone,
-        name: character.characterName,
+        name: character.name,
       };
     });
   }

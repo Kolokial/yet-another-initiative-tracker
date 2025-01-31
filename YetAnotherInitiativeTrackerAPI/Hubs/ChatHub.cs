@@ -159,12 +159,12 @@ public class ChatHub : Hub
     public async Task RollDice(Envelope<RollDiceRequest> envelope)
     {
         var roomKey = _roomService.FindPeerRoomKey(envelope.auth0Id);
-
+        _roomService.UpdateCharacterInitiative(envelope.auth0Id, envelope.message.characterId, envelope.message.diceRoll);
         var broadcastMessage = new DiceRolledBroadcast()
         {
             auth0Id = envelope.auth0Id,
             diceRoll = envelope.message.diceRoll,
-            characteId = envelope.message.characteId
+            characterId = envelope.message.characterId
 
         };
         await Clients.Group(roomKey).SendAsync("DiceRolled", broadcastMessage);

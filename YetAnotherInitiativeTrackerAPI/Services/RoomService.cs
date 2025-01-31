@@ -147,4 +147,16 @@ public class RoomService
         }
         return null;
     }
+
+    public void UpdateCharacterInitiative(string auth0Id, int characterId, int initiative)
+    {
+        var character = FindCharacter(auth0Id, characterId);
+
+        if (character == null)
+        {
+            return;
+        }
+
+        character.Initiative = initiative;
+    }
 }
