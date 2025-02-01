@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { environment } from 'src/environments/environment';
 import { AppServiceStore } from '../app.service.store';
@@ -28,6 +28,8 @@ import { CharacterAddedBroadcast } from '../types/messageContracts/addCharacter/
 import { AddCharacterRequest } from '../types/messageContracts/addCharacter/AddCharacterRequest';
 import { RemoveCharacterRequest } from '../types/messageContracts/removeCharacter/RemoveCharacterRequest';
 import { CharacteRemovedBroadcast } from '../types/messageContracts/removeCharacter/CharacterRemovedBroadcast';
+import { HubConnectionState } from '@microsoft/signalr';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable({
   providedIn: 'root',
@@ -79,6 +81,7 @@ export class SignalRService {
   }
 
   private _hubConnection: signalR.HubConnection;
+  private _snackBar = inject(MatSnackBar);
   constructor(
     private appStore: AppServiceStore,
     private auth: AuthService
@@ -215,6 +218,11 @@ export class SignalRService {
           console.error('IdTokenClaim has failed. Are you logged in?');
           return of();
         }
+
+        if (this._hubConnection.state !== HubConnectionState.Connected) {
+          this._snackBar.open('Not connected.');
+        }
+
         const envelope: Envelope<T> = {
           auth0Id: idTokenClaim['sub'],
           message: message,

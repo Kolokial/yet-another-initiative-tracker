@@ -75,9 +75,9 @@ export class CharacterListItem {
     };
   }
 
-  public getCharacter(): Character {
+  public getCharacter(auth0Id: string): Character {
     return {
-      auth0Id: '',
+      auth0Id: auth0Id,
       alertFeat: this.hasAlertFeat,
       name: this.characterName,
       dexterityMod: this.dexterityModifier,

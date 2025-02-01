@@ -36,7 +36,7 @@ export class InitiativeListComponent implements HasTitle {
     this._isDungeonMaster = value;
     if (value) {
       this.displayedColumns.unshift('rollDice');
-      this.displayedColumns.push('endTurn');
+      //this.displayedColumns.push('endTurn');
     }
   }
 
@@ -82,10 +82,10 @@ export class InitiativeListComponent implements HasTitle {
     this._signalR.finishTurn().subscribe((x) => console.log('ending turn'));
   }
 
-  openInitiativeTracker(element: any): void {
+  openInitiativeTracker(element: Character): void {
     console.log(element);
     const dialogRef = this.dialog.open(InitiativeTrackerComponent, {
-      data: this.selectedCharacter,
+      data: this.selectedCharacter == element ? this.selectedCharacter : element,
     });
 
     dialogRef.afterClosed().subscribe((result) => {

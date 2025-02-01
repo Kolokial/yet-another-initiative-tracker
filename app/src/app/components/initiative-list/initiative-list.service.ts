@@ -73,7 +73,7 @@ export class InitiativeListService {
             return this._characters.findIndex((pchar) => char.id === pchar.id);
           });
 
-          characterIndexes.forEach((ci) => {
+          characterIndexes.reverse().forEach((ci) => {
             if (ci !== -1) {
               this._characters.splice(ci, 1);
             }

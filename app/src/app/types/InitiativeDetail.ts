@@ -8,4 +8,5 @@ export interface InitiativeDetail extends HasAuth0Id {
   displayName: string;
   playerCharacterName: string | undefined;
   initiativeValue: number;
+  order: number;
 }

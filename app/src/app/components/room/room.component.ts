@@ -104,6 +104,8 @@ export class RoomComponent implements HasTitle {
   }
 
   leaveRoom() {
+    const length = this._appServiceStore.selectedCharacter.value.length;
+    this._appServiceStore.selectedCharacter.value.splice(1, length - 1);
     this._roomService.leaveRoom();
   }
 

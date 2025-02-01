@@ -159,7 +159,9 @@ export class CharacterManagerComponent {
     }
 
     const previousCharacterId = this.appServiceStore.selectedCharacter.value[0].id;
-    this.appServiceStore.selectedCharacter.next([characterListItem.getCharacter()]);
+    this.appServiceStore.selectedCharacter.next([
+      characterListItem.getCharacter(this.appServiceStore.auth0Id),
+    ]);
 
     this.characterForm.forEach((x) => {
       if (x.isDeleted) {
@@ -170,7 +172,7 @@ export class CharacterManagerComponent {
     this.updateCharacter(characterListItem);
     this._signalR.removeCharacter(previousCharacterId).subscribe((x) => console.log(x));
     this._signalR
-      .addCharacter(characterListItem.getCharacter())
+      .addCharacter(characterListItem.getCharacter(this.appServiceStore.auth0Id))
       .subscribe((x) => console.log(x));
     this._signalR.rollDice(
       this.appServiceStore.lastDiceRoll + characterListItem.dexterityModifier,
@@ -191,8 +193,10 @@ export class CharacterManagerComponent {
     const selectedCharacters = this.appServiceStore.selectedCharacter.value;
 
     if (checkboxEvent.checked === true) {
-      selectedCharacters.push(character.getCharacter());
-      this._signalR.addCharacter(character.getCharacter()).subscribe();
+      selectedCharacters.push(character.getCharacter(this.appServiceStore.auth0Id));
+      this._signalR
+        .addCharacter(character.getCharacter(this.appServiceStore.auth0Id))
+        .subscribe();
       this._signalR.rollDice(
         this.appServiceStore.lastDiceRoll + character.dexterityModifier,
         character.characterId
@@ -233,7 +237,9 @@ export class CharacterManagerComponent {
       .subscribe((status: FormControlStatus) => {
         if (status === 'VALID') {
           this.updateCharacter(character);
-          this.appServiceStore.selectedCharacter.next([character.getCharacter()]);
+          this.appServiceStore.selectedCharacter.next([
+            character.getCharacter(this.appServiceStore.auth0Id),
+          ]);
         }
       });
   }
