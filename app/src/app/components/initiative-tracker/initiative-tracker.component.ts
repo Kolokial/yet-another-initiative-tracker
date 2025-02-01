@@ -69,6 +69,9 @@ export class InitiativeTrackerComponent {
   }
 
   ngOnDestroy() {
+    if (this.lastSentRoll !== this.impendingRoll) {
+      this.sendInitiative(this.impendingRoll);
+    }
     this.keyupSubscription.unsubscribe();
   }
 
@@ -82,7 +85,7 @@ export class InitiativeTrackerComponent {
 
   sendInitiative(initiativeString: number) {
     let initiativeValue = parseInt(`${initiativeString}`);
-    this.character.initiative = initiativeValue;
+
     if (this.dexterityModifier) {
       initiativeValue += this.dexterityModifier;
     }
@@ -91,6 +94,7 @@ export class InitiativeTrackerComponent {
       .rollDice(initiativeValue, this.character.id)
       .subscribe((x) => console.log('Dice roll sent:', initiativeValue));
     this.character.initiative = initiativeValue;
+    this.lastSentRoll = initiativeValue;
   }
 
   onInitiativeKeyUp() {
