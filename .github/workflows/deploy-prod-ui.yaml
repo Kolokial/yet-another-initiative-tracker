@@ -1,0 +1,48 @@
+name: Deploy UI to Production
+run-name: Deploying UI to Production
+on:
+  push:
+    paths: app/**
+    branches: main
+  workflow_dispatch:
+jobs:
+  Deploy-UI:
+    runs-on: ubuntu-latest
+    container: node:21
+    steps:
+      - name: 🚚 Get Latest Code
+        uses: actions/checkout@v3
+
+      - name: 🧱 Install Deps & Build
+        run: |
+          apt-get update
+          apt-get -y install rsync
+          npm install
+          npm run build
+        working-directory: ${{ github.workspace }}/app/
+
+      - name: 🔐 Prepping Keys
+        run: |
+          pwd
+          mkdir /.ssh    
+          touch /.ssh/yait_ssh_key
+          echo "${{ secrets.SSH_KEY }}" > /.ssh/yait_ssh_key
+          chmod --recursive 700 /.ssh
+          ls -l /.ssh
+          md5sum /.ssh/yait_ssh_key
+        working-directory: ${{ github.workspace }}
+
+      - name: ⬆ Uploading to Server
+        run: >
+          rsync 
+          -e "
+          ssh -p 22 
+          -i /.ssh/yait_ssh_key 
+          -o StrictHostKeyChecking=no" 
+          --archive 
+          --verbose 
+          --compress 
+          --human-readable 
+          --progress 
+          --delete-after ./* ${{secrets.REMOTE_USER}}@${{secrets.TARGET_SERVER}}:${{ secrets.UI_DESTINATION_PATH}}
+        working-directory: ${{ github.workspace }}/app/dist/app/browser
