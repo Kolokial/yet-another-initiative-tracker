@@ -1,5 +1,5 @@
-name: Deploy UI
-run-name: Deploying UI
+name: Deploy UI to Production
+run-name: Deploying UI to Production
 on:
   push:
     paths: app/**
