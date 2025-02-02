@@ -25,9 +25,11 @@ public static class ServiceExtensions
                 if (environment.EnvironmentName == "UAT")
                 {
                     policy.WithOrigins("https://uat-yait.airdnd.co.uk");
+
                 }
 
-                policy.WithOrigins("https://yait.airdnd.co.uk");
+                policy.WithOrigins("https://yait.airdnd.co.uk")
+                 .AllowCredentials();
             });
         });
 
