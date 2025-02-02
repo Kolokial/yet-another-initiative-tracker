@@ -20,7 +20,7 @@ jobs:
           apt-get update
           apt-get -y install rsync
           npm install
-          npm run build
+          npm run build:uat
         working-directory: ${{ github.workspace }}/app/
 
       - name: 🔐 Prepping Keys
