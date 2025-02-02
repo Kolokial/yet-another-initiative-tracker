@@ -29,7 +29,8 @@ public static class ServiceExtensions
                 }
 
                 policy.WithOrigins("https://yait.airdnd.co.uk")
-                 .AllowCredentials();
+                 .AllowCredentials()
+                 .WithHeaders(["X-Requested-With", "X-Signalr-User-Agent"]);
             });
         });
 
