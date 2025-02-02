@@ -1,5 +1,5 @@
-name: Deploy API to Production
-run-name: Deploying API to Production
+name: "Deploy to Production: API"
+run-name: "Deploying to Production: API"
 on:
   push:
     paths: YetAnotherInitiativeTrackerAPI/**
