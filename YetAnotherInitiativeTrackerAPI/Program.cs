@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 var appsettingsPath = $"{builder.Environment.ContentRootPath}/appsettings.json";
 
 builder.Configuration.AddJsonFile(appsettingsPath);
-builder.Services.AddAppServices(builder.Configuration);
+builder.Services.AddAppServices(builder.Configuration, builder.Environment);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddSwaggerBearerAuthorization();
 builder.Services.AddSingleton<RoomService>();

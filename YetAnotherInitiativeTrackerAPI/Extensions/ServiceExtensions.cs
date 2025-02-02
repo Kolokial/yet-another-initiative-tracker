@@ -6,19 +6,28 @@ using Microsoft.OpenApi.Models;
 
 public static class ServiceExtensions
 {
-    public static IServiceCollection AddAppServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddAppServices(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
 
         services.AddCors(options =>
         {
             options.AddPolicy("AllowSpecificOrigin", policy =>
             {
-                policy.WithOrigins("http://localhost:4200")  // Your frontend URL or allowed origins
-                    .WithOrigins("http://localhost:7180")
-                    .WithOrigins("https://yait.airdnd.co.uk")
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();  // Optional if using authentication cookies, can be removed for APIs using JWT
+
+                if (environment.EnvironmentName == "Development")
+                {
+                    policy.WithOrigins("http://localhost:4200")  // Your frontend URL or allowed origins
+                        .WithOrigins("http://localhost:7180")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                }
+
+                if (environment.EnvironmentName == "UAT")
+                {
+                    policy.WithOrigins("https://uat-yait.airdnd.co.uk");
+                }
+
+                policy.WithOrigins("https://yait.airdnd.co.uk");
             });
         });
 
