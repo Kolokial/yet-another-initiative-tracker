@@ -1,5 +1,5 @@
-name: Deploy UI to UAT
-run-name: Deploying UI to UAT
+name: "Deploy to UAT: UI"
+run-name: "Deploy to UAT: UI"
 on:
   push:
     paths: app/**

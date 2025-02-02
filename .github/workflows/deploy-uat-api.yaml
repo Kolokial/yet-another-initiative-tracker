@@ -1,5 +1,5 @@
-name: Deploy API to UAT
-run-name: Deploying API to UAT
+name: "Deploy to UAT: API"
+run-name: "Deploy to UAT: API"
 on:
   push:
     paths: YetAnotherInitiativeTrackerAPI/**
