@@ -28,16 +28,9 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AppServiceStore } from './app.service.store';
 import { LoginComponent } from './components/login/login.component';
-import { environment } from 'src/environments/environment';
 import { LoginService } from './components/login/login.service';
 import { SignalRService } from './shared-services/signal-r.service';
 import { initiativeListServiceInit } from './components/initiative-list/initiative-list.factory';
-
-//const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
-const config: SocketIoConfig = {
-  url: environment.signalServer,
-  options: { autoConnect: false, closeOnBeforeunload: true },
-};
 
 @NgModule({
   declarations: [AppComponent],
@@ -45,7 +38,6 @@ const config: SocketIoConfig = {
     CommonModule,
     BrowserModule,
     RouterModule.forRoot(routes),
-    SocketIoModule.forRoot(config),
     MatTabsModule,
     InitiativeTrackerComponent,
     LoginComponent,
