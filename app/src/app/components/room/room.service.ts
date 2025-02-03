@@ -5,7 +5,7 @@ import { BehaviorSubject, first, Observable, throwError } from 'rxjs';
 import { Location } from '@angular/common';
 import { AuthService } from '@auth0/auth0-angular';
 import { SignalRService } from 'src/app/shared-services/signal-r.service';
-import { JoinRoomResponse } from 'src/app/types/messageContracts/JoinRoom/JoinRoomResponse';
+import { JoinRoomResponse } from 'src/app/types/messageContracts/joinRoom/JoinRoomResponse';
 
 @Injectable({
   providedIn: 'root',

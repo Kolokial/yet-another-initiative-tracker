@@ -11,7 +11,7 @@ import { HasTitle } from '../../types/Title';
 import { AppServiceStore } from 'src/app/app.service.store';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { InitiativeListComponent } from '../initiative-list/initiative-list.component';
-import { JoinRoomResponse } from 'src/app/types/messageContracts/JoinRoom/JoinRoomResponse';
+import { JoinRoomResponse } from 'src/app/types/messageContracts/joinRoom/JoinRoomResponse';
 
 @Component({
   selector: 'room',
