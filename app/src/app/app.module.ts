@@ -17,6 +17,7 @@ import {
   RouterModule,
   provideRouter,
   withComponentInputBinding,
+  TitleStrategy,
 } from '@angular/router';
 import { RoomComponent } from './components/room/room.component';
 import { routes } from './app.routes';
@@ -31,6 +32,7 @@ import { LoginService } from './components/login/login.service';
 import { SignalRService } from './shared-services/signal-r.service';
 import { initiativeListServiceInit } from './components/initiative-list/initiative-list.factory';
 import { environment } from 'src/environments/environment';
+import { PageTitleStrategy } from './page-title-strategy.service';
 
 @NgModule({
   declarations: [AppComponent],
@@ -65,6 +67,7 @@ import { environment } from 'src/environments/environment';
     provideAnimationsAsync(),
     QrScannerService,
     provideRouter(routes, withComponentInputBinding()),
+    { provide: TitleStrategy, useClass: PageTitleStrategy },
     RoomService,
     LoginService,
     provideAuth0({
