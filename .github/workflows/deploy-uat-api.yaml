@@ -5,7 +5,7 @@ on:
     paths: YetAnotherInitiativeTrackerAPI/**
     branches:
       - "**" # matches every branch
-      - "!master" # excludes master
+      - "!main" # excludes main
   workflow_dispatch:
 jobs:
   Deploy-API:
