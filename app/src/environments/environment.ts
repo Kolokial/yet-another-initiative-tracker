@@ -1,9 +1,8 @@
 export const environment = {
   apiUrl: `https://api-yait.airdnd.co.uk`,
-  signalServer: `https://api-yait.airdnd.co.uk`,
   hostname: 'https://yait.airdnd.co.uk',
-  iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: `turn:yait.airdnd.co.uk:3478`, credential: 'test123', username: 'test' },
-  ],
+  auth0: {
+    domain: 'dev-sulaeis36e3ik0p1.us.auth0.com',
+    clientId: 'VNWSxuQoYRjruQIaPlz2qN6kj7jpL7DM',
+  },
 };

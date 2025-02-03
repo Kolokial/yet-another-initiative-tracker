@@ -1,6 +1,5 @@
 import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 import { AppComponent } from './app.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { MatTabNav, MatTabsModule } from '@angular/material/tabs';
@@ -28,16 +27,10 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AppServiceStore } from './app.service.store';
 import { LoginComponent } from './components/login/login.component';
-import { environment } from 'src/environments/environment';
 import { LoginService } from './components/login/login.service';
 import { SignalRService } from './shared-services/signal-r.service';
 import { initiativeListServiceInit } from './components/initiative-list/initiative-list.factory';
-
-//const config: SocketIoConfig = { url: 'http://192.168.0.8:3000', options: {} };
-const config: SocketIoConfig = {
-  url: environment.signalServer,
-  options: { autoConnect: false, closeOnBeforeunload: true },
-};
+import { environment } from 'src/environments/environment';
 
 @NgModule({
   declarations: [AppComponent],
@@ -45,7 +38,6 @@ const config: SocketIoConfig = {
     CommonModule,
     BrowserModule,
     RouterModule.forRoot(routes),
-    SocketIoModule.forRoot(config),
     MatTabsModule,
     InitiativeTrackerComponent,
     LoginComponent,
@@ -76,8 +68,8 @@ const config: SocketIoConfig = {
     RoomService,
     LoginService,
     provideAuth0({
-      domain: 'dev-sulaeis36e3ik0p1.us.auth0.com',
-      clientId: 'LaP8gm04fP6EnxRhmVBc8F86lCUKKAUA',
+      domain: environment.auth0.domain,
+      clientId: environment.auth0.clientId,
       authorizationParams: {
         redirect_uri: window.location.origin,
         audience: `yait`,
