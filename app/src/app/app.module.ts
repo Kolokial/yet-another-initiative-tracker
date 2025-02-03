@@ -30,6 +30,7 @@ import { LoginComponent } from './components/login/login.component';
 import { LoginService } from './components/login/login.service';
 import { SignalRService } from './shared-services/signal-r.service';
 import { initiativeListServiceInit } from './components/initiative-list/initiative-list.factory';
+import { environment } from 'src/environments/environment';
 
 @NgModule({
   declarations: [AppComponent],
@@ -67,8 +68,8 @@ import { initiativeListServiceInit } from './components/initiative-list/initiati
     RoomService,
     LoginService,
     provideAuth0({
-      domain: 'dev-sulaeis36e3ik0p1.us.auth0.com',
-      clientId: 'LaP8gm04fP6EnxRhmVBc8F86lCUKKAUA',
+      domain: environment.auth0.domain,
+      clientId: environment.auth0.clientId,
       authorizationParams: {
         redirect_uri: window.location.origin,
         audience: `yait`,
