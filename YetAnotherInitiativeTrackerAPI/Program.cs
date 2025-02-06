@@ -24,18 +24,7 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.UseAppMiddleware();
-// if (app.Environment.IsDevelopment())
-// {
-//     Console.WriteLine("is dev mode");
-//     app.UseSwagger();
-//     app.UseSwaggerUI(c =>
-//     {
-//         c.SwaggerEndpoint("/swagger/v1/swagger.json", "YAIT v1");
-//     });
-// }
-
 app.UseRouting();
-
 
 // Enable CORS
 app.UseCors("AllowSpecificOrigin");
