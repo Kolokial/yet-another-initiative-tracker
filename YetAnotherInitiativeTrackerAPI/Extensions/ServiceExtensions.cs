@@ -22,17 +22,16 @@ public static class ServiceExtensions
                         .AllowAnyMethod();
                 }
 
-                Console.WriteLine("just before using UAT origin");
                 if (environment.EnvironmentName == "UAT")
                 {
-                    Console.WriteLine("using UAT origin");
                     policy.WithOrigins("https://uat-yait.airdnd.co.uk");
-
                 }
 
                 policy.WithOrigins("https://yait.airdnd.co.uk")
-                 .AllowCredentials()
-                 .WithHeaders(["X-Requested-With", "X-Signalr-User-Agent"]);
+                    .AllowCredentials()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .WithHeaders(["X-Requested-With", "X-Signalr-User-Agent"]);
             });
         });
 
