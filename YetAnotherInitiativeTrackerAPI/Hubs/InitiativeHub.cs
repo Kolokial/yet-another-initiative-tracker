@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.OpenApi.Extensions;
 using YAIT.MessageContracts;
 using YAIT.MessageContracts.AddCharacter;
 using YAIT.MessageContracts.FinishTurn;
@@ -30,8 +31,9 @@ public class InitiativHub : Hub
     {
 
         var roomName = envelope.message.roomName;
+        var dungeonMaster = _roomService.GetDungeonMaster(roomName);
 
-        if (envelope.message.isDungeonMaster && _roomService.hasDungeonMasterJoinedRoom(roomName))
+        if (dungeonMaster != null && envelope.message.isDungeonMaster && dungeonMaster.auth0Id != envelope.auth0Id)
         {
             return new JoinRoomResponse()
             {

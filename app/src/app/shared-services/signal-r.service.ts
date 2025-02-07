@@ -100,6 +100,7 @@ export class SignalRService {
       .build();
 
     this.startConnection();
+    this.handleReconnect();
   }
 
   private startConnection(): void {
@@ -118,6 +119,12 @@ export class SignalRService {
         console.log(reason);
         setTimeout(() => this.startConnection(), 5000);
       });
+  }
+
+  private handleReconnect(): void {
+    this._hubConnection.onreconnecting((x) => {
+      console.log(x);
+    });
   }
 
   private setupEventHubMethods(): void {

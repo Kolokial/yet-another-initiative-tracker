@@ -52,7 +52,7 @@ export class RoomService {
         if (this._router.url !== '/room') {
           this._router.navigate(['/room']);
         }
-
+        this.userType = roomInfo.userType;
         this.joinRoom(roomInfo.roomId, roomInfo.userType, roomInfo.characters);
       }
     });

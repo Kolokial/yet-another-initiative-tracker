@@ -103,15 +103,15 @@ public class RoomService
         return null;
     }
 
-    public bool hasDungeonMasterJoinedRoom(string roomName)
+    public Peer GetDungeonMaster(string roomName)
     {
         var peers = GetRoomPeers(roomName);
         if (peers.Count == 0)
         {
-            return false;
+            return null;
         }
         var peer = peers.FirstOrDefault<Peer>(p => p.isDungeonMaster);
-        return peer != null;
+        return peer;
     }
 
     public void AddCharacterToPeer(string auth0Id, Character character)
