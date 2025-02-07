@@ -34,5 +34,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.UsePathBase("/api");
-app.MapHub<ChatHub>("/chathub");
+app.MapHub<InitiativHub>("/chathub");
 app.Run();

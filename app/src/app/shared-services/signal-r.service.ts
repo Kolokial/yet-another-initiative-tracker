@@ -30,6 +30,8 @@ import { RemoveCharacterRequest } from '../types/messageContracts/removeCharacte
 import { CharacteRemovedBroadcast } from '../types/messageContracts/removeCharacter/CharacterRemovedBroadcast';
 import { HubConnectionState } from '@microsoft/signalr';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { InitiativeListSortedBroadcast } from '../types/messageContracts/sortInitiativeList/InitiativeListSortedBroadcast';
+import { SortInitiativeListRequest } from '../types/messageContracts/sortInitiativeList/SortInitiativeList';
 
 @Injectable({
   providedIn: 'root',
@@ -78,6 +80,11 @@ export class SignalRService {
   private _onCharacterRemoved$ = new Subject<CharacteRemovedBroadcast>();
   public get onCharacterRemoved$(): Observable<CharacteRemovedBroadcast> {
     return this._onCharacterRemoved$.asObservable();
+  }
+
+  private _onInitiativeListSorted$ = new Subject<InitiativeListSortedBroadcast>();
+  public get onInitiativeListSorted$(): Observable<InitiativeListSortedBroadcast> {
+    return this._onInitiativeListSorted$.asObservable();
   }
 
   private _hubConnection: signalR.HubConnection;
@@ -146,6 +153,11 @@ export class SignalRService {
     this._hubConnection.on('CharacterRemoved', (broadcastMsg: CharacteRemovedBroadcast) =>
       this.onCharacterRemoved(broadcastMsg)
     );
+    this._hubConnection.on(
+      'InitiativeListSorted',
+      (broadcastMsg: InitiativeListSortedBroadcast) =>
+        this.onInitiativeListSorted(broadcastMsg)
+    );
   }
 
   public joinRoom(
@@ -208,6 +220,10 @@ export class SignalRService {
     return this.invoke<RemoveCharacterRequest, void>('RemoveCharacter', {
       characterId: characterId,
     });
+  }
+
+  public sortInitiativeList(): Observable<void> {
+    return this.invoke<SortInitiativeListRequest, void>('SortInitiativeList', {});
   }
 
   private invoke<T, O>(method: string, message: T): Observable<O> {
@@ -284,6 +300,10 @@ export class SignalRService {
 
   private onCharacterRemoved(broadcastMessage: CharacteRemovedBroadcast): void {
     this._onCharacterRemoved$.next(broadcastMessage);
+  }
+
+  private onInitiativeListSorted(broadcastMessage: InitiativeListSortedBroadcast): void {
+    this._onInitiativeListSorted$.next(broadcastMessage);
   }
 
   private doAuthCheck(broadcastMessage: Broadcast, callback: () => void): void {

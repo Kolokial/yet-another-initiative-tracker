@@ -1,6 +1,4 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.OpenApi.Extensions;
 using YAIT.MessageContracts;
 using YAIT.MessageContracts.AddCharacter;
 using YAIT.MessageContracts.FinishTurn;
@@ -8,15 +6,16 @@ using YAIT.MessageContracts.JoinRoom;
 using YAIT.MessageContracts.LeaveRoom;
 using YAIT.MessageContracts.RemoveCharacter;
 using YAIT.MessageContracts.RollDice;
+using YAIT.MessageContracts.SortInitiativeList;
 using YAIT.MessageContracts.UpdateCharacterInPlay;
 using YAIT.MessageContracts.UpdateDisplayName;
 
 namespace SignalRChat.Hubs;
 
-public class ChatHub : Hub
+public class InitiativHub : Hub
 {
     private RoomService _roomService;
-    public ChatHub(RoomService roomService)
+    public InitiativHub(RoomService roomService)
     {
         _roomService = roomService;
     }
@@ -43,13 +42,22 @@ public class ChatHub : Hub
             };
         }
 
-        var peer = new Peer()
+        var peer = _roomService.GetPeer(envelope.auth0Id);
+
+        if (peer == null)
         {
-            auth0Id = envelope.auth0Id,
-            characters = envelope.message.characters == null ? new List<Character>() : envelope.message.characters,
-            displayName = envelope.message.displayName,
-            isDungeonMaster = envelope.message.isDungeonMaster
-        };
+            peer = new Peer()
+            {
+                auth0Id = envelope.auth0Id,
+                characters = envelope.message.characters == null ? new List<Character>() : envelope.message.characters,
+                displayName = envelope.message.displayName,
+                isDungeonMaster = envelope.message.isDungeonMaster
+            };
+        }
+        else
+        {
+            peer.characters = envelope.message?.characters;
+        }
         //Console.WriteLine($"{envelope.auth0Id} joined {envelope.message.roomName} with ConnectionId: {Context.ConnectionId}");
         await Groups.AddToGroupAsync(Context.ConnectionId, envelope.message.roomName);
         _roomService.AddPeerToRoom(envelope.message.roomName, peer);
@@ -191,5 +199,12 @@ public class ChatHub : Hub
             auth0Id = envelope.auth0Id,
             characterId = envelope.message.characterId
         });
+    }
+
+    public async Task SortInitiativeList(Envelope<SortInitiativeListRequest> envelope)
+    {
+        var roomKey = _roomService.FindPeerRoomKey(envelope.auth0Id);
+
+        await Clients.Group(roomKey).SendAsync("InitiativeListSorted", new InitiativeListSortedBroadcast());
     }
 }

@@ -35,13 +35,11 @@ export class AppComponent {
   }
 
   constructor(
-    private _loginSevice: LoginService,
     private userApi: UserApiService,
     private characterService: CharacterManagerApiService,
     public auth0: AuthService,
     private appServiceStore: AppServiceStore,
     private qrScanner: QrScannerService,
-    private _roomService: RoomService,
     ref: ChangeDetectorRef,
     media: MediaMatcher
   ) {
