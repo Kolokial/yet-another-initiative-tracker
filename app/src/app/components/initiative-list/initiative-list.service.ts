@@ -102,6 +102,7 @@ export class InitiativeListService {
           (c) => c.auth0Id === broadcast.auth0Id && c.id === broadcast.characterId
         );
         if (index === -1) {
+          console.warn("Couldn't match dice roll to character.");
           return;
         }
 

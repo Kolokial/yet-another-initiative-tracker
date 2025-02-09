@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { QrScannerService } from './components/qr-scanner/qr-scanner.service';
-import { map, mergeMap, of, switchMap } from 'rxjs';
+import { first, map, mergeMap, of, switchMap } from 'rxjs';
 import { HasTitle } from './types/Title';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { UserApiService } from './shared-services/user-api.service';
@@ -9,8 +9,6 @@ import { AppServiceStore } from './app.service.store';
 import { CharacterManagerApiService } from './components/character-manager/character-manager.service';
 import { environment } from 'src/environments/environment';
 import { ReadUserResponse } from './types/api/User';
-import { RoomService } from './components/room/room.service';
-import { LoginService } from './components/login/login.service';
 
 @Component({
   selector: 'app-root',
@@ -53,6 +51,7 @@ export class AppComponent {
   }
 
   ngOnInit() {
+    this.retrieveAuth0Id();
     this.getUserDisplayNameOnStartup();
 
     this.auth0.user$.subscribe((x) => console.log(x));
@@ -121,5 +120,25 @@ export class AppComponent {
           },
         ]);
       });
+  }
+
+  private retrieveAuth0Id() {
+    this.auth0.idTokenClaims$.pipe(first()).subscribe({
+      next: (idToken) => {
+        if (idToken) {
+          const displayName = idToken.name ? idToken.name : (idToken.nickname as string);
+          this.appServiceStore.auth0Id = idToken['sub'];
+          this.userApi.getUser().subscribe({
+            error: (error) => {
+              if (error.status === 404) {
+                this.userApi.createUser(idToken['sub'], displayName);
+              }
+            },
+          });
+        } else {
+          console.warn('No auth0Id from Auth0.');
+        }
+      },
+    });
   }
 }

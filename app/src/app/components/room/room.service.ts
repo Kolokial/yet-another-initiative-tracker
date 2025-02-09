@@ -124,7 +124,9 @@ export class RoomService {
         JSON.stringify({
           roomId: roomId,
           userType: this.userType,
-          characters: characters,
+          characters: characters.filter(
+            (x) => x.auth0Id === this._appServiceStore.auth0Id
+          ),
         })
       );
     }
