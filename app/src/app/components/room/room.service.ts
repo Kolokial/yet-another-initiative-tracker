@@ -24,20 +24,20 @@ export class RoomService {
   }
 
   constructor(
-    private auth0: AuthService,
-    private signalR: SignalRService,
+    private _auth0: AuthService,
+    private _signalR: SignalRService,
     private _snackBar: MatSnackBar,
     private _router: Router,
     private _appServiceStore: AppServiceStore
   ) {
     this.attemptToAutoJoinRoom();
-
+    this.setupReconnectHandler();
     this.setupOnPeerJoinedSnackBar();
     this.setupOnPeerLeftSnackBar();
   }
 
-  private attemptToAutoJoinRoom() {
-    this.auth0.isAuthenticated$.subscribe((isAuthenticated) => {
+  private attemptToAutoJoinRoom(): void {
+    this._auth0.isAuthenticated$.subscribe((isAuthenticated) => {
       if (isAuthenticated) {
         const roomInfoItem = localStorage.getItem(ROOM_INFO);
         if (roomInfoItem == null) {
@@ -58,8 +58,18 @@ export class RoomService {
     });
   }
 
+  private setupReconnectHandler(): void {
+    this._signalR.onReconnected$.subscribe(() => {
+      console.log('reconnected!');
+    });
+
+    this._signalR.onReconnecting$.subscribe(() => {
+      console.log('reconnecting!');
+    });
+  }
+
   public joinRoom(roomId: string, userType: UserType, characters: Character[]): void {
-    this.signalR
+    this._signalR
       .joinRoom(roomId, userType, characters)
       .subscribe((joinRoomResponse) =>
         this.handleJoinRoomReponse(joinRoomResponse, roomId)
@@ -67,7 +77,7 @@ export class RoomService {
   }
 
   public leaveRoom() {
-    this.signalR
+    this._signalR
       .leaveRoom(this.roomId.value)
       .pipe(first())
       .subscribe(() => {
@@ -78,8 +88,8 @@ export class RoomService {
   }
 
   private setupOnPeerJoinedSnackBar() {
-    this.signalR.onRoomJoined$.subscribe((peer) => {
-      this.auth0.idTokenClaims$.pipe(first()).subscribe((idToken) => {
+    this._signalR.onRoomJoined$.subscribe((peer) => {
+      this._auth0.idTokenClaims$.pipe(first()).subscribe((idToken) => {
         if (!idToken) {
           return;
         }
@@ -95,8 +105,8 @@ export class RoomService {
   }
 
   public setupOnPeerLeftSnackBar() {
-    this.signalR.onRoomLeft$.subscribe((peer) => {
-      this.auth0.idTokenClaims$.pipe(first()).subscribe((idToken) => {
+    this._signalR.onRoomLeft$.subscribe((peer) => {
+      this._auth0.idTokenClaims$.pipe(first()).subscribe((idToken) => {
         if (!idToken) {
           return;
         }

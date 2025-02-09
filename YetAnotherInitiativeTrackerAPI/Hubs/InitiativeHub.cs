@@ -27,6 +27,15 @@ public class InitiativHub : Hub
         Console.WriteLine(user, message);
     }
 
+    public async Task Reconnect(Envelope<ReconnectRequest> envelope)
+    {
+        var roomKey = _roomService.FindPeerRoomKey(envelope.auth0Id);
+        if (roomKey != null)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, roomKey);
+        }
+    }
+
     public async Task<JoinRoomResponse> JoinRoom(Envelope<JoinRoomRequest> envelope)
     {
 

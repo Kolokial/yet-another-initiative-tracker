@@ -37,6 +37,21 @@ import { SortInitiativeListRequest } from '../types/messageContracts/sortInitiat
   providedIn: 'root',
 })
 export class SignalRService {
+  private _onConnected$ = new Subject<void>();
+  public get onConnected$(): Observable<void> {
+    return this._onConnected$.asObservable();
+  }
+
+  private _onReconnecting$ = new Subject<void>();
+  public get onReconnecting$(): Observable<void> {
+    return this._onReconnecting$.asObservable();
+  }
+
+  private _onReconnected$ = new Subject<void>();
+  public get onReconnected$(): Observable<void> {
+    return this._onReconnected$.asObservable();
+  }
+
   private _onRoomJoined$ = new Subject<Peer>();
   public get onRoomJoined$(): Observable<Peer> {
     return this._onRoomJoined$.asObservable();
@@ -110,6 +125,7 @@ export class SignalRService {
         console.assert(
           this._hubConnection.state === signalR.HubConnectionState.Connected
         );
+        this._onConnected$.next();
         this.setupEventHubMethods();
       })
       .catch((reason) => {
@@ -123,7 +139,12 @@ export class SignalRService {
 
   private handleReconnect(): void {
     this._hubConnection.onreconnecting((x) => {
-      console.log(x);
+      this._onReconnecting$.next();
+    });
+
+    this._hubConnection.onreconnected((x) => {
+      this._onReconnected$.next();
+      this.invoke('Reconnect', {});
     });
   }
 
