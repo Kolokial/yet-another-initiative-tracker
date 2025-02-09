@@ -144,8 +144,14 @@ export class SignalRService {
 
     this._hubConnection.onreconnected((x) => {
       this._onReconnected$.next();
-      this.invoke('Reconnect', {});
+      this.reconnect();
     });
+  }
+
+  /* need a better name for this method */
+  public reconnect(): void {
+    /* it's not actually reconnecting. */
+    this.invoke('Reconnect', {});
   }
 
   private setupEventHubMethods(): void {
