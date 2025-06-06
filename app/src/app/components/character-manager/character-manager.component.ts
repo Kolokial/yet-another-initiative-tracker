@@ -23,6 +23,8 @@ import { AppServiceStore } from 'src/app/app.service.store';
 import { ReadPlayerCharacterResponse } from 'src/app/types/api/PlayerCharacter';
 import { SignalRService } from 'src/app/shared-services/signal-r.service';
 import { MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
+import { ROOM_INFO } from 'src/app/constants';
+import { Character } from 'src/app/types/messageContracts/Character';
 
 @Component({
   selector: 'character-manager',
@@ -159,9 +161,6 @@ export class CharacterManagerComponent {
     }
 
     const previousCharacterId = this.appServiceStore.selectedCharacter.value[0].id;
-    this.appServiceStore.selectedCharacter.next([
-      characterListItem.getCharacter(this.appServiceStore.auth0Id),
-    ]);
 
     this.characterForm.forEach((x) => {
       if (x.isDeleted) {
@@ -169,15 +168,19 @@ export class CharacterManagerComponent {
       }
     });
     characterListItem.isInPlay = true;
+
     this.updateCharacter(characterListItem);
     this._signalR.removeCharacter(previousCharacterId).subscribe((x) => console.log(x));
-    this._signalR
-      .addCharacter(characterListItem.getCharacter(this.appServiceStore.auth0Id))
-      .subscribe((x) => console.log(x));
+
     this._signalR.rollDice(
       this.appServiceStore.lastDiceRoll + characterListItem.dexterityModifier,
       characterListItem.characterId
     );
+
+    const character = characterListItem.getCharacter(this.appServiceStore.auth0Id);
+    this._signalR.addCharacter(character).subscribe((x) => console.log(x));
+    this.appServiceStore.selectedCharacter.next([character]);
+    this.updateRoomInfoCharactersSelected([character]);
   }
 
   toggleMultipleCharacterSelect(
@@ -212,6 +215,7 @@ export class CharacterManagerComponent {
 
     this.appServiceStore.selectedCharacter.next(selectedCharacters);
     this.updateCharacter(character);
+    this.updateRoomInfoCharactersSelected(selectedCharacters);
   }
 
   isSelected(row: CharacterListItem) {}
@@ -276,6 +280,16 @@ export class CharacterManagerComponent {
 
   public getCharacterSummary(character: FormGroup<CharacterFormGroup>): string {
     return `Dex: ${character.controls.DexterityModifier.value}` + ``;
+  }
+
+  public updateRoomInfoCharactersSelected(charactersSelected: Character[]): void {
+    const roomInfo = JSON.parse(localStorage.getItem(ROOM_INFO) as string);
+    if (roomInfo == null) {
+      return;
+    }
+
+    roomInfo.characters = charactersSelected;
+    localStorage.setItem(ROOM_INFO, JSON.stringify(roomInfo));
   }
 }
 

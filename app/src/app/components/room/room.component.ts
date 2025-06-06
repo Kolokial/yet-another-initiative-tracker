@@ -18,6 +18,7 @@ import { DmToolsComponent } from '../dm-tools/dm-tools.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { CharacterManagerComponent } from '../character-manager/character-manager.component';
 import { MatIconModule } from '@angular/material/icon';
+import { ROOM_INFO } from 'src/app/constants';
 
 @Component({
   selector: 'room',
@@ -84,22 +85,14 @@ export class RoomComponent implements HasTitle {
     if (this.displayName.length) {
       const roomId = Math.random().toString(36).substring(7);
       const characters = this._appServiceStore.convertPlayerCharacterToCharacter();
-      this._roomService
-        .joinRoom(roomId, this.userType, characters)
-        .subscribe((response: JoinRoomResponse) => {
-          this.handleJoinRoomReponse(response, roomId);
-        });
+      this._roomService.joinRoom(roomId, this.userType, characters);
     }
   }
 
   joinRoom(roomId: string, userType: UserType) {
     if (this.displayName.length && roomId !== null && roomId.length > 0) {
       var characters = this._appServiceStore.convertPlayerCharacterToCharacter();
-      this._roomService
-        .joinRoom(roomId, userType, characters)
-        .subscribe((response: JoinRoomResponse) => {
-          this.handleJoinRoomReponse(response, roomId);
-        });
+      this._roomService.joinRoom(roomId, userType, characters);
     }
   }
 
@@ -111,16 +104,5 @@ export class RoomComponent implements HasTitle {
 
   isSpectatorChange(isChecked: boolean) {
     this.isSpectator = isChecked;
-  }
-
-  private handleJoinRoomReponse(joinRoomResponse: JoinRoomResponse, roomId: string) {
-    if (joinRoomResponse?.errorMessage) {
-      this._snackBar.open(joinRoomResponse.errorMessage);
-    } else {
-      this._roomService.roomId.next(roomId);
-      this._appServiceStore.peerList.next(joinRoomResponse.peerList);
-      const characters = joinRoomResponse.peerList.flatMap((peer) => peer.characters);
-      this._appServiceStore.charactersInRoom.next(characters);
-    }
   }
 }

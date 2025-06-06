@@ -1,9 +1,11 @@
-name: "Deploy to Production: API"
-run-name: "Deploying to Production: API"
+name: "Deploy to UAT: API"
+run-name: "Deploy to UAT: API"
 on:
   push:
     paths: YetAnotherInitiativeTrackerAPI/**
-    branches: main
+    branches:
+      - "**" # matches every branch
+      - "!main" # excludes main
   workflow_dispatch:
 jobs:
   Deploy-API:
@@ -49,7 +51,7 @@ jobs:
           --progress 
           --exclude=Data/ 
           --delete-after ./* 
-          ${{secrets.REMOTE_USER}}@${{secrets.TARGET_SERVER}}:${{ secrets.API_DESTINATION_PATH}}
+          ${{secrets.REMOTE_USER}}@${{secrets.TARGET_SERVER}}:${{ secrets.UAT_API_DESTINATION_PATH}}
         working-directory: ${{ github.workspace }}/YetAnotherInitiativeTrackerAPI/bin/Release/net8.0/linux-x64/publish
 
       - name: 🔄 Restart Service
@@ -58,5 +60,5 @@ jobs:
           -i /.ssh/yait_ssh_key 
           -o StrictHostKeyChecking=no
           ${{secrets.REMOTE_USER}}@${{secrets.TARGET_SERVER}} 
-          "restart-yait-api"
+          "restart-uat-yait-api"
         working-directory: ${{ github.workspace }}/YetAnotherInitiativeTrackerAPI/bin/Release/net8.0/linux-x64/publish

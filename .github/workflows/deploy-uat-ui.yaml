@@ -1,9 +1,11 @@
-name: "Deploy to Production: UI"
-run-name: "Deploy to Production: UI"
+name: "Deploy to UAT: UI"
+run-name: "Deploy to UAT: UI"
 on:
   push:
     paths: app/**
-    branches: main
+    branches:
+      - "**" # matches every branch
+      - "!main" # excludes main
   workflow_dispatch:
 jobs:
   Deploy-UI:
@@ -18,7 +20,7 @@ jobs:
           apt-get update
           apt-get -y install rsync
           npm install
-          npm run build
+          npm run build:uat
         working-directory: ${{ github.workspace }}/app/
 
       - name: 🔐 Prepping Keys
@@ -44,5 +46,5 @@ jobs:
           --compress 
           --human-readable 
           --progress 
-          --delete-after ./* ${{secrets.REMOTE_USER}}@${{secrets.TARGET_SERVER}}:${{ secrets.UI_DESTINATION_PATH}}
+          --delete-after ./* ${{secrets.REMOTE_USER}}@${{secrets.TARGET_SERVER}}:${{ secrets.UAT_UI_DESTINATION_PATH}}
         working-directory: ${{ github.workspace }}/app/dist/app/browser

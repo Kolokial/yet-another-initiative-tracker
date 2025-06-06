@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --host 0.0.0.0",
     "two": "concurrently --kill-others \"ng serve --host 0.0.0.0 --port 5200\" \"ng serve --host 0.0.0.0 --port 4200\"",
     "build": "ng build",
+    "build:uat": "ng build --configuration uat",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "analyze": "webpack --profile --json"

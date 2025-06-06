@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 var appsettingsPath = $"{builder.Environment.ContentRootPath}/appsettings.json";
 
 builder.Configuration.AddJsonFile(appsettingsPath);
-builder.Services.AddAppServices(builder.Configuration);
+builder.Services.AddAppServices(builder.Configuration, builder.Environment);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddSwaggerBearerAuthorization();
 builder.Services.AddSingleton<RoomService>();
@@ -24,18 +24,7 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.UseAppMiddleware();
-// if (app.Environment.IsDevelopment())
-// {
-//     Console.WriteLine("is dev mode");
-//     app.UseSwagger();
-//     app.UseSwaggerUI(c =>
-//     {
-//         c.SwaggerEndpoint("/swagger/v1/swagger.json", "YAIT v1");
-//     });
-// }
-
 app.UseRouting();
-
 
 // Enable CORS
 app.UseCors("AllowSpecificOrigin");
@@ -45,5 +34,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.UsePathBase("/api");
-app.MapHub<ChatHub>("/chathub");
+app.MapHub<InitiativHub>("/chathub");
 app.Run();

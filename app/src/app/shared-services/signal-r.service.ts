@@ -30,11 +30,28 @@ import { RemoveCharacterRequest } from '../types/messageContracts/removeCharacte
 import { CharacteRemovedBroadcast } from '../types/messageContracts/removeCharacter/CharacterRemovedBroadcast';
 import { HubConnectionState } from '@microsoft/signalr';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { InitiativeListSortedBroadcast } from '../types/messageContracts/sortInitiativeList/InitiativeListSortedBroadcast';
+import { SortInitiativeListRequest } from '../types/messageContracts/sortInitiativeList/SortInitiativeList';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SignalRService {
+  private _onConnected$ = new Subject<void>();
+  public get onConnected$(): Observable<void> {
+    return this._onConnected$.asObservable();
+  }
+
+  private _onReconnecting$ = new Subject<void>();
+  public get onReconnecting$(): Observable<void> {
+    return this._onReconnecting$.asObservable();
+  }
+
+  private _onReconnected$ = new Subject<void>();
+  public get onReconnected$(): Observable<void> {
+    return this._onReconnected$.asObservable();
+  }
+
   private _onRoomJoined$ = new Subject<Peer>();
   public get onRoomJoined$(): Observable<Peer> {
     return this._onRoomJoined$.asObservable();
@@ -80,6 +97,11 @@ export class SignalRService {
     return this._onCharacterRemoved$.asObservable();
   }
 
+  private _onInitiativeListSorted$ = new Subject<InitiativeListSortedBroadcast>();
+  public get onInitiativeListSorted$(): Observable<InitiativeListSortedBroadcast> {
+    return this._onInitiativeListSorted$.asObservable();
+  }
+
   private _hubConnection: signalR.HubConnection;
   private _snackBar = inject(MatSnackBar);
   constructor(
@@ -93,6 +115,7 @@ export class SignalRService {
       .build();
 
     this.startConnection();
+    this.handleReconnect();
   }
 
   private startConnection(): void {
@@ -102,6 +125,7 @@ export class SignalRService {
         console.assert(
           this._hubConnection.state === signalR.HubConnectionState.Connected
         );
+        this._onConnected$.next();
         this.setupEventHubMethods();
       })
       .catch((reason) => {
@@ -111,6 +135,23 @@ export class SignalRService {
         console.log(reason);
         setTimeout(() => this.startConnection(), 5000);
       });
+  }
+
+  private handleReconnect(): void {
+    this._hubConnection.onreconnecting((x) => {
+      this._onReconnecting$.next();
+    });
+
+    this._hubConnection.onreconnected((x) => {
+      this._onReconnected$.next();
+      this.reconnect();
+    });
+  }
+
+  /* need a better name for this method */
+  public reconnect(): void {
+    /* it's not actually reconnecting. */
+    this.invoke('Reconnect', {});
   }
 
   private setupEventHubMethods(): void {
@@ -145,6 +186,11 @@ export class SignalRService {
     );
     this._hubConnection.on('CharacterRemoved', (broadcastMsg: CharacteRemovedBroadcast) =>
       this.onCharacterRemoved(broadcastMsg)
+    );
+    this._hubConnection.on(
+      'InitiativeListSorted',
+      (broadcastMsg: InitiativeListSortedBroadcast) =>
+        this.onInitiativeListSorted(broadcastMsg)
     );
   }
 
@@ -208,6 +254,10 @@ export class SignalRService {
     return this.invoke<RemoveCharacterRequest, void>('RemoveCharacter', {
       characterId: characterId,
     });
+  }
+
+  public sortInitiativeList(): Observable<void> {
+    return this.invoke<SortInitiativeListRequest, void>('SortInitiativeList', {});
   }
 
   private invoke<T, O>(method: string, message: T): Observable<O> {
@@ -284,6 +334,10 @@ export class SignalRService {
 
   private onCharacterRemoved(broadcastMessage: CharacteRemovedBroadcast): void {
     this._onCharacterRemoved$.next(broadcastMessage);
+  }
+
+  private onInitiativeListSorted(broadcastMessage: InitiativeListSortedBroadcast): void {
+    this._onInitiativeListSorted$.next(broadcastMessage);
   }
 
   private doAuthCheck(broadcastMessage: Broadcast, callback: () => void): void {

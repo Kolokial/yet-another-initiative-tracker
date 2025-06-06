@@ -4,6 +4,7 @@ import { SignalRService } from 'src/app/shared-services/signal-r.service';
 import { Character } from 'src/app/types/messageContracts/Character';
 import { Peer } from 'src/app/types/messageContracts/Peer';
 import { CharacteRemovedBroadcast as CharacterRemovedBroadcast } from 'src/app/types/messageContracts/removeCharacter/CharacterRemovedBroadcast';
+import { InitiativeListSortedBroadcast } from 'src/app/types/messageContracts/sortInitiativeList/InitiativeListSortedBroadcast';
 import { UpdateDisplayNameBroadcast } from 'src/app/types/messageContracts/updateDisplayName/DisplayNameUpdatedBroadcast';
 
 export class InitiativeListService {
@@ -23,6 +24,7 @@ export class InitiativeListService {
     this.setupOnCharacterInPlayUpdatedSubscription();
     this.setupOnCharacterAddedSubscription();
     this.setupOnCharacterRemovedSubscription();
+    this.setupOnInitiativeListSortedSubscription();
 
     this._appStore.peerList.subscribe((peers) => {
       this._peers = peers;
@@ -100,6 +102,7 @@ export class InitiativeListService {
           (c) => c.auth0Id === broadcast.auth0Id && c.id === broadcast.characterId
         );
         if (index === -1) {
+          console.warn("Couldn't match dice roll to character.");
           return;
         }
 
@@ -161,6 +164,25 @@ export class InitiativeListService {
             this._characters.splice(characterIndex, 1);
             this._appStore.charactersInRoom.next(this._characters);
           }
+        }
+      )
+    );
+  }
+
+  private setupOnInitiativeListSortedSubscription(): void {
+    this._subscriptions.push(
+      this._signalR.onInitiativeListSorted$.subscribe(
+        (initiativeListSortedBroadcast: InitiativeListSortedBroadcast) => {
+          this._characters.sort((a, b) => {
+            if (a.initiative > b.initiative) {
+              return 1;
+            } else if (a.initiative < b.initiative) {
+              return -1;
+            } else {
+              return 0;
+            }
+          });
+          this._appStore.charactersInRoom.next(this._characters);
         }
       )
     );

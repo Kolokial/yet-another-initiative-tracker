@@ -87,15 +87,31 @@ public class RoomService
         return null;
     }
 
-    public bool hasDungeonMasterJoinedRoom(string roomName)
+    public Peer GetPeer(string auth0Id)
+    {
+        foreach (var room in roomList)
+        {
+            foreach (var peer in room.Value)
+            {
+                if (peer.auth0Id == auth0Id)
+                {
+                    return peer;
+                }
+            }
+        }
+        Console.WriteLine($"Can't find Peer with auth0id: ${auth0Id}");
+        return null;
+    }
+
+    public Peer GetDungeonMaster(string roomName)
     {
         var peers = GetRoomPeers(roomName);
         if (peers.Count == 0)
         {
-            return false;
+            return null;
         }
         var peer = peers.FirstOrDefault<Peer>(p => p.isDungeonMaster);
-        return peer != null;
+        return peer;
     }
 
     public void AddCharacterToPeer(string auth0Id, Character character)
