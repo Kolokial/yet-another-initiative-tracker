@@ -8,23 +8,29 @@
             [(ngModel)]="roomCode"
             matInput
             placeholder="Ex. l33tdnd"
-            (keyup.enter)="joinRoomWithCode(roomCode)"
+            (keyup.enter)="joinRoom(roomCode, userType)"
           />
         </mat-form-field>
+        <mat-button-toggle-group
+          [(ngModel)]="userType"
+          [hideSingleSelectionIndicator]="true"
+          vertical
+          name="user-type"
+          aria-label="Font Style"
+        >
+          <mat-button-toggle value="player">Player</mat-button-toggle>
+          <mat-button-toggle value="dungeon-master">Dungeon Master</mat-button-toggle>
+          <mat-button-toggle value="spectator">Spectator</mat-button-toggle>
+        </mat-button-toggle-group>
         <button
           class="flex-item"
           mat-flat-button
           color="primary"
-          (click)="joinRoomWithCode(roomCode)"
+          (click)="joinRoom(roomCode, userType)"
           [disabled]="!roomCode"
         >
           Join Room
         </button>
-        <mat-slide-toggle
-          [checked]="isSpectator"
-          (change)="isSpectatorChange($event.checked)"
-          >Just spectating?</mat-slide-toggle
-        >
         <div class="flex-item">Join your friends room!</div>
       </div>
 
@@ -37,6 +43,25 @@
     </div>
   </div>
 } @else {
-  <p>RoomId: {{ roomId | async }}</p>
-  <initiative-list></initiative-list>
+  <button class="action-butons-flex-item" mat-fab extended (click)="leaveRoom()">
+    <mat-icon>exit_to_app</mat-icon>
+    <span>Leave Room RoomId: {{ roomId | async }}</span>
+  </button>
+  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center">
+    <mat-tab label="Room: {{ roomId | async }}">
+      <initiative-list
+        [isDungeonMaster]="userType === 'dungeon-master'"
+      ></initiative-list>
+    </mat-tab>
+    <mat-tab label="Characters"
+      ><character-manager
+        [showInPlayColumn]="true"
+        [inPlayColumnControl]="userType === 'dungeon-master' ? 'checkbox' : 'radio'"
+      ></character-manager
+    ></mat-tab>
+
+    @if (userType === 'dungeon-master') {
+      <mat-tab label="DM Tools"> <dm-tools></dm-tools></mat-tab>
+    }
+  </mat-tab-group>
 }

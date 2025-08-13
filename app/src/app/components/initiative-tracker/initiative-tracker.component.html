@@ -1,4 +1,4 @@
-<h2>{{ displayName | async }}</h2>
+<h2>{{ displayName }}</h2>
 <input
   [disabled]="isInitiativeInputDisabled"
   class="initiative"
@@ -7,8 +7,6 @@
   autofocus
   [(ngModel)]="initiativeValue"
   max="70"
-  (keyup)="onInitiativeKeyUp(initiativeValue)"
-  (keyup.enter)="sendInitiative(initiativeValue)"
+  (keyup)="onInitiativeKeyUp()"
+  (keyup.enter)="triggerInitiative()"
 />
-
-<button (click)="sendInitiative(initiativeValue)">Fight!</button>

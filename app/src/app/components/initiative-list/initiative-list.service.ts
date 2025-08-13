@@ -1,14 +1,16 @@
 import { Observable, Subscription } from 'rxjs';
 import { AppServiceStore } from 'src/app/app.service.store';
 import { SignalRService } from 'src/app/shared-services/signal-r.service';
+import { Character } from 'src/app/types/messageContracts/Character';
 import { Peer } from 'src/app/types/messageContracts/Peer';
-import { DiceRolledBroadcast } from 'src/app/types/messageContracts/rollDice/DiceRolledBroadcast';
-import { CharacterInPlayUpdatedBroadcast } from 'src/app/types/messageContracts/updateCharacterInPlay/CharacterInPlayUpdatedBroadcast';
+import { CharacteRemovedBroadcast as CharacterRemovedBroadcast } from 'src/app/types/messageContracts/removeCharacter/CharacterRemovedBroadcast';
+import { InitiativeListSortedBroadcast } from 'src/app/types/messageContracts/sortInitiativeList/InitiativeListSortedBroadcast';
 import { UpdateDisplayNameBroadcast } from 'src/app/types/messageContracts/updateDisplayName/DisplayNameUpdatedBroadcast';
 
 export class InitiativeListService {
   private _subscriptions: Subscription[] = [];
   private _peers: Peer[] = [];
+  private _characters: Character[] = [];
 
   constructor(
     private _signalR: SignalRService,
@@ -20,9 +22,16 @@ export class InitiativeListService {
     this.setupOnTurnFinishedSubscription();
     this.setupOnDisplayNameUpdatedSubscription();
     this.setupOnCharacterInPlayUpdatedSubscription();
+    this.setupOnCharacterAddedSubscription();
+    this.setupOnCharacterRemovedSubscription();
+    this.setupOnInitiativeListSortedSubscription();
 
     this._appStore.peerList.subscribe((peers) => {
       this._peers = peers;
+    });
+
+    this._appStore.charactersInRoom.subscribe((characters) => {
+      this._characters = characters;
     });
   }
 
@@ -33,28 +42,46 @@ export class InitiativeListService {
           this._peers.push(peer);
         }
 
-        this._peers.sort((a: Peer, b: Peer) => {
-          return a.diceRoll > b.diceRoll ? 0 : 1;
-        });
-
         this._appStore.peerList.next(this._peers);
+
+        if (peer.characters && peer.characters.length) {
+          if (this._characters.length) {
+            const peerCharacters = peer.characters.filter(
+              (pc) => !this._characters.some((c) => c.id === pc.id)
+            );
+            this._characters.push(...peerCharacters);
+          } else {
+            this._characters.push(...peer.characters);
+          }
+          this._appStore.charactersInRoom.next(this._characters);
+        }
       })
     );
   }
 
   private setupOnRoomLeftSubscription(): void {
     this._subscriptions.push(
-      this._signalR.onRoomLeft$.subscribe((auth0Id: string) => {
-        const index = this._peers.findIndex((x) => x.auth0Id === auth0Id);
+      this._signalR.onRoomLeft$.subscribe((peer: Peer) => {
+        const index = this._peers.findIndex((x) => x.auth0Id === peer.auth0Id);
         if (index === -1) {
           return;
         }
         this._peers.splice(index, 1);
 
-        this._peers.sort((a: Peer, b: Peer) => {
-          return a.diceRoll > b.diceRoll ? 0 : 1;
-        });
         this._appStore.peerList.next(this._peers);
+
+        if (peer.characters && peer.characters.length) {
+          const characterIndexes = peer.characters.map((char) => {
+            return this._characters.findIndex((pchar) => char.id === pchar.id);
+          });
+
+          characterIndexes.reverse().forEach((ci) => {
+            if (ci !== -1) {
+              this._characters.splice(ci, 1);
+            }
+          });
+          this._appStore.charactersInRoom.next(this._characters);
+        }
       })
     );
   }
@@ -69,13 +96,19 @@ export class InitiativeListService {
   }
 
   private setupOnDiceRolledSubscription(): void {
-    this.setupGenericUpdatePeerListItemSubscription(
-      this._signalR.onDiceRolled$,
-      (diceRoll: DiceRolledBroadcast) => diceRoll.auth0Id,
-      (peer: Peer, diceRoll: DiceRolledBroadcast) => {
-        peer.diceRoll = diceRoll.diceRoll;
-        return peer;
-      }
+    this._subscriptions.push(
+      this._signalR.onDiceRolled$.subscribe((broadcast) => {
+        var index = this._characters.findIndex(
+          (c) => c.auth0Id === broadcast.auth0Id && c.id === broadcast.characterId
+        );
+        if (index === -1) {
+          console.warn("Couldn't match dice roll to character.");
+          return;
+        }
+
+        this._characters[index].initiative = broadcast.diceRoll;
+        this._appStore.charactersInRoom.next(this._characters);
+      })
     );
   }
 
@@ -91,13 +124,67 @@ export class InitiativeListService {
   }
 
   private setupOnCharacterInPlayUpdatedSubscription(): void {
-    this.setupGenericUpdatePeerListItemSubscription(
-      this._signalR.onCharacterInPlayUpdated$,
-      (char: CharacterInPlayUpdatedBroadcast) => char.auth0Id,
-      (peer: Peer, char: CharacterInPlayUpdatedBroadcast) => {
-        peer.characterName = char.characterName;
-        return peer;
-      }
+    this._subscriptions.push(
+      this._signalR.onCharacterInPlayUpdated$.subscribe((broadcast) => {
+        var index = this._characters.findIndex(
+          (c) => c.auth0Id === broadcast.auth0Id && c.id === broadcast.character.id
+        );
+        if (index === -1) {
+          return;
+        }
+
+        this._characters[index] = broadcast.character;
+        this._appStore.charactersInRoom.next(this._characters);
+      })
+    );
+  }
+
+  private setupOnCharacterAddedSubscription(): void {
+    this._subscriptions.push(
+      this._signalR.onCharacterAdded$.subscribe((character: Character) => {
+        const characterIndex = this._characters.findIndex((c) => c.id == character.id);
+
+        if (characterIndex === -1) {
+          this._characters.push(character);
+          this._appStore.charactersInRoom.next(this._characters);
+        }
+      })
+    );
+  }
+
+  private setupOnCharacterRemovedSubscription(): void {
+    this._subscriptions.push(
+      this._signalR.onCharacterRemoved$.subscribe(
+        (character: CharacterRemovedBroadcast) => {
+          const characterIndex = this._characters.findIndex(
+            (c) => c.id == character.characterId
+          );
+
+          if (characterIndex !== -1) {
+            this._characters.splice(characterIndex, 1);
+            this._appStore.charactersInRoom.next(this._characters);
+          }
+        }
+      )
+    );
+  }
+
+  private setupOnInitiativeListSortedSubscription(): void {
+    this._subscriptions.push(
+      this._signalR.onInitiativeListSorted$.subscribe(
+        (initiativeListSortedBroadcast: InitiativeListSortedBroadcast) => {
+          this._characters.sort((a, b) => {
+            if (a.initiative > b.initiative) {
+              return 1;
+            } else if (a.initiative < b.initiative) {
+              return -1;
+            } else {
+              return 0;
+            }
+          });
+          this._appStore.charactersInRoom.next(this._characters);
+        }
+      )
     );
   }
 

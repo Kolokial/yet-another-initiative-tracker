@@ -1,20 +1,22 @@
 /* Housekeeping! */
 import { Injectable } from '@angular/core';
-import { ROOM_ID } from '../../constants';
+import { ROOM_INFO } from '../../constants';
 import { BehaviorSubject, first, Observable, throwError } from 'rxjs';
-import { Location } from '@angular/common';
 import { AuthService } from '@auth0/auth0-angular';
 import { SignalRService } from 'src/app/shared-services/signal-r.service';
 import { JoinRoomResponse } from 'src/app/types/messageContracts/joinRoom/JoinRoomResponse';
+import { UserType } from 'src/app/types/formGroups/JoinRoom.FormGroup';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Character } from 'src/app/types/messageContracts/Character';
+import { Router } from '@angular/router';
+import { AppServiceStore } from 'src/app/app.service.store';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RoomService {
-  private _roomId: BehaviorSubject<string> = new BehaviorSubject<string>('');
-  public get roomId(): Observable<string> {
-    return this._roomId.asObservable();
-  }
+  public roomId: BehaviorSubject<string> = new BehaviorSubject<string>('');
+  public userType: UserType = 'player';
 
   private _myPeerId: BehaviorSubject<string> = new BehaviorSubject<string>('');
   public get myPeerId(): Observable<string> {
@@ -22,54 +24,121 @@ export class RoomService {
   }
 
   constructor(
-    private location: Location,
-    private auth0: AuthService,
-    private signalR: SignalRService
+    private _auth0: AuthService,
+    private _signalR: SignalRService,
+    private _snackBar: MatSnackBar,
+    private _router: Router,
+    private _appServiceStore: AppServiceStore
   ) {
     this.attemptToAutoJoinRoom();
+    this.setupReconnectHandler();
+    this.setupOnPeerJoinedSnackBar();
+    this.setupOnPeerLeftSnackBar();
   }
 
-  private attemptToAutoJoinRoom() {
-    this.auth0.isAuthenticated$.subscribe((isAuthenticated) => {
+  private attemptToAutoJoinRoom(): void {
+    this._auth0.isAuthenticated$.subscribe((isAuthenticated) => {
       if (isAuthenticated) {
-        const url = new URL(window.location.href);
-        let roomId = url.searchParams.get(ROOM_ID);
-        if (!roomId) {
-          console.log('checking localStorage');
-          roomId = localStorage.getItem(ROOM_ID);
+        const roomInfoItem = localStorage.getItem(ROOM_INFO);
+        if (roomInfoItem == null) {
+          return;
         }
 
-        if (roomId != null) {
-          this.joinRoom(roomId);
+        const roomInfo = JSON.parse(roomInfoItem);
+        if (roomInfo == null) {
+          return;
         }
+
+        if (this._router.url !== '/room') {
+          this._router.navigate(['/room']);
+        }
+        this.userType = roomInfo.userType;
+        this.joinRoom(roomInfo.roomId, roomInfo.userType, roomInfo.characters);
       }
     });
   }
 
-  public joinRoom(roomId: string): Observable<JoinRoomResponse> {
-    if (!roomId) {
-      return throwError(() => new Error('No Room ID supplied.'));
-    } else {
-      this._roomId.next(roomId);
-      return this.signalR.joinRoom(roomId);
-    }
+  private setupReconnectHandler(): void {
+    this._signalR.onReconnected$.subscribe(() => {
+      console.log('reconnected!');
+    });
+
+    this._signalR.onReconnecting$.subscribe(() => {
+      console.log('reconnecting!');
+    });
   }
 
-  leaveRoom() {
-    this.signalR
-      .leaveRoom(this._roomId.value)
+  public joinRoom(roomId: string, userType: UserType, characters: Character[]): void {
+    this._signalR
+      .joinRoom(roomId, userType, characters)
+      .subscribe((joinRoomResponse) =>
+        this.handleJoinRoomReponse(joinRoomResponse, roomId)
+      );
+  }
+
+  public leaveRoom() {
+    this._signalR
+      .leaveRoom(this.roomId.value)
       .pipe(first())
       .subscribe(() => {
-        this._roomId.next('');
+        this.roomId.next('');
         this._myPeerId.next('');
-
-        localStorage.removeItem(ROOM_ID);
+        localStorage.removeItem(ROOM_INFO);
       });
   }
 
-  createRoom() {
-    const roomId = Math.random().toString(36).substring(7);
-    this.location.replaceState(`room`);
-    return this.joinRoom(roomId);
+  private setupOnPeerJoinedSnackBar() {
+    this._signalR.onRoomJoined$.subscribe((peer) => {
+      this._auth0.idTokenClaims$.pipe(first()).subscribe((idToken) => {
+        if (!idToken) {
+          return;
+        }
+
+        const emoji = peer.isDungeonMaster ? '🎲' : '⚔';
+        if (idToken['sub'] !== peer.auth0Id) {
+          this._snackBar.open(`${emoji} ${peer.displayName} has joined!`, '❌', {
+            duration: 3000,
+          });
+        }
+      });
+    });
+  }
+
+  public setupOnPeerLeftSnackBar() {
+    this._signalR.onRoomLeft$.subscribe((peer) => {
+      this._auth0.idTokenClaims$.pipe(first()).subscribe((idToken) => {
+        if (!idToken) {
+          return;
+        }
+
+        if (idToken['sub'] !== peer.auth0Id) {
+          this._snackBar.open(`${peer.displayName} has left!`, 'X', {
+            duration: 3000,
+          });
+        }
+      });
+    });
+  }
+
+  private handleJoinRoomReponse(joinRoomResponse: JoinRoomResponse, roomId: string) {
+    if (joinRoomResponse?.errorMessage) {
+      this._snackBar.open(joinRoomResponse.errorMessage);
+    } else {
+      this._appServiceStore.peerList.next(joinRoomResponse.peerList);
+      const characters = joinRoomResponse.peerList.flatMap((peer) => peer.characters);
+      this._appServiceStore.charactersInRoom.next(characters);
+
+      this.roomId.next(roomId);
+      localStorage.setItem(
+        ROOM_INFO,
+        JSON.stringify({
+          roomId: roomId,
+          userType: this.userType,
+          characters: characters.filter(
+            (x) => x.auth0Id === this._appServiceStore.auth0Id
+          ),
+        })
+      );
+    }
   }
 }

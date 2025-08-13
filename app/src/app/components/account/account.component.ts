@@ -33,11 +33,10 @@ export class AccountComponent {
       .subscribe((displayName) => {
         this._user.updateUserDisplayName(displayName);
         this._appServiceStore.displayName.next(displayName);
-        if (this._room.roomId && this._room.myPeerId) {
-          this._signalR
-            .updateDisplayName(displayName)
-            .subscribe((x) => console.log('DisplayName Updated'));
-        }
+
+        this._signalR
+          .updateDisplayName(displayName)
+          .subscribe((x) => console.log('DisplayName Updated'));
       });
   }
 

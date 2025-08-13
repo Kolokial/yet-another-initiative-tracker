@@ -1,5 +1,6 @@
-#!/bin/sh
-npx kill-port 3000 8080 3001 4200 5200 7180
+#! /bin/sh
+
+npx kill-port 3000 8080 3001 4200 5200 7180 5046
 # Kill any running YAIT .net apis.
 kill -9 $(lsof -t -i:7180)
 # Function to handle termination
@@ -16,15 +17,9 @@ trap terminate INT TERM
 
 # Navigate to the first npm project and start it
 cd ./app/
-npm run two &
+npm start &
 NPM1_PID=$!
 echo "Started YAIT with PID $NPM1_PID"
-
-# Navigate to the second npm project and start it
-cd ../signal-server/
-npm start &
-NPM2_PID=$!
-echo "Started Signal Server with PID $NPM2_PID"
 
 # Start the SQLite database
 #sqlite3 ./src/database/myTestDatabase2.db < ./src/database/schema.sql &

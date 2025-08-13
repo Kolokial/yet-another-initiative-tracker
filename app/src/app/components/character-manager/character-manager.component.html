@@ -12,13 +12,22 @@
     <ng-container matColumnDef="select">
       <th mat-header-cell *matHeaderCellDef>In play</th>
       <td mat-cell *matCellDef="let row">
-        <mat-radio-button
-          [disabled]="!row.playerCharacterId"
-          (click)="$event.stopPropagation()"
-          (change)="$event ? toggleCharacterSelect(row) : null"
-          [checked]="row.isInPlay === true"
-        >
-        </mat-radio-button>
+        @if (inPlayColumnControl === 'checkbox') {
+          <mat-checkbox
+            [disabled]="!row.characterId"
+            (click)="$event.stopPropagation()"
+            (change)="toggleMultipleCharacterSelect(row, $event)"
+            [checked]="row.isInPlay === true"
+          ></mat-checkbox>
+        } @else if (inPlayColumnControl === 'radio') {
+          <mat-radio-button
+            [disabled]="!row.characterId"
+            (click)="$event.stopPropagation()"
+            (change)="$event ? toggleSingleCharacterSelect(row) : null"
+            [checked]="row.isInPlay === true"
+          >
+          </mat-radio-button>
+        }
       </td>
     </ng-container>
 

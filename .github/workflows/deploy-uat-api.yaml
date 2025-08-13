@@ -60,5 +60,5 @@ jobs:
           -i /.ssh/yait_ssh_key 
           -o StrictHostKeyChecking=no
           ${{secrets.REMOTE_USER}}@${{secrets.TARGET_SERVER}} 
-          "restart-yait-api"
+          "restart-uat-yait-api"
         working-directory: ${{ github.workspace }}/YetAnotherInitiativeTrackerAPI/bin/Release/net8.0/linux-x64/publish

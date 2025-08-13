@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { QrScannerService } from './components/qr-scanner/qr-scanner.service';
-import { map, mergeMap, of, switchMap } from 'rxjs';
+import { first, map, mergeMap, of, switchMap } from 'rxjs';
 import { HasTitle } from './types/Title';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { UserApiService } from './shared-services/user-api.service';
@@ -9,8 +9,6 @@ import { AppServiceStore } from './app.service.store';
 import { CharacterManagerApiService } from './components/character-manager/character-manager.service';
 import { environment } from 'src/environments/environment';
 import { ReadUserResponse } from './types/api/User';
-import { RoomService } from './components/room/room.service';
-import { LoginService } from './components/login/login.service';
 
 @Component({
   selector: 'app-root',
@@ -35,13 +33,11 @@ export class AppComponent {
   }
 
   constructor(
-    private _loginSevice: LoginService,
     private userApi: UserApiService,
     private characterService: CharacterManagerApiService,
     public auth0: AuthService,
     private appServiceStore: AppServiceStore,
     private qrScanner: QrScannerService,
-    private _roomService: RoomService,
     ref: ChangeDetectorRef,
     media: MediaMatcher
   ) {
@@ -55,12 +51,8 @@ export class AppComponent {
   }
 
   ngOnInit() {
-    //this.loginService.determineAuthenticationStatus();
+    this.retrieveAuth0Id();
     this.getUserDisplayNameOnStartup();
-
-    this._roomService.roomId.subscribe((roomId) => {
-      this.roomUrl = `room/${roomId}`;
-    });
 
     this.auth0.user$.subscribe((x) => console.log(x));
   }
@@ -109,10 +101,44 @@ export class AppComponent {
         })
       )
       .subscribe((characterList) => {
-        if (characterList) {
-          const slectedCharacter = characterList.find((x) => x.isInPlay) || null;
-          this.appServiceStore.selectedCharacter.next(slectedCharacter);
+        if (!characterList) {
+          return;
         }
+        const selectedCharacter = characterList.find((x) => x.isInPlay);
+        if (!selectedCharacter) {
+          return;
+        }
+        this.appServiceStore.selectedCharacter.next([
+          {
+            alertFeat: selectedCharacter.alertFeat,
+            dexterityMod: selectedCharacter.dexterityMod,
+            id: selectedCharacter.playerCharacterId,
+            initiative: 0,
+            luckStone: selectedCharacter.luckStone,
+            name: selectedCharacter.characterName,
+            auth0Id: this.appServiceStore.auth0Id,
+          },
+        ]);
       });
+  }
+
+  private retrieveAuth0Id() {
+    this.auth0.idTokenClaims$.pipe(first()).subscribe({
+      next: (idToken) => {
+        if (idToken) {
+          const displayName = idToken.name ? idToken.name : (idToken.nickname as string);
+          this.appServiceStore.auth0Id = idToken['sub'];
+          this.userApi.getUser().subscribe({
+            error: (error) => {
+              if (error.status === 404) {
+                this.userApi.createUser(idToken['sub'], displayName);
+              }
+            },
+          });
+        } else {
+          console.warn('No auth0Id from Auth0.');
+        }
+      },
+    });
   }
 }

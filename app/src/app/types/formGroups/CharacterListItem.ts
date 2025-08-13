@@ -1,20 +1,23 @@
 import { FormControl, FormGroup } from '@angular/forms';
 import { CharacterFormGroup } from './Character.FormGroup';
 import { PlayerCharacter } from '@shared-types/api/PlayerCharacter';
+import { Character } from '../messageContracts/Character';
 
 export class CharacterListItem {
   public formGroup: FormGroup<CharacterFormGroup>;
   public isUpdating: boolean = false;
+  public lastDiceRoll: number = 0;
+  public lastSentRoll: number = 0;
 
   public get characterName(): string {
     return this.formGroup.controls.CharacterName.value as string;
   }
 
-  public get playerCharacterId(): number {
+  public get characterId(): number {
     return this.formGroup.controls.PlayerCharacterId.value as number;
   }
 
-  public set playerCharacterId(id: number) {
+  public set characterId(id: number) {
     this.formGroup.controls.PlayerCharacterId.setValue(id, { emitEvent: false });
   }
 
@@ -68,7 +71,19 @@ export class CharacterListItem {
       isDeleted: this.isDeleted,
       isInPlay: this.isInPlay,
       luckStone: this.hasLuckStone,
-      playerCharacterId: this.playerCharacterId,
+      playerCharacterId: this.characterId,
+    };
+  }
+
+  public getCharacter(auth0Id: string): Character {
+    return {
+      auth0Id: auth0Id,
+      alertFeat: this.hasAlertFeat,
+      name: this.characterName,
+      dexterityMod: this.dexterityModifier,
+      luckStone: this.hasLuckStone,
+      id: this.characterId,
+      initiative: this.lastSentRoll,
     };
   }
 }

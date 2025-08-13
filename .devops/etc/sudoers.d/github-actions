@@ -1,0 +1,2 @@
+github-actions ALL = NOPASSWD: /usr/bin/systemctl restart yait-api.service
+github-actions ALL = NOPASSWD: /usr/bin/systemctl restart uat-yait-api.service

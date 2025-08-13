@@ -1,0 +1,62 @@
+name: "Deploy to Production: API"
+run-name: "Deploying to Production: API"
+on:
+  push:
+    paths: YetAnotherInitiativeTrackerAPI/**
+    branches: main
+  workflow_dispatch:
+jobs:
+  Deploy-API:
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/dotnet/sdk:8.0
+    steps:
+      - name: 🚚 Get Latest Code
+        uses: actions/checkout@v3
+
+      - name: 📦 Install rsync & SSH
+        run: |
+          apt-get update
+          apt-get -y install rsync
+          apt-get -y install openssh-client
+        working-directory: ${{ github.workspace }}
+
+      - name: 🏗 Build
+        run: |
+          dotnet publish --runtime linux-x64 --configuration Release --self-contained
+        working-directory: ${{ github.workspace }}/YetAnotherInitiativeTrackerAPI/
+
+      - name: 🔐 Prepping Keys
+        run: |
+          pwd
+          mkdir /.ssh    
+          touch /.ssh/yait_ssh_key
+          echo "${{ secrets.SSH_KEY }}" > /.ssh/yait_ssh_key
+          chmod --recursive 700 /.ssh
+          ls -l /.ssh
+          md5sum /.ssh/yait_ssh_key
+        working-directory: ${{ github.workspace }}
+
+      - name: ⬆ Sync to server
+        run: >
+          rsync 
+          -e "
+          ssh -p 22 
+          -i /.ssh/yait_ssh_key 
+          -o StrictHostKeyChecking=no" 
+          --archive 
+          --compress 
+          --human-readable 
+          --progress 
+          --exclude=Data/ 
+          --delete-after ./* 
+          ${{secrets.REMOTE_USER}}@${{secrets.TARGET_SERVER}}:${{ secrets.API_DESTINATION_PATH}}
+        working-directory: ${{ github.workspace }}/YetAnotherInitiativeTrackerAPI/bin/Release/net8.0/linux-x64/publish
+
+      - name: 🔄 Restart Service
+        run: >
+          ssh -p 22 
+          -i /.ssh/yait_ssh_key 
+          -o StrictHostKeyChecking=no
+          ${{secrets.REMOTE_USER}}@${{secrets.TARGET_SERVER}} 
+          "restart-yait-api"
+        working-directory: ${{ github.workspace }}/YetAnotherInitiativeTrackerAPI/bin/Release/net8.0/linux-x64/publish

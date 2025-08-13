@@ -13,27 +13,5 @@ export class LoginService {
     private auth0: AuthService,
     private userApi: UserApiService,
     private appServiceStore: AppServiceStore
-  ) {
-    this.init();
-  }
-
-  private init() {
-    this.auth0.idTokenClaims$.pipe(first()).subscribe({
-      next: (idToken) => {
-        console.log(idToken);
-        if (idToken) {
-          const displayName = idToken.name ? idToken.name : (idToken.nickname as string);
-          this.userApi.getUser().subscribe({
-            error: (error) => {
-              if (error.status === 404) {
-                this.userApi.createUser(idToken['sub'], displayName);
-              }
-            },
-          });
-        } else {
-          console.warn('No auth0Id from Auth0.');
-        }
-      },
-    });
-  }
+  ) {}
 }

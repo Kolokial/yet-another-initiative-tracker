@@ -1,9 +1,8 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { environment } from 'src/environments/environment';
 import { AppServiceStore } from '../app.service.store';
-import { first, from, Observable, of, Subject, switchMap } from 'rxjs';
-
+import { defer, first, from, Observable, of, Subject, switchMap } from 'rxjs';
 import { AuthService, IdToken } from '@auth0/auth0-angular';
 import { Peer } from '../types/messageContracts/Peer';
 import { Broadcast } from '../types/messageContracts/Broadcast';
@@ -23,18 +22,43 @@ import { CharacterInPlayUpdatedBroadcast } from '../types/messageContracts/updat
 import { UpdateCharacterInPlayRequest } from '../types/messageContracts/updateCharacterInPlay/UpdateCharacterInPlayRequest';
 import { UpdateInitiativeRequest } from '../types/messageContracts/updateInitiative/UpdateInitiativeRequest';
 import { InitiativeUpdatedBroadcast } from '../types/messageContracts/updateInitiative/InitiativeUpdatedBroadcast';
+import { UserType } from '../types/formGroups/JoinRoom.FormGroup';
+import { Character } from '../types/messageContracts/Character';
+import { CharacterAddedBroadcast } from '../types/messageContracts/addCharacter/CharacterAddedBroadcast';
+import { AddCharacterRequest } from '../types/messageContracts/addCharacter/AddCharacterRequest';
+import { RemoveCharacterRequest } from '../types/messageContracts/removeCharacter/RemoveCharacterRequest';
+import { CharacteRemovedBroadcast } from '../types/messageContracts/removeCharacter/CharacterRemovedBroadcast';
+import { HubConnectionState } from '@microsoft/signalr';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { InitiativeListSortedBroadcast } from '../types/messageContracts/sortInitiativeList/InitiativeListSortedBroadcast';
+import { SortInitiativeListRequest } from '../types/messageContracts/sortInitiativeList/SortInitiativeList';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SignalRService {
+  private _onConnected$ = new Subject<void>();
+  public get onConnected$(): Observable<void> {
+    return this._onConnected$.asObservable();
+  }
+
+  private _onReconnecting$ = new Subject<void>();
+  public get onReconnecting$(): Observable<void> {
+    return this._onReconnecting$.asObservable();
+  }
+
+  private _onReconnected$ = new Subject<void>();
+  public get onReconnected$(): Observable<void> {
+    return this._onReconnected$.asObservable();
+  }
+
   private _onRoomJoined$ = new Subject<Peer>();
   public get onRoomJoined$(): Observable<Peer> {
     return this._onRoomJoined$.asObservable();
   }
 
-  private _onRoomLeft$ = new Subject<string>();
-  public get onRoomLeft$(): Observable<string> {
+  private _onRoomLeft$ = new Subject<Peer>();
+  public get onRoomLeft$(): Observable<Peer> {
     return this._onRoomLeft$.asObservable();
   }
 
@@ -58,12 +82,28 @@ export class SignalRService {
     return this._onTurnFinished$.asObservable();
   }
 
-  private _onInitiativeUpdated$ = new Subject<number>();
-  public get onInitiativeUpdated$(): Observable<number> {
+  private _onInitiativeUpdated$ = new Subject<InitiativeUpdatedBroadcast>();
+  public get onInitiativeUpdated$(): Observable<InitiativeUpdatedBroadcast> {
     return this._onInitiativeUpdated$.asObservable();
   }
 
+  private _onCharacterAdded$ = new Subject<Character>();
+  public get onCharacterAdded$(): Observable<Character> {
+    return this._onCharacterAdded$.asObservable();
+  }
+
+  private _onCharacterRemoved$ = new Subject<CharacteRemovedBroadcast>();
+  public get onCharacterRemoved$(): Observable<CharacteRemovedBroadcast> {
+    return this._onCharacterRemoved$.asObservable();
+  }
+
+  private _onInitiativeListSorted$ = new Subject<InitiativeListSortedBroadcast>();
+  public get onInitiativeListSorted$(): Observable<InitiativeListSortedBroadcast> {
+    return this._onInitiativeListSorted$.asObservable();
+  }
+
   private _hubConnection: signalR.HubConnection;
+  private _snackBar = inject(MatSnackBar);
   constructor(
     private appStore: AppServiceStore,
     private auth: AuthService
@@ -75,6 +115,7 @@ export class SignalRService {
       .build();
 
     this.startConnection();
+    this.handleReconnect();
   }
 
   private startConnection(): void {
@@ -84,6 +125,7 @@ export class SignalRService {
         console.assert(
           this._hubConnection.state === signalR.HubConnectionState.Connected
         );
+        this._onConnected$.next();
         this.setupEventHubMethods();
       })
       .catch((reason) => {
@@ -93,6 +135,23 @@ export class SignalRService {
         console.log(reason);
         setTimeout(() => this.startConnection(), 5000);
       });
+  }
+
+  private handleReconnect(): void {
+    this._hubConnection.onreconnecting((x) => {
+      this._onReconnecting$.next();
+    });
+
+    this._hubConnection.onreconnected((x) => {
+      this._onReconnected$.next();
+      this.reconnect();
+    });
+  }
+
+  /* need a better name for this method */
+  public reconnect(): void {
+    /* it's not actually reconnecting. */
+    this.invoke('Reconnect', {});
   }
 
   private setupEventHubMethods(): void {
@@ -122,15 +181,30 @@ export class SignalRService {
       'InitiativeUpdated',
       (broadcastMsg: InitiativeUpdatedBroadcast) => this.onInitiativeUpdated(broadcastMsg)
     );
+    this._hubConnection.on('CharacterAdded', (broadcastMsg: CharacterAddedBroadcast) =>
+      this.onCharacterAdded(broadcastMsg)
+    );
+    this._hubConnection.on('CharacterRemoved', (broadcastMsg: CharacteRemovedBroadcast) =>
+      this.onCharacterRemoved(broadcastMsg)
+    );
+    this._hubConnection.on(
+      'InitiativeListSorted',
+      (broadcastMsg: InitiativeListSortedBroadcast) =>
+        this.onInitiativeListSorted(broadcastMsg)
+    );
   }
 
-  public joinRoom(roomName: string): Observable<JoinRoomResponse> {
+  public joinRoom(
+    roomName: string,
+    userType: UserType,
+    characters: Character[]
+  ): Observable<JoinRoomResponse> {
     return this.invoke<JoinRoomRequest, JoinRoomResponse>('JoinRoom', {
       roomName: roomName,
       /* probably should have these passed in */
-      characterName: this.appStore.selectedCharacter.value?.characterName,
-      diceRoll: this.appStore.lastSentRoll,
+      characters: characters,
       displayName: this.appStore.displayName.value,
+      isDungeonMaster: userType === 'dungeon-master',
     });
   }
 
@@ -146,9 +220,10 @@ export class SignalRService {
     });
   }
 
-  public updateCharacterInPlayName(characterName: string): Observable<void> {
+  public updateCharacterInPlayName(id: number, name: string): Observable<void> {
     return this.invoke<UpdateCharacterInPlayRequest, void>('UpdateCharacterInPlay', {
-      characterName: characterName,
+      characterName: name,
+      characterId: id,
     });
   }
 
@@ -162,8 +237,27 @@ export class SignalRService {
     return this.invoke<FinishTurnRequest, void>('FinishTurn', { test: '' });
   }
 
-  public rollDice(diceRoll: number): Observable<void> {
-    return this.invoke<RollDiceRequest, void>('RollDice', { diceRoll: diceRoll });
+  public rollDice(diceRoll: number, characterId: number): Observable<void> {
+    return this.invoke<RollDiceRequest, void>('RollDice', {
+      diceRoll: diceRoll,
+      characterId: characterId,
+    });
+  }
+
+  public addCharacter(character: Character): Observable<void> {
+    return this.invoke<AddCharacterRequest, void>('AddCharacter', {
+      character: character,
+    });
+  }
+
+  public removeCharacter(characterId: number): Observable<void> {
+    return this.invoke<RemoveCharacterRequest, void>('RemoveCharacter', {
+      characterId: characterId,
+    });
+  }
+
+  public sortInitiativeList(): Observable<void> {
+    return this.invoke<SortInitiativeListRequest, void>('SortInitiativeList', {});
   }
 
   private invoke<T, O>(method: string, message: T): Observable<O> {
@@ -174,30 +268,33 @@ export class SignalRService {
           console.error('IdTokenClaim has failed. Are you logged in?');
           return of();
         }
+
+        if (this._hubConnection.state !== HubConnectionState.Connected) {
+          this._snackBar.open('Not connected.');
+        }
+
         const envelope: Envelope<T> = {
           auth0Id: idTokenClaim['sub'],
           message: message,
           dateStamp: new Date(),
         };
-        const promise = this._hubConnection.invoke(method, envelope);
+        const promise = this._hubConnection.invoke<O>(method, envelope);
         promise.catch(console.error);
-        return from(promise);
+        return defer(() => from(promise));
       })
     );
   }
 
   private onRoomJoined(broadcastMessage: RoomJoinedBroadcast): void {
-    this.auth.idTokenClaims$.pipe(first()).subscribe((idTokenClaim) => {
-      if (idTokenClaim && idTokenClaim['sub']) {
-        this._onRoomJoined$.next(broadcastMessage.peer);
-        console.log('Peer Joined: ', broadcastMessage);
-      }
+    this.doAuthCheck(broadcastMessage, () => {
+      this._onRoomJoined$.next(broadcastMessage.peer);
+      console.log('Peer Joined: ', broadcastMessage);
     });
   }
 
   private onRoomLeft(broadcastMessage: RoomLeftBroadcast): void {
     this.doAuthCheck(broadcastMessage, () => {
-      this._onRoomLeft$.next(broadcastMessage.auth0Id);
+      this._onRoomLeft$.next(broadcastMessage.peer);
       console.log('Peer Left: ', broadcastMessage);
     });
   }
@@ -228,7 +325,19 @@ export class SignalRService {
   }
 
   private onInitiativeUpdated(broadcastMessage: InitiativeUpdatedBroadcast): void {
-    this._onInitiativeUpdated$.next(broadcastMessage.initiative);
+    this._onInitiativeUpdated$.next(broadcastMessage);
+  }
+
+  private onCharacterAdded(broadcastMessage: CharacterAddedBroadcast): void {
+    this._onCharacterAdded$.next(broadcastMessage.character);
+  }
+
+  private onCharacterRemoved(broadcastMessage: CharacteRemovedBroadcast): void {
+    this._onCharacterRemoved$.next(broadcastMessage);
+  }
+
+  private onInitiativeListSorted(broadcastMessage: InitiativeListSortedBroadcast): void {
+    this._onInitiativeListSorted$.next(broadcastMessage);
   }
 
   private doAuthCheck(broadcastMessage: Broadcast, callback: () => void): void {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import {
   FormControlStatus,
   FormGroup,
@@ -18,10 +18,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CharacterListItem } from 'src/app/types/formGroups/CharacterListItem';
 import { MatButtonModule } from '@angular/material/button';
 import { MatRadioModule } from '@angular/material/radio';
-import { MatTableModule } from '@angular/material/table';
+import { MatTable, MatTableModule } from '@angular/material/table';
 import { AppServiceStore } from 'src/app/app.service.store';
 import { ReadPlayerCharacterResponse } from 'src/app/types/api/PlayerCharacter';
 import { SignalRService } from 'src/app/shared-services/signal-r.service';
+import { MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
+import { ROOM_INFO } from 'src/app/constants';
+import { Character } from 'src/app/types/messageContracts/Character';
 
 @Component({
   selector: 'character-manager',
@@ -34,6 +37,7 @@ import { SignalRService } from 'src/app/shared-services/signal-r.service';
     MatSlideToggleModule,
     MatExpansionModule,
     MatRadioModule,
+    MatCheckboxModule,
     MatIcon,
     MatButtonModule,
     MatProgressSpinnerModule,
@@ -59,17 +63,38 @@ export class CharacterManagerComponent {
     set character musical cue?
     Set initiative bonuses
   */
+  private _showInPlayColumn: boolean = false;
+  @Input()
+  public set showInPlayColumn(value: boolean) {
+    this._showInPlayColumn = value;
+    if (value) {
+      this.columnsToDisplay = ['select', ...this.columnsToDisplay];
+      this.columnsToDisplayWithExpand = [...this.columnsToDisplay, 'expand'];
+    }
+  }
+
+  public get showInPlayColumn(): boolean {
+    return this._showInPlayColumn;
+  }
+
+  @Input()
+  public inPlayColumnControl: InputSelectionType = 'radio';
+
+  @Input()
+  public maxCharacterSelect: number = 1;
+
+  @ViewChild(MatTable) table!: MatTable<CharacterListItem>;
+
   public characterForm: CharacterListItem[] = [];
   public characterFormSource = new Subject<CharacterListItem>();
-  columnsToDisplay = [
-    'select',
+  public columnsToDisplay = [
     'characterName',
     'dexterityModifier',
     'hasAlertFeat',
     'hasLuckStone',
   ];
-  columnsToDisplayWithExpand = [...this.columnsToDisplay, 'expand'];
-  expandedElement!: CharacterListItem | null;
+  public columnsToDisplayWithExpand = [...this.columnsToDisplay, 'expand'];
+  public expandedElement!: CharacterListItem | null;
 
   constructor(
     private characterService: CharacterManagerApiService,
@@ -105,16 +130,19 @@ export class CharacterManagerComponent {
         character.dexterityModifier
       )
       .subscribe((createCharacterResponse) => {
-        character.playerCharacterId = createCharacterResponse.playerCharacterId;
+        character.characterId = createCharacterResponse.playerCharacterId;
         character.isUpdating = false;
+
+        this.setCharacterGroupStatusChange(character);
+        this.setupCharacterNameStatusChange(character);
         this.characterForm = [...this.characterForm];
       });
   }
 
   deleteCharacter(character: CharacterListItem) {
-    if (character.playerCharacterId) {
+    if (character.characterId) {
       this.characterService
-        .deleteCharacter(character.playerCharacterId as number)
+        .deleteCharacter(character.characterId as number)
         .subscribe(() => {
           const index = this.characterForm.findIndex((char) => char === character);
           if (index > -1) {
@@ -127,30 +155,67 @@ export class CharacterManagerComponent {
     }
   }
 
-  toggleCharacterSelect(character: CharacterListItem) {
-    if (!character.playerCharacterId) {
+  toggleSingleCharacterSelect(characterListItem: CharacterListItem) {
+    if (!characterListItem.characterId) {
       return;
     }
 
-    this.appServiceStore.selectedCharacter.next({
-      playerCharacterId: character.playerCharacterId as number,
-      alertFeat: character.hasAlertFeat,
-      characterName: character.characterName,
-      dexterityMod: character.dexterityModifier,
-      luckStone: character.hasLuckStone,
-    });
+    const previousCharacterId = this.appServiceStore.selectedCharacter.value[0].id;
 
     this.characterForm.forEach((x) => {
       if (x.isDeleted) {
         x.isInPlay = false;
       }
     });
-    character.isInPlay = true;
-    this.updateCharacter(character, character.playerCharacterId);
-    this._signalR.updateCharacterInPlayName(character.characterName).subscribe();
+    characterListItem.isInPlay = true;
+
+    this.updateCharacter(characterListItem);
+    this._signalR.removeCharacter(previousCharacterId).subscribe((x) => console.log(x));
+
     this._signalR.rollDice(
-      this.appServiceStore.lastDiceRoll + character.dexterityModifier
+      this.appServiceStore.lastDiceRoll + characterListItem.dexterityModifier,
+      characterListItem.characterId
     );
+
+    const character = characterListItem.getCharacter(this.appServiceStore.auth0Id);
+    this._signalR.addCharacter(character).subscribe((x) => console.log(x));
+    this.appServiceStore.selectedCharacter.next([character]);
+    this.updateRoomInfoCharactersSelected([character]);
+  }
+
+  toggleMultipleCharacterSelect(
+    character: CharacterListItem,
+    checkboxEvent: MatCheckboxChange
+  ) {
+    console.log(checkboxEvent, character.characterId);
+    if (!character.characterId) {
+      return;
+    }
+
+    character.isInPlay = checkboxEvent.checked;
+    const selectedCharacters = this.appServiceStore.selectedCharacter.value;
+
+    if (checkboxEvent.checked === true) {
+      selectedCharacters.push(character.getCharacter(this.appServiceStore.auth0Id));
+      this._signalR
+        .addCharacter(character.getCharacter(this.appServiceStore.auth0Id))
+        .subscribe();
+      this._signalR.rollDice(
+        this.appServiceStore.lastDiceRoll + character.dexterityModifier,
+        character.characterId
+      );
+    } else if (checkboxEvent.checked === false) {
+      const index = selectedCharacters.findIndex((x) => x.id === character.characterId);
+
+      if (index !== -1) {
+        selectedCharacters.splice(index, 1);
+      }
+      this._signalR.removeCharacter(character.characterId).subscribe();
+    }
+
+    this.appServiceStore.selectedCharacter.next(selectedCharacters);
+    this.updateCharacter(character);
+    this.updateRoomInfoCharactersSelected(selectedCharacters);
   }
 
   isSelected(row: CharacterListItem) {}
@@ -162,7 +227,7 @@ export class CharacterManagerComponent {
           return;
         }
         const characterGroup = new CharacterListItem(x, x.playerCharacterId);
-        this.setCharacterGroupStatusChange(characterGroup, x.playerCharacterId);
+        this.setCharacterGroupStatusChange(characterGroup);
         this.setupCharacterNameStatusChange(characterGroup);
         this.characterForm.push(characterGroup);
       });
@@ -170,35 +235,35 @@ export class CharacterManagerComponent {
     });
   }
 
-  private setCharacterGroupStatusChange(
-    character: CharacterListItem,
-    playerCharacterId: number
-  ): void {
+  private setCharacterGroupStatusChange(character: CharacterListItem): void {
     character.formGroup.statusChanges
       .pipe(debounceTime(1000))
       .subscribe((status: FormControlStatus) => {
         if (status === 'VALID') {
-          this.updateCharacter(character, playerCharacterId);
-          this.appServiceStore.selectedCharacter.next(character.getPlayerCharacter());
+          this.updateCharacter(character);
+          this.appServiceStore.selectedCharacter.next([
+            character.getCharacter(this.appServiceStore.auth0Id),
+          ]);
         }
       });
   }
 
   private setupCharacterNameStatusChange(character: CharacterListItem): void {
     character.formGroup.controls.CharacterName.statusChanges.subscribe((status) => {
-      if (status === 'VALID') {
-        this._signalR.updateCharacterInPlayName(character.characterName).subscribe();
+      if (status === 'VALID' && character.isInPlay) {
+        this._signalR
+          .updateCharacterInPlayName(character.characterId, character.characterName)
+          .subscribe();
       }
     });
   }
 
   private updateCharacter(
-    character: CharacterListItem,
-    playerCharacterId: number
+    character: CharacterListItem
   ): Observable<ReadPlayerCharacterResponse> {
     character.isUpdating = true;
     const observable = this.characterService.updateCharacter(
-      playerCharacterId,
+      character.characterId,
       character.characterName,
       character.hasAlertFeat,
       character.hasLuckStone,
@@ -216,4 +281,16 @@ export class CharacterManagerComponent {
   public getCharacterSummary(character: FormGroup<CharacterFormGroup>): string {
     return `Dex: ${character.controls.DexterityModifier.value}` + ``;
   }
+
+  public updateRoomInfoCharactersSelected(charactersSelected: Character[]): void {
+    const roomInfo = JSON.parse(localStorage.getItem(ROOM_INFO) as string);
+    if (roomInfo == null) {
+      return;
+    }
+
+    roomInfo.characters = charactersSelected;
+    localStorage.setItem(ROOM_INFO, JSON.stringify(roomInfo));
+  }
 }
+
+export type InputSelectionType = 'radio' | 'checkbox';
